@@ -12,16 +12,35 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+    // --- THIS IS THE IMPORTANT PART ---
+    // We use guarded = [] to allow ALL fields (store_name, profile_type, etc.) to be saved.
+    // We DELETED the $fillable array because it was blocking the other fields.
+    protected $guarded = []; 
+
+    protected static function booted()
+    {
+        static::saving(function ($user) {
+            if ($user->store_name && !$user->store_slug) {
+                // 1. Auto-generate Slug (e.g. "ABC Hardware" -> "abc-hardware")
+                $user->store_slug = \Illuminate\Support\Str::slug($user->store_name);
+                
+                // 2. Generate QR Code URL
+                $url = url('/v/' . $user->store_slug);
+                
+                // 3. Create the QR Image
+                $qrContent = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')->size(300)->generate($url);
+                
+                // 4. Save it to storage
+                $filename = 'qrcodes/' . $user->store_slug . '.svg';
+                \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $qrContent);
+                
+                $user->qr_code_path = $filename;
+                
+                // Ensure they are marked as a vendor/service provider
+                $user->is_vendor = true;
+            }
+        });
+    }
 
     /**
      * The attributes that should be hidden for serialization.
