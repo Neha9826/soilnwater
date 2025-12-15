@@ -64,4 +64,25 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    // Relationships for the Dashboard
+    public function properties()
+    {
+        return $this->hasMany(Property::class);
+    }
+
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
+
+    public function hotels()
+    {
+        return $this->hasMany(Hotel::class);
+    }
+
+    public function projects()
+    {
+        return $this->hasMany(Project::class);
+    }
 }

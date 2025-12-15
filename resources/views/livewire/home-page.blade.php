@@ -22,10 +22,40 @@
             </div>
 
             <div class="flex items-center gap-6 text-gray-600 text-sm font-medium flex-shrink-0">
-                <a href="#" class="flex flex-col items-center hover:text-blue-600">
-                    <i class="fas fa-user text-lg"></i>
-                    <span>Login</span>
-                </a>
+                @auth
+                    <div class="relative group">
+                        <button class="flex flex-col items-center hover:text-blue-600 focus:outline-none">
+                            <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold mb-1">
+                                {{ substr(Auth::user()->name, 0, 1) }}
+                            </div>
+                            <span>Account</span>
+                        </button>
+                        
+                        <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden group-hover:block border border-gray-100 z-50">
+                            <div class="px-4 py-2 border-b text-xs text-gray-500">
+                                Signed in as<br>
+                                <span class="font-bold text-gray-900 truncate block">{{ Auth::user()->name }}</span>
+                            </div>
+                            
+                            <a href="{{ route('dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Dashboard</a>
+                            
+                            <a href="/admin" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Admin Panel</a>
+                            
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+                                    Logout
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                @else
+                    <a href="/admin/login" class="flex flex-col items-center hover:text-blue-600">
+                        <i class="fas fa-user text-lg"></i>
+                        <span>Login</span>
+                    </a>
+                @endauth
+
                 <a href="#" class="flex flex-col items-center hover:text-blue-600">
                     <i class="fas fa-shopping-cart text-lg"></i>
                     <span>Cart</span>
