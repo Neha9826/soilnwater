@@ -1,83 +1,70 @@
-<div class="min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4">
-    <div class="max-w-md w-full bg-white p-8 rounded-xl shadow-lg">
+<div class="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full bg-white p-10 rounded-2xl shadow-xl border border-gray-200">
         
-        <div class="text-center mb-6">
-            <h2 class="text-3xl font-bold text-gray-900">Join SoilNWater</h2>
-            <p class="text-sm text-gray-500 mt-1">Create your account to get started</p>
+        <div class="text-center mb-10">
+            <h2 class="text-3xl font-extrabold text-gray-900">Create Account</h2>
+            <p class="text-sm text-gray-500 mt-2">Join SoilNWater to start your journey</p>
         </div>
 
-        <form wire:submit.prevent="register" class="space-y-4">
+        <a href="{{ route('google.login') }}" class="flex items-center justify-center gap-3 w-full bg-white text-gray-700 font-bold py-3 px-4 rounded-xl border-2 border-gray-200 hover:border-gray-400 hover:bg-gray-50 transition duration-300">
+            <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google">
+            Continue with Google
+        </a>
+
+        <div class="relative flex py-6 items-center">
+            <div class="flex-grow border-t border-gray-200"></div>
+            <span class="flex-shrink-0 mx-4 text-gray-400 text-xs uppercase font-bold tracking-wider">Or register with email</span>
+            <div class="flex-grow border-t border-gray-200"></div>
+        </div>
+
+        <form wire:submit.prevent="register" class="space-y-6">
             
             <div>
-                <label class="block text-sm font-bold text-gray-700 mb-1">I want to...</label>
-                <select wire:model.live="role" class="w-full border-gray-300 rounded-lg p-3 border focus:ring-blue-500 focus:border-blue-500 bg-white">
-                    <option value="customer">Just Buy / Browse</option>
-                    <option value="vendor">Sell Products (Vendor)</option>
-                    <option value="dealer">Sell/Rent Properties (Real Estate)</option>
-                    <option value="hotel">List Hotel / Homestay</option>
-                    <option value="consultant">Offer Services (Plumber/Architect)</option>
-                </select>
-                @error('role') <span class="text-red-500 text-xs block mt-1">{{ $message }}</span> @enderror
+                <label class="block text-sm font-bold text-gray-900 mb-1">Full Name</label>
+                <input wire:model="name" type="text" placeholder="e.g. Rahul Kumar" 
+                       class="w-full border-2 border-gray-300 rounded-xl p-3 text-gray-900 placeholder-gray-400 focus:border-blue-600 focus:ring-0 transition">
+                @error('name') <span class="text-red-600 text-xs font-bold mt-1 block">{{ $message }}</span> @enderror
             </div>
 
             <div>
-                <input wire:model="name" type="text" placeholder="Full Name" class="w-full border-gray-300 rounded-lg p-3 border focus:ring-blue-500 focus:border-blue-500">
-                @error('name') <span class="text-red-500 text-xs block mt-1">{{ $message }}</span> @enderror
+                <label class="block text-sm font-bold text-gray-900 mb-1">Email Address</label>
+                <input wire:model="email" type="email" placeholder="name@example.com" 
+                       class="w-full border-2 border-gray-300 rounded-xl p-3 text-gray-900 placeholder-gray-400 focus:border-blue-600 focus:ring-0 transition">
+                @error('email') <span class="text-red-600 text-xs font-bold mt-1 block">{{ $message }}</span> @enderror
             </div>
 
             <div>
-                <input wire:model="email" type="email" placeholder="Email Address" class="w-full border-gray-300 rounded-lg p-3 border focus:ring-blue-500 focus:border-blue-500">
-                @error('email') <span class="text-red-500 text-xs block mt-1">{{ $message }}</span> @enderror
-            </div>
-
-            <div>
-                <input wire:model="password" type="password" placeholder="Password" class="w-full border-gray-300 rounded-lg p-3 border focus:ring-blue-500 focus:border-blue-500">
-                @error('password') <span class="text-red-500 text-xs block mt-1">{{ $message }}</span> @enderror
-            </div>
-
-            @if($role !== 'customer')
-                <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 space-y-3 animate-fade-in">
-                    <h3 class="text-xs font-bold text-blue-800 uppercase tracking-wide">
-                        {{ ucfirst($role) }} Details
-                    </h3>
-                    
-                    <div>
-                        <input wire:model="store_name" type="text" 
-                               placeholder="@if($role == 'consultant') Service Name (e.g. Rahul Plumbing) @elseif($role == 'hotel') Hotel Name @else Business / Shop Name @endif" 
-                               class="w-full border-gray-300 rounded-lg p-3 border text-sm">
-                        @error('store_name') <span class="text-red-500 text-xs block mt-1">{{ $message }}</span> @enderror
-                    </div>
-
-                    <div>
-                        <input wire:model="contact_phone" type="number" 
-                               placeholder="Business Phone Number" 
-                               class="w-full border-gray-300 rounded-lg p-3 border text-sm">
-                        @error('contact_phone') <span class="text-red-500 text-xs block mt-1">{{ $message }}</span> @enderror
-                    </div>
-
-                    @if($role == 'consultant')
-                        <div>
-                             <select wire:model="service_category" class="w-full border-gray-300 rounded-lg p-3 border text-sm bg-white">
-                                <option value="">Select Profession...</option>
-                                <option value="Plumber">Plumber</option>
-                                <option value="Architect">Architect</option>
-                                <option value="Electrician">Electrician</option>
-                                <option value="Painter">Painter</option>
-                                <option value="Carpenter">Carpenter</option>
-                                <option value="Interior Designer">Interior Designer</option>
-                            </select>
-                            @error('service_category') <span class="text-red-500 text-xs block mt-1">{{ $message }}</span> @enderror
-                        </div>
-                    @endif
+                <label class="block text-sm font-bold text-gray-900 mb-1">Phone Number</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-500 font-bold border-r-2 border-gray-200 pr-3 my-2 text-sm">+91</span>
+                    <input wire:model="phone" type="number" placeholder="98765 43210" 
+                           class="w-full pl-20 border-2 border-gray-300 rounded-xl p-3 text-gray-900 placeholder-gray-400 focus:border-blue-600 focus:ring-0 transition">
                 </div>
-            @endif
+                @error('phone') <span class="text-red-600 text-xs font-bold mt-1 block">{{ $message }}</span> @enderror
+            </div>
 
-            <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition shadow-md">
-                Register Now
+            <div>
+                <label class="block text-sm font-bold text-gray-900 mb-1">Password</label>
+                <input wire:model="password" type="password" placeholder="••••••••" 
+                       class="w-full border-2 border-gray-300 rounded-xl p-3 text-gray-900 placeholder-gray-400 focus:border-blue-600 focus:ring-0 transition">
+                @error('password') <span class="text-red-600 text-xs font-bold mt-1 block">{{ $message }}</span> @enderror
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-gray-900 mb-1">Confirm Password</label>
+                <input wire:model="password_confirmation" type="password" placeholder="••••••••" 
+                       class="w-full border-2 border-gray-300 rounded-xl p-3 text-gray-900 placeholder-gray-400 focus:border-blue-600 focus:ring-0 transition">
+            </div>
+
+            <button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                Create Account
             </button>
             
-            <div class="text-center mt-4">
-                <a href="{{ route('login') }}" class="text-sm text-blue-600 hover:underline">Already have an account? Login</a>
+            <div class="text-center mt-6">
+                <p class="text-sm text-gray-500">
+                    Already have an account? 
+                    <a href="{{ route('login') }}" class="font-bold text-blue-600 hover:underline">Login here</a>
+                </p>
             </div>
         </form>
     </div>

@@ -6,56 +6,42 @@ use Livewire\Component;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-use Filament\Http\Responses\Auth\Contracts\LoginResponse;
 
 class Register extends Component
 {
-    // 1. Define Properties
-    public $name, $email, $password;
-    public $role = 'customer'; 
-    public $store_name, $contact_phone, $service_category;
+    // 1. Define Public Properties
+    public $name;
+    public $email;
+    public $phone;
+    public $password;
+    public $password_confirmation;
 
-    // 2. Register Function
+    // 2. The Register Logic
     public function register()
     {
-        // Validation
         $this->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:8',
-            'role' => 'required|in:customer,vendor,dealer,consultant,hotel',
-            
-            // Conditional Rules
-            'store_name' => $this->role !== 'customer' ? 'required|min:3' : 'nullable',
-            'contact_phone' => $this->role !== 'customer' ? 'required|numeric|digits:10' : 'nullable',
-            'service_category' => $this->role === 'consultant' ? 'required' : 'nullable',
+            'name' => 'required|min:3',
+            'email' => 'required|email|unique:users',
+            'phone' => 'required|numeric|digits:10|unique:users', 
+            'password' => 'required|min:8|confirmed',
         ]);
 
-        // Create User
         $user = User::create([
             'name' => $this->name,
             'email' => $this->email,
+            'phone' => $this->phone,
             'password' => Hash::make($this->password),
-            'profile_type' => $this->role,
-            
-            // Business Details
-            'phone' => $this->contact_phone,
-            'store_name' => $this->store_name,
-            'service_category' => $this->service_category,
-            'store_slug' => $this->store_name ? \Illuminate\Support\Str::slug($this->store_name) : null,
-            
-            'is_vendor' => $this->role !== 'customer', 
+            'profile_type' => 'customer', // Default role
         ]);
 
-        // Login & Redirect
         Auth::login($user);
-        
-        return app(LoginResponse::class)->toResponse(request());
+
+        return redirect()->route('dashboard');
     }
 
-    // 3. Render Function
+    // 3. CRITICAL: The Render Method (This was missing!)
     public function render()
     {
-        return view('livewire.auth.register');
+        return view('livewire.auth.register'); 
     }
 }

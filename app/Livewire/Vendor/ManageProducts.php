@@ -66,7 +66,8 @@ class ManageProducts extends Component
             'name' => 'required|min:3',
             'price' => 'required|numeric',
             'description' => 'required',
-            'images.*' => 'image|max:2048', // 2MB Max
+            'category' => 'required', // <--- Added Validation
+            'images.*' => 'image|max:2048',
         ]);
 
         // Handle Images
@@ -78,18 +79,19 @@ class ManageProducts extends Component
         }
 
         $data = [
-            'user_id' => Auth::id(), // Assign to logged-in Vendor
+            'user_id' => Auth::id(),
             'name' => $this->name,
             'slug' => Str::slug($this->name),
             'description' => $this->description,
             'price' => $this->price,
+            'category' => $this->category, // <--- THIS WAS MISSING
             'is_active' => $this->is_active,
             'is_featured' => $this->is_featured,
             'in_stock' => $this->in_stock,
             'on_sale' => $this->on_sale,
         ];
 
-        // If editing, merge images (logic simplified for now)
+        // If editing, merge images
         if (!empty($imagePaths)) {
             $data['images'] = $imagePaths; 
         }
@@ -99,9 +101,7 @@ class ManageProducts extends Component
             $product->update($data);
             session()->flash('message', 'Product updated successfully!');
         } else {
-            // Default image if none uploaded
             if(empty($imagePaths)) $data['images'] = ['products/default.png'];
-            
             Product::create($data);
             session()->flash('message', 'Product created successfully!');
         }

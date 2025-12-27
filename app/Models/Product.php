@@ -12,6 +12,16 @@ class Product extends Model
     protected $guarded = [];
 
     protected $casts = [
-        'images' => 'array', // Crucial for image upload to work
+        'images' => 'array',
+        'price' => 'decimal:2',
+        'is_active' => 'boolean',
+        'in_stock' => 'boolean',
+        'on_sale' => 'boolean',
     ];
+
+    // CHANGED: Product now belongs to a Business, not a User
+    public function business()
+    {
+        return $this->belongsTo(Business::class);
+    }
 }
