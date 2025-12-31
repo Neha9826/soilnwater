@@ -6,13 +6,14 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\Business;
 use App\Models\User;
+use App\Models\Category; // <--- IMPORTANT: Don't forget this import
 use Illuminate\Support\Facades\Auth;
 
 class JoinPartner extends Component
 {
     use WithFileUploads;
 
-    public $selectedRole = null; // null = Show Grid, 'vendor' = Show Form
+    public $selectedRole = null; 
 
     // Common Fields
     public $company_name, $contact_person, $address, $city, $state, $pincode, $country = 'India';
@@ -20,39 +21,41 @@ class JoinPartner extends Component
     public $logo, $description;
     
     // Role Specific
-    public $gst_number; // Mandatory for Vendor, Builder, Hotel
-    public $category_type; // Dropdown for Vendor Type, Service Type, etc.
+    public $gst_number; 
+    public $category_type; 
+    public $custom_category; // For "Other" Input
     
     // Uploads
-    public $images = []; // Min 3 images
+    public $images = [];
     public $video;
-    public $social_facebook, $social_instagram, $social_linkedin;
 
-    // Validation Rules (Dynamic)
     protected function rules()
     {
         $rules = [
             'company_name' => 'required|min:3',
             'contact_person' => 'required',
+            'phone' => 'required|numeric|digits:10',
+            'email' => 'required|email',
             'address' => 'required',
             'city' => 'required',
             'state' => 'required',
             'pincode' => 'required|numeric',
-            'phone' => 'required|numeric|digits:10',
-            'email' => 'required|email',
             'pan_number' => 'required',
-            'logo' => 'required|image|max:1024', // 1MB Max
+            'logo' => 'required|image|max:1024',
             'description' => 'required|min:20',
+            'category_type' => 'required',
         ];
 
-        // Role Specific Logic 
+        // 1. Validate Custom Category if "Other" is selected
+        if ($this->category_type === 'Other') {
+            $rules['custom_category'] = 'required|string|min:3|max:50';
+        }
+
         if (in_array($this->selectedRole, ['vendor', 'builder', 'hotel'])) {
             $rules['gst_number'] = 'required';
         }
 
         if ($this->selectedRole !== 'vendor') {
-             // Vendor doesn't strictly ask for images in PDF, but others do. 
-             // We will make it required for all for better quality.
              $rules['images'] = 'required|array|min:3';
              $rules['images.*'] = 'image|max:2048';
         }
@@ -63,7 +66,9 @@ class JoinPartner extends Component
     public function selectRole($role)
     {
         $this->selectedRole = $role;
-        $this->resetErrorBag(); // Clear old errors
+        $this->category_type = ''; // Reset dropdown
+        $this->custom_category = ''; // Reset custom input
+        $this->resetErrorBag(); 
     }
 
     public function backToGrid()
@@ -75,27 +80,38 @@ class JoinPartner extends Component
     {
         $this->validate();
 
-        // 1. Upload Files
+        // 2. Handle "Other" Logic
+        $finalCategory = $this->category_type;
+
+        if ($this->category_type === 'Other') {
+            // Create the new category but set is_active = false (Requires Admin Approval)
+            Category::create([
+                'name' => $this->custom_category,
+                'type' => $this->selectedRole,
+                'is_active' => false 
+            ]);
+
+            // Use the custom name for this specific business
+            $finalCategory = $this->custom_category;
+        }
+
+        // 3. File Uploads
         $logoPath = $this->logo->store('logos', 'public');
         $videoPath = $this->video ? $this->video->store('videos', 'public') : null;
         
         $imagePaths = [];
-        foreach ($this->images as $img) {
-            $imagePaths[] = $img->store('business_images', 'public');
+        if($this->images){
+             foreach ($this->images as $img) {
+                $imagePaths[] = $img->store('business_images', 'public');
+            }
         }
 
-        // 2. Prepare Social Links
-        $socials = [
-            'facebook' => $this->social_facebook,
-            'instagram' => $this->social_instagram,
-            'linkedin' => $this->social_linkedin,
-        ];
-
-        // 3. Create Business (Verified = FALSE)
+        // 4. Create Business
         Business::create([
             'user_id' => Auth::id(),
             'name' => $this->company_name,
             'type' => $this->selectedRole,
+            'about_text' => $finalCategory, // Storing the Category Name
             'email' => $this->email,
             'phone' => $this->phone,
             'whatsapp_number' => $this->whatsapp_number,
@@ -107,16 +123,13 @@ class JoinPartner extends Component
             'pincode' => $this->pincode,
             'pan_number' => $this->pan_number,
             'gst_number' => $this->gst_number,
-            'about_text' => $this->category_type, // Storing "Type" (Dropdown) here or create a new column
             'description' => $this->description,
             'logo' => $logoPath,
             'header_images' => $imagePaths,
             'video_path' => $videoPath,
-            'social_links' => $socials,
-            'is_verified' => false, // CRITICAL: Pending Approval
+            'is_verified' => false,
         ]);
 
-        // 4. Update User Profile Type
         $user = User::find(Auth::id());
         $user->profile_type = $this->selectedRole;
         $user->save();
@@ -126,6 +139,19 @@ class JoinPartner extends Component
 
     public function render()
     {
-        return view('livewire.user.join-partner')->layout('layouts.app');
+        // 5. THIS IS THE MISSING PART CAUSING YOUR ERROR
+        $categories = [];
+        
+        if($this->selectedRole) {
+            // Fetch categories that match the selected role (e.g., 'builder')
+            $categories = Category::where('type', $this->selectedRole)
+                                  ->where('is_active', true) 
+                                  ->orderBy('name')
+                                  ->get();
+        }
+
+        return view('livewire.user.join-partner', [
+            'dbCategories' => $categories // Sending the variable to the view
+        ])->layout('layouts.app');
     }
 }

@@ -4,25 +4,25 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Product;
-use App\Models\Property;
 
 class UserDashboard extends Component
 {
+    public function mount()
+    {
+        // 1. Security Check: Redirect Super Admin to the Admin Panel
+        // Since Admins shouldn't be using the Customer Dashboard
+        if (Auth::check() && Auth::user()->email === 'admin@soilnwater.com') {
+            return redirect('/admin');
+        }
+    }
+
     public function render()
     {
         $user = Auth::user();
-        
-        // Fetch data based on WHO the user is
-        $myProducts = [];
-        $myProperties = [];
 
-        // Currently, we don't have a 'user_id' in products/properties table yet. 
-        // We will need to add that next to make this work fully.
-        // For now, let's just set up the view logic.
-
+        // 2. Return the View with the Layout
         return view('livewire.user-dashboard', [
             'user' => $user
-        ]);
+        ])->layout('layouts.app'); 
     }
 }
