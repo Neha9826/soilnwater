@@ -16,20 +16,21 @@ class EditBusinessPage extends Component
     public $header_title, $header_subtitle;
     
     // Images
-    public $store_logo; // New Upload
-    public $existing_logo; // Saved
-    public $header_images = []; // New Uploads
-    public $existing_headers = []; // Saved
+    public $store_logo; 
+    public $existing_logo; 
+    public $header_images = []; 
+    public $existing_headers = []; 
     
     // Dynamic Sections
-    public $sections = []; // Array of [title, description, image(temp), image_path(saved)]
+    public $sections = []; 
 
+    // FIX IS HERE: No $id parameter needed anymore!
     public function mount()
     {
         $user = Auth::user();
-        if($user->profile_type === 'customer') return redirect()->route('dashboard');
 
-        $this->store_name = $user->store_name;
+        // Load data from USER table
+        $this->store_name = $user->store_name ?? $user->name . "'s Business";
         $this->store_slug = $user->store_slug;
         $this->address = $user->address;
         $this->facebook = $user->facebook;
@@ -55,6 +56,12 @@ class EditBusinessPage extends Component
         $this->sections = array_values($this->sections); // Re-index
     }
 
+    public function removeHeaderImage($index)
+    {
+        unset($this->existing_headers[$index]);
+        $this->existing_headers = array_values($this->existing_headers);
+    }
+
     public function save()
     {
         $this->validate([
@@ -63,7 +70,6 @@ class EditBusinessPage extends Component
             'store_logo' => 'nullable|image|max:1024',
             'sections.*.title' => 'nullable|string',
             'sections.*.description' => 'nullable|string',
-            'sections.*.new_image' => 'nullable|image|max:2048', // Validation for section images
         ]);
 
         $user = Auth::user();
@@ -80,23 +86,16 @@ class EditBusinessPage extends Component
         }
 
         // 3. Handle Dynamic Section Images
-        // We loop through sections to see if a NEW image was uploaded
         $processedSections = $this->sections;
-        
         foreach ($processedSections as $key => $section) {
-            // Check if there is a 'new_image' uploaded in this section
             if (isset($section['new_image']) && !empty($section['new_image'])) {
-                // Store the image
                 $path = $section['new_image']->store('section-images', 'public');
-                
-                // Save the path to 'image_path'
                 $processedSections[$key]['image_path'] = $path;
-                
-                // Remove the temporary file object so we don't try to save it to DB
                 unset($processedSections[$key]['new_image']);
             }
         }
 
+        // 4. Save to User Table
         $user->update([
             'store_name' => $this->store_name,
             'store_slug' => Str::slug($this->store_name),
@@ -106,25 +105,21 @@ class EditBusinessPage extends Component
             'header_title' => $this->header_title,
             'header_subtitle' => $this->header_subtitle,
             'header_images' => $headerPaths,
-            'page_sections' => $processedSections, // Save the processed array
+            'page_sections' => $processedSections, 
         ]);
 
         session()->flash('message', 'Your website has been published successfully!');
         
         // Refresh state
-        $this->header_images = [];
-        $this->existing_headers = $headerPaths;
-        $this->sections = $processedSections; // Update local state to show new images
-    }
-
-    public function removeHeaderImage($index)
-    {
-        unset($this->existing_headers[$index]);
-        $this->existing_headers = array_values($this->existing_headers);
+        $this->mount(); // Reload data
+        $this->reset(['store_logo', 'header_images']); // Clear inputs
     }
 
     public function render()
     {
-        return view('livewire.vendor.edit-business-page');
+        return view('livewire.vendor.edit-business-page', [
+            // Pass the slug for the Preview button
+            'current_slug' => Auth::user()->store_slug
+        ])->layout('layouts.app');
     }
 }

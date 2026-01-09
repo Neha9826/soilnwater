@@ -42,6 +42,8 @@ return new class extends Migration
             $table->string('license_number')->nullable(); // Optional
             $table->boolean('is_verified')->default(false);
 
+            $table->string('qr_code_path')->nullable();
+
             $table->timestamps();
         });
 

@@ -58,4 +58,9 @@ class Business extends Model
     {
         return $this->hasMany(Product::class);
     }
+
+    public function sections()
+    {
+        return $this->hasMany(PageSection::class)->orderBy('sort_order');
+    }
 }

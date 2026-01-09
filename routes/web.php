@@ -16,10 +16,14 @@ use App\Livewire\UserDashboard;
 use App\Livewire\UserProfile;
 use App\Livewire\User\Onboarding;
 use App\Livewire\Vendor\EditBusinessPage;
+// use App\Livewire\EditBusinessPage;
+use App\Http\Controllers\PublicProfileController;
+use App\Http\Controllers\BusinessController;
 use App\Livewire\Vendor\ManageProducts;
 use App\Livewire\Vendor\PublicProfile;
 use App\Livewire\Auth\Register;
 use App\Livewire\Auth\Login;
+use App\Livewire\User\JoinPartner;
 
 /*
 |--------------------------------------------------------------------------
@@ -95,6 +99,17 @@ Route::middleware([
         return redirect()->route('dashboard')->with('error', 'Unauthorized access');
     })->name('business.manage');
 
+   
+
+    // 1. The Builder (Where you edit the design)
+    Route::get('/manage-website', EditBusinessPage::class)
+        ->middleware(['auth'])
+        ->name('website.builder'); 
+
+    // 2. The Public Page (What visitors see)
+    Route::get('/v/{slug}', [PublicProfileController::class, 'show'])
+        ->name('public.profile');
+
     // 5. Manage Products (Loads data based on 'active_business_id' session)
     Route::get('/my-products', ManageProducts::class)->name('vendor.products');
 
@@ -105,6 +120,7 @@ Route::middleware([
 
 // New Route: Selection Page
 Route::get('/join-partner', \App\Livewire\User\JoinPartner::class)->name('join.partner');
+Route::get('/join-partner', JoinPartner::class)->name('join');
 
 // Existing Routes
 Route::get('/onboarding', \App\Livewire\User\Onboarding::class)->name('onboarding');

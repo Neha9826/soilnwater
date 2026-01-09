@@ -15,4 +15,9 @@ class Property extends Model
     protected $casts = [
         'images' => 'array',
     ];
+
+    public function business()
+    {
+        return $this->belongsTo(Business::class);
+    }
 }

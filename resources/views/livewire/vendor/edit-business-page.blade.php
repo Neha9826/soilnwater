@@ -1,166 +1,242 @@
-<div class="max-w-5xl mx-auto py-10 px-4">
+<div class="flex h-screen bg-gray-100 overflow-hidden" x-data="{ mobileMenuOpen: false }">
     
-    <link rel="stylesheet" type="text/css" href="https://unpkg.com/trix@2.0.0/dist/trix.css">
-    <script type="text/javascript" src="https://unpkg.com/trix@2.0.0/dist/trix.umd.min.js"></script>
-    
-    <style>
-        .trix-button-group--file-tools { display: none !important; }
-        .trix-content ul { list-style-type: disc !important; padding-left: 1.5rem !important; }
-        .trix-content ol { list-style-type: decimal !important; padding-left: 1.5rem !important; }
-        .trix-content blockquote { border-left: 4px solid #ccc; padding-left: 1rem; }
-    </style>
-
-    <div class="flex justify-between items-end mb-8 border-b pb-4">
-        <div>
-            <h1 class="text-3xl font-bold text-gray-900">Website Builder</h1>
-            <p class="text-gray-500 mt-1">Design your public page block by block.</p>
+    <aside :class="mobileMenuOpen ? 'block' : 'hidden'" 
+           class="md:block bg-white shadow-xl border-r border-gray-200 md:w-64 flex-shrink-0 z-30 transition-all duration-300 flex flex-col">
+        
+        <div class="p-6 border-b border-gray-100 flex-shrink-0">
+            <h2 class="text-xl font-extrabold text-blue-900 flex items-center gap-2">
+                <i class="fas fa-user-circle"></i> Dashboard
+            </h2>
+            <p class="text-xs text-gray-500 mt-1 uppercase tracking-wide font-bold">
+                Website Editor
+            </p>
         </div>
-        <div class="flex gap-3">
-             <a href="{{ url('/v/'.Auth::user()->store_slug) }}" target="_blank" class="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg transition">
-                <i class="fas fa-eye"></i> Preview Page
+
+        <nav class="p-4 space-y-2 flex-1 overflow-y-auto">
+            <a href="{{ route('dashboard') }}" 
+               class="w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition font-medium text-gray-600 hover:bg-gray-50 hover:text-blue-700">
+                <i class="fas fa-chart-pie w-5"></i> Overview
             </a>
-            <a href="{{ route('dashboard') }}" class="text-blue-600 hover:underline py-2 px-2">Back to Dashboard</a>
-        </div>
-    </div>
 
-    <form wire:submit.prevent="save" class="space-y-8">
-
-        <div class="bg-white shadow-sm rounded-xl border border-gray-200 p-6">
-            <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <i class="fas fa-paint-brush text-blue-500"></i> Branding & Header
-            </h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="col-span-1 text-center">
-                    <label class="block text-sm font-bold text-gray-700 mb-2">Company Logo</label>
-                    <div class="relative w-32 h-32 mx-auto bg-gray-100 rounded-full overflow-hidden border-4 border-white shadow-lg group">
-                        @if ($store_logo) 
-                            <img src="{{ $store_logo->temporaryUrl() }}" class="object-cover w-full h-full">
-                        @elseif($existing_logo)
-                            <img src="{{ asset('storage/'.$existing_logo) }}" class="object-cover w-full h-full">
-                        @else
-                            <div class="flex items-center justify-center w-full h-full text-gray-300">
-                                <i class="fas fa-camera text-3xl"></i>
-                            </div>
-                        @endif
-                        
-                        <label for="logo-upload" class="absolute inset-0 bg-black/50 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 cursor-pointer transition">
-                            <span class="text-xs font-bold">Change</span>
-                        </label>
-                        <input wire:model="store_logo" type="file" id="logo-upload" class="hidden">
-                    </div>
-                </div>
-
-                <div class="col-span-2 space-y-4">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700">Page Title (Hero Text)</label>
-                        <input wire:model="header_title" type="text" placeholder="e.g. Building Tomorrow, Today" class="w-full mt-1 border-gray-300 rounded-lg p-2.5 border focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700">Subtitle</label>
-                        <input wire:model="header_subtitle" type="text" placeholder="e.g. Premium Construction Materials in Dehradun" class="w-full mt-1 border-gray-300 rounded-lg p-2.5 border">
-                    </div>
-                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Banner Images (Slideshow)</label>
-                        <input wire:model="header_images" type="file" multiple class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
-                        
-                        <div class="flex gap-2 mt-2">
-                             @foreach($existing_headers as $index => $img)
-                                <div class="relative h-12 w-16 group">
-                                    <img src="{{ asset('storage/'.$img) }}" class="h-full w-full object-cover rounded">
-                                    <button type="button" wire:click="removeHeaderImage({{ $index }})" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shadow opacity-0 group-hover:opacity-100 transition">&times;</button>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
+            <div class="w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                <i class="fas fa-globe w-5"></i> Public Page
             </div>
-        </div>
 
-        <div class="bg-white shadow-sm rounded-xl border border-gray-200 p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                    <i class="fas fa-layer-group text-purple-500"></i> Content Sections
-                </h2>
-                <button type="button" wire:click="addSection" class="text-sm bg-purple-50 text-purple-700 font-bold py-2 px-4 rounded-lg hover:bg-purple-100 transition">
-                    + Add New Section
+            <a href="{{ route('dashboard') }}" 
+               class="w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition font-medium text-gray-600 hover:bg-gray-50 hover:text-blue-700">
+                <i class="fas fa-building w-5"></i> My Branches
+            </a>
+
+            <a href="{{ route('dashboard') }}" 
+               class="w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition font-medium text-gray-600 hover:bg-gray-50 hover:text-blue-700">
+                @if(Auth::user()->profile_type === 'vendor')
+                    <i class="fas fa-box-open w-5"></i> Manage Products
+                @else
+                    <i class="fas fa-bed w-5"></i> Manage Listings
+                @endif
+            </a>
+
+            <form method="POST" action="{{ route('logout') }}" class="mt-8 border-t border-gray-100 pt-4">
+                @csrf
+                <button type="submit" class="w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition font-bold text-red-600 hover:bg-red-50">
+                    <i class="fas fa-sign-out-alt w-5"></i> Logout
                 </button>
-            </div>
+            </form>
+        </nav>
+    </aside>
 
-            <div class="space-y-8">
-                @foreach($sections as $index => $section)
-                    <div wire:key="section-{{ $index }}" class="bg-gray-50 p-6 rounded-xl border border-gray-200 relative group transition hover:shadow-md">
-                        
-                        <button type="button" wire:click="removeSection({{ $index }})" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition z-10 bg-white p-2 rounded-full shadow-sm">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            
-                            <div class="col-span-1">
-                                <label class="text-xs font-bold text-gray-500 uppercase mb-2 block">Section Image</label>
-                                
-                                <div class="relative h-40 bg-white border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center overflow-hidden">
-                                    @if(isset($sections[$index]['new_image']) && $sections[$index]['new_image'])
-                                        <img src="{{ $sections[$index]['new_image']->temporaryUrl() }}" class="absolute inset-0 w-full h-full object-cover">
-                                    @elseif(isset($section['image_path']) && $section['image_path'])
-                                        <img src="{{ asset('storage/'.$section['image_path']) }}" class="absolute inset-0 w-full h-full object-cover">
-                                    @else
-                                        <i class="fas fa-image text-3xl text-gray-300 mb-2"></i>
-                                        <span class="text-xs text-gray-400">Upload Image</span>
-                                    @endif
-                                    
-                                    <input type="file" wire:model="sections.{{ $index }}.new_image" class="absolute inset-0 opacity-0 cursor-pointer">
-                                </div>
-                            </div>
-
-                            <div class="col-span-2 space-y-4">
-                                <div>
-                                    <label class="text-xs font-bold text-gray-500 uppercase">Section Title</label>
-                                    <input wire:model.defer="sections.{{ $index }}.title" type="text" class="w-full mt-1 bg-white border-gray-300 rounded-lg p-2 border focus:ring-purple-500" placeholder="e.g. Our History">
-                                </div>
-                                
-                                <div wire:ignore>
-                                    <label class="text-xs font-bold text-gray-500 uppercase mb-1 block">Description Content</label>
-                                    <trix-editor input="desc-{{ $index }}" class="bg-white border-gray-300 rounded-lg min-h-[150px] formatted-content"></trix-editor>
-                                    <input id="desc-{{ $index }}" type="hidden" value="{{ $section['description'] }}" onchange="@this.set('sections.{{ $index }}.description', this.value)">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-
-        <div class="bg-white shadow-sm rounded-xl border border-gray-200 p-6">
-            <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <i class="fas fa-address-card text-green-500"></i> Contact Details
-            </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Company / Store Name</label>
-                    <input wire:model="store_name" type="text" class="w-full border-gray-300 rounded-lg p-3 border">
-                </div>
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Full Address</label>
-                    <input wire:model="address" type="text" class="w-full border-gray-300 rounded-lg p-3 border">
-                </div>
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Facebook Page Link</label>
-                    <input wire:model="facebook" type="text" class="w-full border-gray-300 rounded-lg p-3 border">
-                </div>
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Instagram Profile Link</label>
-                    <input wire:model="instagram" type="text" class="w-full border-gray-300 rounded-lg p-3 border">
-                </div>
-            </div>
-        </div>
-
-        <div class="flex justify-end pt-4">
-            <button type="submit" class="bg-blue-600 text-white font-bold py-4 px-10 rounded-xl hover:bg-blue-700 shadow-lg transition transform hover:-translate-y-1">
-                Save & Publish Website
+    <main class="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-8">
+        
+        <div class="md:hidden mb-6">
+            <button @click="mobileMenuOpen = !mobileMenuOpen" class="bg-white border border-gray-300 px-4 py-2 rounded-lg shadow-sm text-gray-700 font-bold w-full flex justify-between">
+                <span>Menu</span><i class="fas fa-bars"></i>
             </button>
         </div>
 
-    </form>
+        @if (session()->has('message'))
+            <div class="max-w-5xl mx-auto bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-8 rounded shadow-sm animate-pulse">
+                <p class="font-bold">Success</p>
+                <p>{{ session('message') }}</p>
+            </div>
+        @endif
+
+        <div class="max-w-5xl mx-auto pb-20">
+            
+            <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+            <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 border-b border-gray-200 pb-6 gap-4">
+                <div>
+                    <h1 class="text-3xl font-extrabold text-gray-900">Website Builder</h1>
+                    <p class="text-gray-500 mt-1">Design your public profile block by block.</p>
+                </div>
+                
+                <div class="flex gap-3">
+                    @if(!empty($current_slug))
+                        <a href="{{ route('public.profile', ['slug' => $current_slug]) }}" target="_blank" class="flex items-center gap-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold py-2 px-4 rounded-lg transition shadow-sm">
+                            <i class="fas fa-eye text-blue-500"></i> Preview
+                        </a>
+                    @else
+                        <button disabled class="flex items-center gap-2 bg-gray-100 text-gray-400 font-bold py-2 px-4 rounded-lg cursor-not-allowed">
+                            <i class="fas fa-eye-slash"></i> Preview
+                        </button>
+                    @endif
+
+                    <a href="{{ route('dashboard') }}" class="text-red-500 font-bold py-2 px-4 rounded-lg hover:bg-red-50 transition border border-transparent hover:border-red-200">
+                        Cancel & Exit
+                    </a>
+                </div>
+            </div>
+
+            <form wire:submit.prevent="save" class="space-y-8">
+
+                <div class="bg-white shadow-sm rounded-2xl border border-gray-200 p-6 md:p-8">
+                    <h2 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2 border-b border-gray-100 pb-2">
+                        <i class="fas fa-paint-brush text-purple-500 bg-purple-50 p-2 rounded-lg"></i> Branding & Header
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="col-span-1 text-center">
+                            <label class="block text-sm font-bold text-gray-700 mb-3">Company Logo</label>
+                            <div class="relative w-40 h-40 mx-auto bg-gray-50 rounded-full overflow-hidden border-4 border-white shadow-lg group">
+                                @if ($store_logo) 
+                                    <img src="{{ $store_logo->temporaryUrl() }}" class="object-cover w-full h-full">
+                                @elseif($existing_logo)
+                                    <img src="{{ asset('storage/'.$existing_logo) }}" class="object-cover w-full h-full">
+                                @else
+                                    <div class="flex items-center justify-center w-full h-full text-gray-300"><i class="fas fa-camera text-4xl"></i></div>
+                                @endif
+                                <label for="logo-upload" class="absolute inset-0 bg-black/50 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 cursor-pointer transition">
+                                    <span class="text-xs font-bold uppercase tracking-wider">Change Logo</span>
+                                </label>
+                                <input wire:model="store_logo" type="file" id="logo-upload" class="hidden">
+                            </div>
+                            @error('store_logo') <span class="text-red-500 text-xs block mt-2">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div class="col-span-2 space-y-5">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-1">Page Title</label>
+                                <input wire:model="header_title" type="text" class="w-full border-gray-300 rounded-xl p-3 border">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-1">Subtitle</label>
+                                <input wire:model="header_subtitle" type="text" class="w-full border-gray-300 rounded-xl p-3 border">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Banner Images</label>
+                                <input wire:model="header_images" type="file" multiple class="block w-full text-sm text-gray-500"/>
+                                @error('header_images.*') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                
+                                <div class="flex gap-3 mt-4 flex-wrap">
+                                    @foreach($existing_headers as $index => $img)
+                                        <div class="relative h-20 w-32 group rounded-lg overflow-hidden shadow-sm border border-gray-200">
+                                            <img src="{{ asset('storage/'.$img) }}" class="h-full w-full object-cover">
+                                            <button type="button" wire:click="removeHeaderImage({{ $index }})" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition"><i class="fas fa-times"></i></button>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white shadow-sm rounded-2xl border border-gray-200 p-6 md:p-8">
+                    <div class="flex justify-between items-center mb-6 border-b border-gray-100 pb-2">
+                        <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                            <i class="fas fa-layer-group text-blue-500 bg-blue-50 p-2 rounded-lg"></i> Content Sections
+                        </h2>
+                        <button type="button" wire:click="addSection" class="bg-black text-white text-sm font-bold py-2 px-4 rounded-lg hover:bg-gray-800 transition shadow-md">
+                            + Add Section
+                        </button>
+                    </div>
+
+                    <div class="space-y-8">
+                        @foreach($sections as $index => $section)
+                            <div wire:key="section-{{ $index }}" class="bg-gray-50 p-6 rounded-2xl border border-gray-200 relative group">
+                                <button type="button" wire:click="removeSection({{ $index }})" class="absolute top-4 right-4 text-gray-400 hover:text-red-600 bg-white p-2 rounded-full shadow-sm z-10"><i class="fas fa-trash-alt"></i></button>
+
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div class="col-span-1">
+                                        <label class="text-xs font-bold text-gray-500 uppercase mb-2 block">Image</label>
+                                        <div class="relative h-48 bg-white border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center overflow-hidden cursor-pointer">
+                                            @if(isset($sections[$index]['new_image']) && $sections[$index]['new_image'])
+                                                <img src="{{ $sections[$index]['new_image']->temporaryUrl() }}" class="absolute inset-0 w-full h-full object-cover">
+                                            @elseif(isset($section['image_path']) && $section['image_path'])
+                                                <img src="{{ asset('storage/'.$section['image_path']) }}" class="absolute inset-0 w-full h-full object-cover">
+                                            @else
+                                                <i class="fas fa-cloud-upload-alt text-3xl text-gray-300 mb-2"></i>
+                                                <span class="text-xs text-gray-400 font-bold">Upload</span>
+                                            @endif
+                                            <input type="file" wire:model="sections.{{ $index }}.new_image" class="absolute inset-0 opacity-0 cursor-pointer">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-span-2 space-y-4">
+                                        <div>
+                                            <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Title</label>
+                                            <input wire:model.defer="sections.{{ $index }}.title" type="text" class="w-full mt-1 bg-white border-gray-300 rounded-xl p-3 border">
+                                        </div>
+                                        
+                                        <div wire:ignore 
+                                             x-data="{
+                                                 content: @entangle('sections.'.$index.'.description'),
+                                                 initQuill() {
+                                                     let quill = new Quill(this.$refs.editor, {
+                                                         theme: 'snow',
+                                                         modules: { toolbar: [['bold', 'italic', 'underline'], [{'list':'ordered'}, {'list':'bullet'}]] }
+                                                     });
+                                                     if (this.content) { quill.root.innerHTML = this.content; }
+                                                     quill.on('text-change', () => { this.content = quill.root.innerHTML; });
+                                                 }
+                                             }"
+                                             x-init="initQuill()"
+                                        >
+                                            <label class="text-xs font-bold text-gray-500 uppercase mb-1 block">Description</label>
+                                            <div x-ref="editor" class="bg-white h-40 border border-gray-300 rounded-xl"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="bg-white shadow-sm rounded-2xl border border-gray-200 p-6 md:p-8">
+                    <h2 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2 border-b border-gray-100 pb-2">
+                        <i class="fas fa-address-card text-green-500 bg-green-50 p-2 rounded-lg"></i> Contact Details
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Store Name *</label>
+                            <input wire:model="store_name" type="text" class="w-full border-gray-300 rounded-xl p-3 border">
+                            @error('store_name') <span class="text-red-500 text-xs font-bold">{{ $message }}</span> @enderror
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Full Address</label>
+                            <input wire:model="address" type="text" class="w-full border-gray-300 rounded-xl p-3 border">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Facebook Link</label>
+                            <input wire:model="facebook" type="text" class="w-full border-gray-300 rounded-xl p-3 border">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Instagram Link</label>
+                            <input wire:model="instagram" type="text" class="w-full border-gray-300 rounded-xl p-3 border">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end pt-4 pb-12">
+                    <button type="submit" 
+                            class="flex items-center gap-2 bg-black text-white font-bold py-4 px-10 rounded-xl hover:bg-gray-800 shadow-lg transition transform hover:-translate-y-1 text-lg disabled:opacity-50 disabled:cursor-wait">
+                        <span wire:loading.remove wire:target="save">Save & Publish Website</span>
+                        <span wire:loading wire:target="save"><i class="fas fa-spinner fa-spin"></i> Saving...</span>
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </main>
 </div>
