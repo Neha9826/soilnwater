@@ -9,43 +9,32 @@ use App\Models\Category;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
-class ManageProducts extends Component
+class CreateProduct extends Component
 {
     use WithFileUploads;
 
-    public $products; 
-    public $isCreating = false; 
-
-    // 1. Basic Fields
+    // Form Fields
     public $name, $brand, $price, $stock_quantity, $sku, $description;
-    
-    // 2. New Professional Fields (ADDED THESE)
     public $weight, $dimensions, $video_url;
-
-    // 3. Arrays & Media
-    public $images = []; 
-    public $colors = [], $sizes = []; 
     
-    // 4. Categorization
+    // Arrays & Media
+    public $images = [];
+    public $colors, $sizes; // Text inputs (comma separated)
+    
+    // Categorization
     public $category_id, $subcategory_id;
-    public $new_category_name; 
+    public $new_category_name;
     public $is_other_category = false;
     
     public $categories = [];
     public $subcategories = [];
-
-    // 5. Specs
+    
+    // Specs
     public $specs = [['key' => '', 'value' => '']];
 
     public function mount()
     {
-        $this->loadProducts();
         $this->categories = Category::whereNull('parent_id')->where('is_approved', true)->get();
-    }
-
-    public function loadProducts()
-    {
-        $this->products = Product::where('user_id', Auth::id())->latest()->get();
     }
 
     public function updatedCategoryId($value)
@@ -80,34 +69,32 @@ class ManageProducts extends Component
             'category_id' => 'required',
         ]);
 
-        // Handle "Other" Category
+        // 1. Handle "Other" Category
         $finalCatId = $this->category_id;
         if ($this->category_id === 'other') {
             $this->validate(['new_category_name' => 'required|string|min:3']);
             $newCat = Category::create([
                 'name' => $this->new_category_name,
                 'slug' => Str::slug($this->new_category_name),
-                'is_approved' => false, 
+                'is_approved' => false,
                 'created_by' => Auth::id()
             ]);
             $finalCatId = $newCat->id;
         }
 
-        // Handle Images
+        // 2. Upload Images
         $imagePaths = [];
         foreach ($this->images as $img) {
             $imagePaths[] = $img->store('products', 'public');
         }
 
-        // Handle Specs
+        // 3. Process Specs
         $cleanSpecs = [];
         foreach ($this->specs as $spec) {
-            if (!empty($spec['key'])) {
-                $cleanSpecs[$spec['key']] = $spec['value'];
-            }
+            if (!empty($spec['key'])) $cleanSpecs[$spec['key']] = $spec['value'];
         }
 
-        // Create Product
+        // 4. Create Product
         Product::create([
             'user_id' => Auth::id(),
             'name' => $this->name,
@@ -120,26 +107,20 @@ class ManageProducts extends Component
             'category_id' => $finalCatId,
             'subcategory_id' => is_numeric($this->subcategory_id) ? $this->subcategory_id : null,
             'images' => $imagePaths,
-            
-            // Handle Arrays (Convert string input "Red, Blue" to Array)
-            'colors' => is_array($this->colors) ? $this->colors : array_map('trim', explode(',', $this->colors)),
-            'sizes' => is_array($this->sizes) ? $this->sizes : array_map('trim', explode(',', $this->sizes)),
-            
-            // New Fields
+            'colors' => $this->colors ? array_map('trim', explode(',', $this->colors)) : [],
+            'sizes' => $this->sizes ? array_map('trim', explode(',', $this->sizes)) : [],
             'weight' => $this->weight,
             'dimensions' => $this->dimensions,
             'video_url' => $this->video_url,
             'specifications' => $cleanSpecs,
         ]);
 
-        session()->flash('message', 'Product listed successfully!');
-        $this->reset();
-        $this->mount(); 
-        $this->isCreating = false;
+        // Redirect back to list
+        return redirect()->route('vendor.products')->with('message', 'Product created successfully!');
     }
 
     public function render()
     {
-        return view('livewire.vendor.manage-products')->layout('layouts.app');
+        return view('livewire.vendor.create-product')->layout('layouts.app');
     }
 }

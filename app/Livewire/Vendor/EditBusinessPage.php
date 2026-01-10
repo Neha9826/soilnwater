@@ -11,25 +11,21 @@ class EditBusinessPage extends Component
 {
     use WithFileUploads;
 
-    // Basic Info
     public $store_name, $store_slug, $address, $facebook, $instagram;
     public $header_title, $header_subtitle;
     
-    // Images
     public $store_logo; 
     public $existing_logo; 
+    
+    // Initialize as Empty Arrays
     public $header_images = []; 
     public $existing_headers = []; 
-    
-    // Dynamic Sections
     public $sections = []; 
 
-    // FIX IS HERE: No $id parameter needed anymore!
     public function mount()
     {
         $user = Auth::user();
 
-        // Load data from USER table
         $this->store_name = $user->store_name ?? $user->name . "'s Business";
         $this->store_slug = $user->store_slug;
         $this->address = $user->address;
@@ -39,10 +35,22 @@ class EditBusinessPage extends Component
         $this->header_title = $user->header_title;
         $this->header_subtitle = $user->header_subtitle;
         $this->existing_logo = $user->store_logo;
-        $this->existing_headers = $user->header_images ?? [];
-        
-        // Load existing sections or start with one empty one
-        $this->sections = $user->page_sections ?? [['title' => '', 'description' => '', 'image_path' => null]];
+
+        // CRITICAL FIX: Ensure existing_headers is ALWAYS an array
+        if (!empty($user->header_images)) {
+            $decoded = is_string($user->header_images) ? json_decode($user->header_images, true) : $user->header_images;
+            $this->existing_headers = is_array($decoded) ? $decoded : [];
+        } else {
+            $this->existing_headers = [];
+        }
+
+        // CRITICAL FIX: Ensure sections is ALWAYS an array
+        if (!empty($user->page_sections)) {
+            $decodedSec = is_string($user->page_sections) ? json_decode($user->page_sections, true) : $user->page_sections;
+            $this->sections = is_array($decodedSec) ? $decodedSec : [];
+        } else {
+            $this->sections = [['title' => '', 'description' => '', 'image_path' => null]];
+        }
     }
 
     public function addSection()
@@ -53,7 +61,7 @@ class EditBusinessPage extends Component
     public function removeSection($index)
     {
         unset($this->sections[$index]);
-        $this->sections = array_values($this->sections); // Re-index
+        $this->sections = array_values($this->sections);
     }
 
     public function removeHeaderImage($index)
@@ -68,24 +76,19 @@ class EditBusinessPage extends Component
             'store_name' => 'required|min:3',
             'header_images.*' => 'image|max:2048',
             'store_logo' => 'nullable|image|max:1024',
-            'sections.*.title' => 'nullable|string',
-            'sections.*.description' => 'nullable|string',
         ]);
 
         $user = Auth::user();
 
-        // 1. Handle Logo
         if ($this->store_logo) {
             $user->store_logo = $this->store_logo->store('uploads', 'public');
         }
 
-        // 2. Handle Header Images
         $headerPaths = $this->existing_headers;
         foreach ($this->header_images as $img) {
             $headerPaths[] = $img->store('vendor-headers', 'public');
         }
 
-        // 3. Handle Dynamic Section Images
         $processedSections = $this->sections;
         foreach ($processedSections as $key => $section) {
             if (isset($section['new_image']) && !empty($section['new_image'])) {
@@ -95,30 +98,24 @@ class EditBusinessPage extends Component
             }
         }
 
-        // 4. Save to User Table
         $user->update([
             'store_name' => $this->store_name,
             'store_slug' => Str::slug($this->store_name),
-            'address' => $this->address,
-            'facebook' => $this->facebook,
-            'instagram' => $this->instagram,
             'header_title' => $this->header_title,
             'header_subtitle' => $this->header_subtitle,
-            'header_images' => $headerPaths,
+            'header_images' => $headerPaths, 
             'page_sections' => $processedSections, 
         ]);
 
-        session()->flash('message', 'Your website has been published successfully!');
+        session()->flash('message', 'Website updated successfully!');
         
-        // Refresh state
-        $this->mount(); // Reload data
-        $this->reset(['store_logo', 'header_images']); // Clear inputs
+        $this->mount(); 
+        $this->reset(['store_logo', 'header_images']); 
     }
 
     public function render()
     {
         return view('livewire.vendor.edit-business-page', [
-            // Pass the slug for the Preview button
             'current_slug' => Auth::user()->store_slug
         ])->layout('layouts.app');
     }
