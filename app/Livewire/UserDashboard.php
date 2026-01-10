@@ -76,7 +76,7 @@ class UserDashboard extends Component
 
         if($item && $item->user_id == $this->user->id) {
             $this->editingItemId = $item->id;
-            $this->selectedBusinessId = $item->business_id;
+            // Removed business_id check as it might not exist on new items
             $this->item_name = $item->name ?? $item->title;
             $this->item_price = $item->price;
             $this->item_description = $item->description;
@@ -89,14 +89,14 @@ class UserDashboard extends Component
     public function saveItem()
     {
         $this->validate([
-            'selectedBusinessId' => 'required',
             'item_name' => 'required|min:3',
             'item_price' => 'required|numeric',
         ]);
 
         $type = $this->user->profile_type;
+        
+        // Data to save (Removed 'business_id' dependency)
         $data = [
-            'business_id' => $this->selectedBusinessId,
             'price' => $this->item_price,
             'description' => $this->item_description,
             'user_id' => $this->user->id,
@@ -152,10 +152,7 @@ class UserDashboard extends Component
 
     public function openBusinessCreate()
     {
-        // For now, redirect to the main join form or a new create form
-        // Simpler: Just show a message or reuse the join form logic later
-        // Let's assume we just want to EDIT existing for now as per requirement 2
-        return redirect()->route('join'); // Placeholder
+        return redirect()->route('join'); 
     }
 
     public function editBusiness($id)
@@ -216,9 +213,11 @@ class UserDashboard extends Component
         // Fetch Items
         $myItems = [];
         if ($this->user->profile_type === 'vendor') {
-            $myItems = Product::where('user_id', $this->user->id)->with('business')->latest()->get();
+            // FIX IS HERE: Removed ->with('business')
+            $myItems = Product::where('user_id', $this->user->id)->latest()->get();
         } elseif (in_array($this->user->profile_type, ['hotel', 'builder'])) {
-            $myItems = Property::where('user_id', $this->user->id)->with('business')->latest()->get();
+            // FIX IS HERE: Removed ->with('business')
+            $myItems = Property::where('user_id', $this->user->id)->latest()->get();
         }
 
         return view('livewire.user-dashboard', [
