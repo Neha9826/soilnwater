@@ -1,8 +1,8 @@
-<div class="flex h-screen bg-gray-100 overflow-hidden" x-data="{ mobileMenuOpen: false }">
+<div class="flex h-full w-full bg-gray-100" x-data="{ mobileMenuOpen: false }">
     
     <x-vendor-sidebar />
 
-    <main class="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-8 md:pl-64">
+    <main class="flex-1 w-full overflow-y-auto bg-gray-50 p-4 md:p-8">
         
         <div class="md:hidden mb-6">
             <button @click="mobileMenuOpen = !mobileMenuOpen" class="bg-white border border-gray-300 px-4 py-2 rounded-lg shadow-sm text-gray-700 font-bold w-full flex justify-between">

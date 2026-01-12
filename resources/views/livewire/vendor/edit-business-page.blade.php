@@ -1,52 +1,8 @@
-<div class="flex h-screen bg-gray-100 overflow-hidden" x-data="{ mobileMenuOpen: false }">
+<div class="flex h-full w-full bg-gray-100" x-data="{ mobileMenuOpen: false }">
     
-    <aside :class="mobileMenuOpen ? 'block' : 'hidden'" 
-           class="md:block bg-white shadow-xl border-r border-gray-200 md:w-64 flex-shrink-0 z-30 transition-all duration-300 flex flex-col">
-        
-        <div class="p-6 border-b border-gray-100 flex-shrink-0">
-            <h2 class="text-xl font-extrabold text-blue-900 flex items-center gap-2">
-                <i class="fas fa-user-circle"></i> Dashboard
-            </h2>
-            <p class="text-xs text-gray-500 mt-1 uppercase tracking-wide font-bold">
-                Website Editor
-            </p>
-        </div>
+    <x-vendor-sidebar />
 
-        <nav class="p-4 space-y-2 flex-1 overflow-y-auto">
-            <a href="{{ route('dashboard') }}" 
-               class="w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition font-medium text-gray-600 hover:bg-gray-50 hover:text-blue-700">
-                <i class="fas fa-chart-pie w-5"></i> Overview
-            </a>
-
-            <div class="w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition font-medium bg-blue-50 text-blue-700 border border-blue-200">
-                <i class="fas fa-globe w-5"></i> Public Page
-            </div>
-
-            <a href="{{ route('dashboard') }}" 
-               class="w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition font-medium text-gray-600 hover:bg-gray-50 hover:text-blue-700">
-                <i class="fas fa-building w-5"></i> My Branches
-            </a>
-
-            <a href="{{ route('dashboard') }}" 
-               class="w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition font-medium text-gray-600 hover:bg-gray-50 hover:text-blue-700">
-                @if(Auth::user()->profile_type === 'vendor')
-                    <i class="fas fa-box-open w-5"></i> Manage Products
-                @else
-                    <i class="fas fa-bed w-5"></i> Manage Listings
-                @endif
-            </a>
-
-            <form method="POST" action="{{ route('logout') }}" class="mt-8 border-t border-gray-100 pt-4">
-                @csrf
-                <button type="submit" class="w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition font-bold text-red-600 hover:bg-red-50">
-                    <i class="fas fa-sign-out-alt w-5"></i> Logout
-                </button>
-            </form>
-        </nav>
-    </aside>
-
-
-    <main class="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-8">
+    <main class="flex-1 w-full overflow-y-auto bg-gray-50 p-4 md:p-8">
         
         <div class="md:hidden mb-6">
             <button @click="mobileMenuOpen = !mobileMenuOpen" class="bg-white border border-gray-300 px-4 py-2 rounded-lg shadow-sm text-gray-700 font-bold w-full flex justify-between">

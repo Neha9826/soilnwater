@@ -17,11 +17,14 @@ class Product extends Model
         'images' => 'array',
         'colors' => 'array',
         'sizes' => 'array',
-        'specifications' => 'array', // <--- This was likely missing causing the crash
+        'specifications' => 'array',
+        'tiered_pricing' => 'array', // <--- ADD THIS
         'price' => 'decimal:2',
+        'discounted_price' => 'decimal:2', // <--- ADD THIS
         'is_active' => 'boolean',
+        'is_sellable' => 'boolean', // <--- ADD THIS
+        'has_special_offer' => 'boolean', // <--- ADD THIS
         'stock_quantity' => 'integer',
-        'weight' => 'decimal:2',
     ];
 
     protected static function boot()

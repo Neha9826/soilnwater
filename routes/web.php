@@ -83,7 +83,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Route::get('/my-branches', UserDashboard::class)->name('vendor.branches');
     Route::get('/my-branches', \App\Livewire\Vendor\ManageBranches::class)->name('vendor.branches');
     Route::get('/my-business', UserDashboard::class)->name('vendor.business'); 
-    
+    Route::get('/my-branches/{id}/edit', \App\Livewire\Vendor\EditBranch::class)->name('vendor.branches.edit');
+    Route::get('/my-branches/create', \App\Livewire\Vendor\CreateBranch::class)->name('vendor.branches.create');
 
     // 5. PROFILE & SETTINGS
     Route::get('/profile', UserProfile::class)->name('profile.edit');

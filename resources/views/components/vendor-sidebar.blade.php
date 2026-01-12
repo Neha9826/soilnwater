@@ -1,6 +1,6 @@
-<aside x-data="{ mobileMenuOpen: false }"
+<aside x-data="{ mobileMenuOpen: false }" 
        :class="mobileMenuOpen ? 'block' : 'hidden'" 
-       class="md:block bg-white shadow-xl border-r border-gray-200 md:w-64 flex-shrink-0 z-50 flex flex-col h-screen fixed inset-y-0 left-0">
+       class="md:block bg-white shadow-xl border-r border-gray-200 md:w-64 flex-shrink-0 z-30 transition-all duration-300 flex flex-col h-full">
     
     <div class="p-6 border-b border-gray-100 flex-shrink-0">
         <h2 class="text-xl font-extrabold text-blue-900 flex items-center gap-2">
@@ -33,7 +33,7 @@
 
         <a href="{{ route('vendor.products') }}" 
            class="w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition font-medium 
-           {{ request()->routeIs('vendor.products') ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'text-gray-600 hover:bg-gray-50' }}">
+           {{ request()->routeIs('vendor.products') || request()->routeIs('vendor.products.create') ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'text-gray-600 hover:bg-gray-50' }}">
             @if(Auth::user()->profile_type === 'vendor') 
                 <i class="fas fa-box-open w-5"></i> Manage Products
             @else 
