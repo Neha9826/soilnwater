@@ -3,143 +3,71 @@
 namespace App\Livewire\Vendor;
 
 use Livewire\Component;
-use Livewire\WithFileUploads;
+use Livewire\WithPagination; 
 use App\Models\Product;
-use App\Models\Category;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 
 class ManageProducts extends Component
 {
-    use WithFileUploads;
+    use WithPagination;
 
-    public $products; 
-    public $isCreating = false; 
-
-    // 1. Basic Fields
-    public $name, $brand, $price, $stock_quantity, $sku, $description;
+    // View & Search State
+    public $viewType = 'list'; // 'list' or 'grid'
+    public $search = '';
     
-    // 2. New Professional Fields (ADDED THESE)
-    public $weight, $dimensions, $video_url;
+    // Actions
+    public $deleteId = null;
 
-    // 3. Arrays & Media
-    public $images = []; 
-    public $colors = [], $sizes = []; 
-    
-    // 4. Categorization
-    public $category_id, $subcategory_id;
-    public $new_category_name; 
-    public $is_other_category = false;
-    
-    public $categories = [];
-    public $subcategories = [];
-
-    // 5. Specs
-    public $specs = [['key' => '', 'value' => '']];
-
-    public function mount()
+    // Reset pagination when searching
+    public function updatedSearch()
     {
-        $this->loadProducts();
-        $this->categories = Category::whereNull('parent_id')->where('is_approved', true)->get();
+        $this->resetPage();
     }
 
-    public function loadProducts()
+    // Toggle "Online Sale" (Eye Icon)
+    public function toggleStatus($id)
     {
-        $this->products = Product::where('user_id', Auth::id())->latest()->get();
-    }
-
-    public function updatedCategoryId($value)
-    {
-        if ($value === 'other') {
-            $this->is_other_category = true;
-            $this->subcategories = [];
-        } else {
-            $this->is_other_category = false;
-            $this->subcategories = Category::where('parent_id', $value)->where('is_approved', true)->get();
-        }
-    }
-
-    public function addSpec()
-    {
-        $this->specs[] = ['key' => '', 'value' => ''];
-    }
-
-    public function removeSpec($index)
-    {
-        unset($this->specs[$index]);
-        $this->specs = array_values($this->specs);
-    }
-
-    public function save()
-    {
-        $this->validate([
-            'name' => 'required|min:3',
-            'price' => 'required|numeric',
-            'stock_quantity' => 'required|integer',
-            'images.*' => 'image|max:2048',
-            'category_id' => 'required',
-        ]);
-
-        // Handle "Other" Category
-        $finalCatId = $this->category_id;
-        if ($this->category_id === 'other') {
-            $this->validate(['new_category_name' => 'required|string|min:3']);
-            $newCat = Category::create([
-                'name' => $this->new_category_name,
-                'slug' => Str::slug($this->new_category_name),
-                'is_approved' => false, 
-                'created_by' => Auth::id()
-            ]);
-            $finalCatId = $newCat->id;
-        }
-
-        // Handle Images
-        $imagePaths = [];
-        foreach ($this->images as $img) {
-            $imagePaths[] = $img->store('products', 'public');
-        }
-
-        // Handle Specs
-        $cleanSpecs = [];
-        foreach ($this->specs as $spec) {
-            if (!empty($spec['key'])) {
-                $cleanSpecs[$spec['key']] = $spec['value'];
-            }
-        }
-
-        // Create Product
-        Product::create([
-            'user_id' => Auth::id(),
-            'name' => $this->name,
-            'slug' => Str::slug($this->name) . '-' . uniqid(),
-            'description' => $this->description,
-            'price' => $this->price,
-            'stock_quantity' => $this->stock_quantity,
-            'sku' => $this->sku ?? strtoupper(Str::random(10)),
-            'brand' => $this->brand,
-            'category_id' => $finalCatId,
-            'subcategory_id' => is_numeric($this->subcategory_id) ? $this->subcategory_id : null,
-            'images' => $imagePaths,
+        $product = Product::where('user_id', Auth::id())->find($id);
+        if ($product) {
+            $product->is_sellable = !$product->is_sellable;
+            $product->save();
             
-            // Handle Arrays (Convert string input "Red, Blue" to Array)
-            'colors' => is_array($this->colors) ? $this->colors : array_map('trim', explode(',', $this->colors)),
-            'sizes' => is_array($this->sizes) ? $this->sizes : array_map('trim', explode(',', $this->sizes)),
-            
-            // New Fields
-            'weight' => $this->weight,
-            'dimensions' => $this->dimensions,
-            'video_url' => $this->video_url,
-            'specifications' => $cleanSpecs,
-        ]);
+            // Optional: You can add a session flash here if you want visual confirmation
+            // session()->flash('message', 'Product visibility updated.'); 
+        }
+    }
 
-        session()->flash('message', 'Product listed successfully!');
-        $this->reset();
-        $this->mount(); 
-        $this->isCreating = false;
+    // Delete Product (Dustbin)
+    public function deleteProduct($id)
+    {
+        $product = Product::where('user_id', Auth::id())->find($id);
+        if ($product) {
+            $product->delete();
+            session()->flash('message', 'Product deleted successfully.');
+        }
     }
 
     public function render()
     {
-        return view('livewire.vendor.manage-products')->layout('layouts.app');
+        $user = Auth::user();
+
+        // Advanced Search Logic
+        $products = Product::where('user_id', $user->id)
+            ->where(function($query) {
+                $query->where('name', 'like', '%'.$this->search.'%')
+                      ->orWhere('brand', 'like', '%'.$this->search.'%')
+                      ->orWhere('stock_quantity', 'like', '%'.$this->search.'%')
+                      ->orWhere('price', 'like', '%'.$this->search.'%')
+                      ->orWhereDate('created_at', 'like', '%'.$this->search.'%')
+                      ->orWhereHas('category', function($q) {
+                          $q->where('name', 'like', '%'.$this->search.'%');
+                      });
+            })
+            ->latest()
+            ->paginate(20); // 20 Items per page
+
+        return view('livewire.vendor.manage-products', [
+            'products' => $products
+        ])->layout('layouts.app');
     }
 }
