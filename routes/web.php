@@ -79,6 +79,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/manage-products', ManageProducts::class)->name('vendor.products');
     Route::get('/manage-products/create', App\Livewire\Vendor\CreateProduct::class)->name('vendor.products.create');
 
+    // Detail Page Route
+    Route::get('/admin/approvals/product/{id}', \App\Livewire\Admin\ProductApprovalDetail::class)
+        ->name('admin.product.approval');
+
     // 4. MY BRANCHES (Added BOTH names to prevent crashes)
     // Route::get('/my-branches', UserDashboard::class)->name('vendor.branches');
     Route::get('/my-branches', \App\Livewire\Vendor\ManageBranches::class)->name('vendor.branches');
