@@ -19,10 +19,10 @@
             <i class="fas fa-chart-pie w-5"></i> Overview
         </a>
 
-        <a href="{{ route('website.builder') }}" 
-           class="w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition font-medium 
-           {{ request()->routeIs('website.builder') ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'text-gray-600 hover:bg-gray-50' }}">
-            <i class="fas fa-globe w-5"></i> Public Page
+        <a href="{{ route('user.profile.public') }}" 
+            class="w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition font-medium 
+            {{ request()->routeIs('user.profile.public') ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'text-gray-600 hover:bg-gray-50' }}">
+                <i class="fas fa-globe w-5"></i> Public Page
         </a>
 
         <a href="{{ route('vendor.branches') }}" 
@@ -31,14 +31,52 @@
             <i class="fas fa-building w-5"></i> My Branches
         </a>
 
-        <a href="{{ route('vendor.products') }}" 
-           class="w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition font-medium 
-           {{ request()->routeIs('vendor.products') || request()->routeIs('vendor.products.create') ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'text-gray-600 hover:bg-gray-50' }}">
-            @if(Auth::user()->profile_type === 'vendor') 
+        @php $role = auth()->user()->profile_type; @endphp
+
+        {{-- 1. VENDOR (Hardware Store) --}}
+        @if($role === 'vendor')
+            <a href="{{ route('vendor.products') }}" 
+               class="w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition font-medium 
+               {{ request()->routeIs('vendor.products*') ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'text-gray-600 hover:bg-gray-50' }}">
                 <i class="fas fa-box-open w-5"></i> Manage Products
-            @else 
-                <i class="fas fa-bed w-5"></i> Manage Listings 
-            @endif
+            </a>
+        
+        {{-- 2. BUILDER (Real Estate) --}}
+        @elseif($role === 'builder' || $role === 'agent')
+            <a href="{{ route('vendor.properties') }}" 
+               class="w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition font-medium 
+               {{ request()->routeIs('vendor.properties*') ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'text-gray-600 hover:bg-gray-50' }}">
+                <i class="fas fa-building w-5"></i> Manage Properties
+            </a>
+
+        {{-- 3. SERVICE PROVIDER (Electrician) --}}
+        @elseif($role === 'service')
+            <a href="{{ route('vendor.services') }}" 
+               class="w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition font-medium 
+               {{ request()->routeIs('vendor.services*') ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'text-gray-600 hover:bg-gray-50' }}">
+                <i class="fas fa-tools w-5"></i> My Services
+            </a>
+
+        {{-- 4. CONSULTANT (Architect) --}}
+        @elseif($role === 'consultant')
+            <a href="{{ route('vendor.consultations') }}" 
+               class="w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition font-medium 
+               {{ request()->routeIs('vendor.consultations*') ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'text-gray-600 hover:bg-gray-50' }}">
+                <i class="fas fa-calendar-check w-5"></i> Consultations
+            </a>
+
+        {{-- 5. HOTEL (Hotel Owner) --}}
+        @elseif($role === 'hotel')
+            <a href="{{ route('vendor.hotel') }}" 
+               class="w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition font-medium 
+               {{ request()->routeIs('vendor.hotel*') ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'text-gray-600 hover:bg-gray-50' }}">
+                <i class="fas fa-bed w-5"></i> Hotel Management
+            </a>
+        @endif
+        <a href="{{ route('profile.edit') }}" 
+           class="w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition font-medium 
+           {{ request()->routeIs('profile.show') ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'text-gray-600 hover:bg-gray-50' }}">
+            <i class="fas fa-cog w-5"></i> Settings
         </a>
 
         <form method="POST" action="{{ route('logout') }}" class="mt-8 border-t border-gray-100 pt-4">

@@ -2,165 +2,222 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Forms\Components\FileUpload;
 use App\Filament\Resources\PropertyResource\Pages;
-use App\Filament\Resources\PropertyResource\RelationManagers;
 use App\Models\Property;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Group;
+use Illuminate\Support\Str;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
+use Illuminate\Database\Eloquent\Collection;
 
 class PropertyResource extends Resource
 {
     protected static ?string $model = Property::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    // Changed Icon to Building
+    protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
+    protected static ?string $navigationGroup = 'Real Estate';
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('title')
-                    ->required()
-                    ->maxLength(255)
-                    // I added this back so your Slug auto-generates when you type Title
-                    ->live(onBlur: true)
-                    ->afterStateUpdated(fn (string $operation, $state, Forms\Set $set) => 
-                        $operation === 'create' ? $set('slug', \Illuminate\Support\Str::slug($state)) : null
-                    ),
+                // --- LEFT COLUMN (Content) ---
+                Group::make()->schema([
+                    
+                    // 1. Title & Description
+                    Section::make('Property Details')->schema([
+                        Forms\Components\TextInput::make('title')
+                            ->required()
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(fn (string $operation, $state, Set $set) => 
+                                $operation === 'create' ? $set('slug', Str::slug($state)) : null
+                            ),
 
-                Forms\Components\TextInput::make('slug')
-                    ->required()
-                    ->maxLength(255)
-                    ->unique(ignoreRecord: true),
+                        Forms\Components\TextInput::make('slug')
+                            ->required()
+                            ->unique(ignoreRecord: true),
 
-                Forms\Components\Textarea::make('description')
-                    ->columnSpanFull(),
+                        Forms\Components\RichEditor::make('description')
+                            ->columnSpanFull(),
+                    ]),
 
-                // --- PASTE STARTS HERE ---
-                Forms\Components\FileUpload::make('images')
-                    ->multiple()
-                    ->reorderable()
-                    ->directory('properties')
-                    ->columnSpanFull(),
-                // --- PASTE ENDS HERE ---
+                    // 2. Media
+                    Section::make('Media')->schema([
+                        Forms\Components\FileUpload::make('images')
+                            ->label('Property Images')
+                            ->multiple()
+                            ->reorderable()
+                            ->directory('properties')
+                            ->image()
+                            ->imageEditor()
+                            ->columnSpanFull(),
+                    ]),
 
-                Forms\Components\TextInput::make('price')
-                    ->required()
-                    ->numeric()
-                    ->prefix('₹'), // Changed to Rupee symbol for you
+                    // 3. Specs & Price
+                    Section::make('Specifications')->schema([
+                        Forms\Components\Grid::make(3)->schema([
+                            Forms\Components\TextInput::make('price')
+                                ->label('Price')
+                                ->required()
+                                ->numeric()
+                                ->prefix('₹'),
 
-                Forms\Components\Select::make('type')
-                    ->options([
-                        'sale' => 'For Sale',
-                        'rent' => 'For Rent',
-                        'pg' => 'PG / Hostel',
-                    ])
-                    ->required(),
+                            Forms\Components\Select::make('type')
+                                ->options([
+                                    'sale' => 'For Sale',
+                                    'rent' => 'For Rent',
+                                    'pg'   => 'PG / Hostel',
+                                ])
+                                ->required(),
+                            
+                            Forms\Components\TextInput::make('area_sqft')
+                                ->label('Area (Sq Ft)')
+                                ->numeric(),
+                        ]),
 
-                Forms\Components\TextInput::make('bedrooms')
-                    ->numeric()
-                    ->default(null),
+                        Forms\Components\Grid::make(3)->schema([
+                            Forms\Components\TextInput::make('bedrooms')
+                                ->numeric()
+                                ->label('Beds'),
 
-                Forms\Components\TextInput::make('bathrooms')
-                    ->numeric()
-                    ->default(null),
+                            Forms\Components\TextInput::make('bathrooms')
+                                ->numeric()
+                                ->label('Baths'),
 
-                Forms\Components\TextInput::make('area_sqft')
-                    ->numeric()
-                    ->default(null),
+                            Forms\Components\Select::make('furnishing')
+                                ->options([
+                                    'furnished' => 'Fully Furnished',
+                                    'semi-furnished' => 'Semi Furnished',
+                                    'unfurnished' => 'Unfurnished',
+                                ])
+                                ->required(),
+                        ]),
+                    ]),
 
-                Forms\Components\Select::make('furnishing')
-                    ->options([
-                        'furnished' => 'Fully Furnished',
-                        'semi-furnished' => 'Semi Furnished',
-                        'unfurnished' => 'Unfurnished',
-                    ])
-                    ->required(),
+                ])->columnSpan(2),
 
-                Forms\Components\TextInput::make('address')
-                    ->required()
-                    ->maxLength(255),
+                // --- RIGHT COLUMN (Sidebar) ---
+                Group::make()->schema([
+                    
+                    // 1. Status & Visibility (Crucial for Admin)
+                    Section::make('Status')->schema([
+                        Forms\Components\Toggle::make('is_active')
+                            ->label('Visible on Site')
+                            ->default(true),
+                        
+                        Forms\Components\Toggle::make('is_featured')
+                            ->label('Featured Property'),
 
-                Forms\Components\TextInput::make('city')
-                    ->required()
-                    ->maxLength(255)
-                    ->default('Dehradun'),
+                        // THE NEW APPROVAL SWITCH
+                        Forms\Components\Toggle::make('is_approved')
+                            ->label('Admin Approved')
+                            ->helperText('Required for public listing')
+                            ->onColor('success')
+                            ->offColor('danger'),
+                    ]),
 
-                Forms\Components\TextInput::make('state')
-                    ->required()
-                    ->maxLength(255)
-                    ->default('Uttarakhand'),
+                    // 2. Location
+                    Section::make('Location')->schema([
+                        Forms\Components\TextInput::make('address')
+                            ->required(),
 
-                Forms\Components\TextInput::make('zip_code')
-                    ->maxLength(255)
-                    ->default(null),
+                        Forms\Components\TextInput::make('city')
+                            ->required()
+                            ->default('Dehradun'),
 
-                Forms\Components\Toggle::make('is_featured')
-                    ->required(),
+                        Forms\Components\TextInput::make('state')
+                            ->required()
+                            ->default('Uttarakhand'),
+                        
+                        Forms\Components\TextInput::make('zip_code'),
+                    ]),
 
-                Forms\Components\Toggle::make('is_active')
-                    ->required(),
-            ]);
+                ])->columnSpan(1),
+
+            ])->columns(3);
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
+                // Image
+                Tables\Columns\ImageColumn::make('images')
+                    ->circular()
+                    ->stacked()
+                    ->limit(1),
+
+                // Title & Type
                 Tables\Columns\TextColumn::make('title')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('slug')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable()
+                    ->description(fn (Property $record): string => Str::limit($record->address, 30)),
+
+                // Price
                 Tables\Columns\TextColumn::make('price')
-                    ->money()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('type'),
-                Tables\Columns\TextColumn::make('bedrooms')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('bathrooms')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('area_sqft')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('furnishing')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('address')
-                    ->searchable(),
+                    ->money('INR')
+                    ->sortable()
+                    ->weight('bold'),
+
+                // Type Badge
+                Tables\Columns\TextColumn::make('type')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'sale' => 'success',
+                        'rent' => 'info',
+                        'pg' => 'warning',
+                        default => 'gray',
+                    }),
+
+                // Location
                 Tables\Columns\TextColumn::make('city')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('state')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('zip_code')
-                    ->searchable(),
-                Tables\Columns\IconColumn::make('is_featured')
-                    ->boolean(),
-                Tables\Columns\IconColumn::make('is_active')
-                    ->boolean(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable(),
+
+                // Status Toggles
+                Tables\Columns\ToggleColumn::make('is_active')
+                    ->label('Visible'),
+
+                Tables\Columns\ToggleColumn::make('is_approved')
+                    ->label('Approved')
+                    ->onColor('success')
+                    ->offColor('danger'),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
-                //
+                // Filter by Approval
+                Tables\Filters\TernaryFilter::make('is_approved')
+                    ->label('Approval Status')
+                    ->trueLabel('Approved Only')
+                    ->falseLabel('Pending Approval'),
+
+                // Filter by Type
+                Tables\Filters\SelectFilter::make('type')
+                    ->options([
+                        'sale' => 'For Sale',
+                        'rent' => 'For Rent',
+                        'pg'   => 'PG',
+                    ]),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    // Bulk Approve
+                    Tables\Actions\BulkAction::make('approve')
+                        ->label('Approve Selected')
+                        ->icon('heroicon-o-check')
+                        ->action(fn (Collection $records) => $records->each->update(['is_approved' => true])),
                 ]),
             ]);
     }

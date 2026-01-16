@@ -2,22 +2,37 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory; // <--- This line was missing or broken
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Property extends Model
 {
     use HasFactory;
 
-    // This allows you to save data without "MassAssignmentException"
     protected $guarded = [];
 
+    // CASTS: Automatically convert JSON database columns to PHP Arrays
     protected $casts = [
         'images' => 'array',
+        'videos' => 'array',
+        'documents' => 'array',
+        'is_active' => 'boolean',
     ];
 
-    public function business()
+    // RELATIONSHIPS
+    public function user()
     {
-        return $this->belongsTo(Business::class);
+        return $this->belongsTo(User::class);
+    }
+
+    public function floors()
+    {
+        return $this->hasMany(PropertyFloor::class);
+    }
+
+    public function amenities()
+    {
+        return $this->belongsToMany(Amenity::class, 'amenity_property');
     }
 }
