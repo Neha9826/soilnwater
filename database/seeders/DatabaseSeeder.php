@@ -16,6 +16,8 @@ class DatabaseSeeder extends Seeder
         // 2. Users (Add this!)
         $this->call(UserSeeder::class);
 
+        $this->call(PropertySeeder::class);
+
         // 3. Admin (Keep this!)
         // checks if email exists; if not, creates it.
         User::firstOrCreate(

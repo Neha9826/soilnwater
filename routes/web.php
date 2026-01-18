@@ -22,6 +22,7 @@ use App\Livewire\User\Onboarding;
 use App\Livewire\User\JoinPartner;
 use App\Livewire\Vendor\EditBusinessPage;
 use App\Livewire\Vendor\ManageProducts;
+use App\Livewire\Vendor\Properties;
 
 /*
 |--------------------------------------------------------------------------
@@ -86,8 +87,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/manage/profile', EditPublicProfile::class)->name('user.profile.public');
     
     // 5. MANAGE PROPERTIES (For Builders)
-    Route::get('/vendor/properties', \App\Livewire\Vendor\ManageProperties::class)->name('vendor.properties');
+    // Route::get('/vendor/properties', \App\Livewire\Vendor\ManageProperties::class)->name('vendor.properties');
+    Route::get('/vendor/properties', Properties::class)->name('vendor.properties');
     Route::get('/vendor/properties/create', \App\Livewire\Vendor\CreateProperty::class)->name('vendor.properties.create');
+    // NEW: Edit Route (Requires ID)
+    Route::get('/vendor/properties/{id}/edit', \App\Livewire\Vendor\EditProperty::class)->name('vendor.properties.edit');
 
     // 6. MANAGE BRANCHES
     Route::get('/my-branches', \App\Livewire\Vendor\ManageBranches::class)->name('vendor.branches');

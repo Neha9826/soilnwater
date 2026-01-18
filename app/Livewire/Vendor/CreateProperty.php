@@ -15,11 +15,13 @@ class CreateProperty extends Component
     use WithFileUploads;
 
     // Basic Fields
-    public $title, $description, $price, $type;
+    public $title, $description, $price;
+    public $type;          // Apartment, Villa, etc.
+    public $listing_type;  // Sale, Rent, PG, Share a Space (NEW)
     
     // Location
     public $address, $city, $state;
-    public $google_map_link, $google_embed_link; // <--- NEW FIELDS
+    public $google_map_link, $google_embed_link;
 
     // Media
     public $images = [];
@@ -72,15 +74,14 @@ class CreateProperty extends Component
     {
         $this->validate([
             'title' => 'required|min:5',
-            'type' => 'required',
             'price' => 'required|numeric',
+            'type' => 'required',          // Validates Property Category
+            'listing_type' => 'required',  // Validates Sale/Rent/Share
             'images.*' => 'image|max:2048',
             'videos.*' => 'mimetypes:video/avi,video/mpeg,video/quicktime,video/mp4|max:20480',
             'documents.*' => 'mimes:pdf,doc,docx|max:5120',
             'floors.*.floor_name' => 'required',
-            'selected_amenities' => 'array',
-            'google_map_link' => 'nullable|url', // Basic URL validation
-            'google_embed_link' => 'nullable|string',
+            'google_map_link' => 'nullable|url',
         ]);
 
         // 1. Create Property
@@ -90,15 +91,15 @@ class CreateProperty extends Component
             'slug' => Str::slug($this->title . '-' . uniqid()),
             'description' => $this->description,
             'price' => $this->price,
-            'type' => $this->type,
+            
+            'type' => $this->type,                 // Saved: Apartment/Villa
+            'listing_type' => $this->listing_type, // Saved: Sale/Rent/Share
+            
             'address' => $this->address,
             'city' => $this->city,
             'state' => $this->state,
-            
-            // NEW MAP FIELDS
             'google_map_link' => $this->google_map_link,
             'google_embed_link' => $this->google_embed_link,
-            
             'is_active' => true,
         ]);
 

@@ -21,7 +21,8 @@ return new class extends Migration
             
             // Money
             $table->decimal('price', 15, 2); // 15 digits total, 2 decimals
-            $table->enum('type', ['sale', 'rent', 'pg']); // Is it for Sale or Rent?
+            // NEW / CORRECT LINE
+            $table->string('type');
             
             // Property Details
             $table->integer('bedrooms')->nullable();
