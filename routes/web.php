@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request; // Required for manual login
 use App\Http\Controllers\GoogleAuthController;
 
 // --- Public Components ---
@@ -38,8 +39,7 @@ Route::get('/projects', ProjectList::class)->name('projects.index');
 Route::get('/offers', OffersPage::class)->name('offers.index');
 Route::get('/classifieds', ClassifiedList::class)->name('classifieds.index');
 
-// 1. PUBLIC STORE PAGE (The "Live Preview" Link)
-// This uses the "ShowPublicProfile" component we defined to display data.
+// Public Store Page
 Route::get('/store/{slug}', ShowPublicProfile::class)->name('public.store');
 
 /*
@@ -50,6 +50,8 @@ Route::get('/store/{slug}', ShowPublicProfile::class)->name('public.store');
 
 Route::middleware('guest')->group(function () {
     Route::get('/register', \App\Livewire\Auth\Register::class)->name('register');
+    
+    // Standard Livewire Login (Keep this for when JS is fixed)
     Route::get('/login', \App\Livewire\Auth\Login::class)->name('login');
     
     // Google Auth
@@ -75,29 +77,25 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // 1. DASHBOARD OVERVIEW
     Route::get('/dashboard', UserDashboard::class)->name('dashboard');
 
-    // 2. WEBSITE BUILDER (Legacy/Optional)
+    // 2. WEBSITE BUILDER
     Route::get('/manage-website', EditBusinessPage::class)->name('website.builder'); 
 
-    // 3. MANAGE PRODUCTS (For Vendors)
+    // 3. MANAGE PRODUCTS
     Route::get('/manage-products', ManageProducts::class)->name('vendor.products');
     Route::get('/manage-products/create', App\Livewire\Vendor\CreateProduct::class)->name('vendor.products.create');
 
-    // 4. MANAGE PUBLIC PROFILE (The "Edit Form" in Sidebar)
-    // This points to EditPublicProfile, so it shows the FORM, not the landing page.
+    // 4. MANAGE PUBLIC PROFILE
     Route::get('/manage/profile', EditPublicProfile::class)->name('user.profile.public');
     
-    // 5. MANAGE PROPERTIES (For Builders)
-    // Route::get('/vendor/properties', \App\Livewire\Vendor\ManageProperties::class)->name('vendor.properties');
+    // 5. MANAGE PROPERTIES
     Route::get('/vendor/properties', Properties::class)->name('vendor.properties');
     Route::get('/vendor/properties/create', \App\Livewire\Vendor\CreateProperty::class)->name('vendor.properties.create');
-    // NEW: Edit Route (Requires ID)
     Route::get('/vendor/properties/{id}/edit', \App\Livewire\Vendor\EditProperty::class)->name('vendor.properties.edit');
 
     // 6. MANAGE BRANCHES
     Route::get('/my-branches', \App\Livewire\Vendor\ManageBranches::class)->name('vendor.branches');
     Route::get('/my-branches/{id}/edit', \App\Livewire\Vendor\EditBranch::class)->name('vendor.branches.edit');
     Route::get('/my-branches/create', \App\Livewire\Vendor\CreateBranch::class)->name('vendor.branches.create');
-    // Keeping this to prevent crashes if old links exist
     Route::get('/my-business', UserDashboard::class)->name('vendor.business'); 
 
     // 7. ADMIN / APPROVALS
@@ -109,7 +107,41 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/onboarding', Onboarding::class)->name('onboarding');
     Route::get('/join-partner', JoinPartner::class)->name('join');
 
+    // 9. CUSTOMER AD POSTING SYSTEM
+    Route::get('/post/choose', \App\Livewire\PostAdSelection::class)
+        ->name('post.choose-category');
+
+    Route::get('/post/property', \App\Livewire\Customer\PostProperty::class)
+        ->name('customer.property.create');
+
+    Route::get('/my-posts', \App\Livewire\Customer\MyPosts::class)
+        ->name('customer.my-posts');
+
+    Route::get('/my-posts/{id}/edit', \App\Livewire\Customer\EditPost::class)
+        ->name('customer.post.edit');
+
 });
 
-Route::get('/store/{slug}', ShowPublicProfile::class)->name('public.store');
+/*
+|--------------------------------------------------------------------------
+| EMERGENCY MANUAL LOGIN ROUTE (For use with Safe Mode HTML Form)
+|--------------------------------------------------------------------------
+*/
+Route::post('/login-manual', function (Request $request) {
+    $credentials = $request->validate([
+        'email' => ['required', 'email'],
+        'password' => ['required'],
+    ]);
 
+    if (Auth::attempt($credentials)) {
+        $request->session()->regenerate();
+
+        $user = Auth::user();
+        if ($user->email === 'admin@demo.com') return redirect('/admin');
+        if ($user->profile_type === 'customer') return redirect('/');
+        
+        return redirect()->route('dashboard');
+    }
+
+    return back()->withErrors(['email' => 'The provided credentials do not match our records.']);
+})->name('login.manual');
