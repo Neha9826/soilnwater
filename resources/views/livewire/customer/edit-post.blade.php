@@ -146,6 +146,42 @@
                     @endif
                 </div>
 
+                {{-- NEW VIDEO SECTION --}}
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">Video</h3>
+                    
+                    {{-- 1. Display Existing Video --}}
+                    @if($existing_video && !$new_video)
+                        <div class="mb-4 relative group max-w-sm">
+                            <video src="{{ asset('storage/'.$existing_video) }}" controls class="w-full h-48 rounded-lg border bg-black"></video>
+                            <button type="button" wire:click="removeVideo" class="absolute top-2 right-2 bg-red-600 text-white px-3 py-1 rounded text-xs font-bold shadow hover:bg-red-700">
+                                Remove Video
+                            </button>
+                        </div>
+                    @endif
+
+                    {{-- 2. Upload New Video --}}
+                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center bg-gray-50 hover:bg-gray-100 transition relative">
+                        <input wire:model="new_video" type="file" accept="video/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                        <div class="text-center">
+                            <i class="fas fa-video text-4xl text-gray-400 mb-3"></i>
+                            <p class="text-sm font-bold text-gray-600">
+                                @if($existing_video) Replace Video @else Upload Video Tour @endif
+                            </p>
+                            <p class="text-xs text-gray-500 mt-1">Max 50MB (MP4, MOV)</p>
+                        </div>
+                    </div>
+                    @error('new_video') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+
+                    {{-- 3. Preview New Upload --}}
+                    @if($new_video)
+                        <div class="mt-4">
+                            <p class="text-xs text-green-600 font-bold mb-1">New Video Selected:</p>
+                            <video src="{{ $new_video->temporaryUrl() }}" controls class="w-full max-w-xs h-32 rounded-lg border bg-black"></video>
+                        </div>
+                    @endif
+                </div>
+
                 <div class="pt-6 border-t flex flex-col md:flex-row gap-4 justify-between items-center">
                     <button type="button" wire:click="delete" 
                             onclick="confirm('Are you sure?') || event.stopImmediatePropagation()"

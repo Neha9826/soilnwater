@@ -8,31 +8,27 @@ use App\Models\Property;
 use App\Models\PropertyFloor;
 use App\Models\Amenity;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class EditProperty extends Component
 {
     use WithFileUploads;
 
-    public $propertyId; // To know which property we are editing
+    public $propertyId;
 
-    // Basic Fields
-    public $title, $description, $price;
+    // Basic Fields (Price removed)
+    public $title, $description;
     public $type;          
-    public $listing_type;  
     
     // Location
     public $address, $city, $state;
     public $google_map_link, $google_embed_link;
 
     // Media
-    public $existing_images = []; // URLs from DB
-    public $new_images = [];      // Fresh uploads
-    
+    public $existing_images = []; 
+    public $new_images = [];
     public $existing_videos = [];
     public $new_videos = [];
-
     public $existing_documents = [];
     public $new_documents = [];
 
@@ -46,7 +42,6 @@ class EditProperty extends Component
 
     public function mount($id)
     {
-        // 1. Load Property & Check Ownership
         $property = Property::with(['floors', 'amenities'])->findOrFail($id);
         
         if ($property->user_id != Auth::id()) {
@@ -55,37 +50,33 @@ class EditProperty extends Component
 
         $this->propertyId = $property->id;
 
-        // 2. Fill Basic Fields
         $this->title = $property->title;
         $this->description = $property->description;
-        $this->price = $property->price;
+        // We DO NOT load price or listing_type here as they are managed via the "Sell" modal
         $this->type = $property->type;
-        $this->listing_type = $property->listing_type;
+        
         $this->address = $property->address;
         $this->city = $property->city;
         $this->state = $property->state;
         $this->google_map_link = $property->google_map_link;
         $this->google_embed_link = $property->google_embed_link;
 
-        // 3. Fill Media
         $this->existing_images = $property->images ?? [];
         $this->existing_videos = $property->videos ?? [];
         $this->existing_documents = $property->documents ?? [];
 
-        // 4. Fill Amenities
         $this->available_amenities = Amenity::all();
         $this->selected_amenities = $property->amenities->pluck('id')->toArray();
 
-        // 5. Fill Floors (Convert Collection to Array for Repeater)
         foreach ($property->floors as $floor) {
             $this->floors[] = [
-                'id' => $floor->id, // Real DB ID
+                'id' => $floor->id,
                 'floor_name' => $floor->floor_name,
                 'area_sqft' => $floor->area_sqft,
                 'rooms' => $floor->rooms,
                 'description' => $floor->description,
-                'image_path' => $floor->image_path, // Existing image
-                'new_image' => null, // Placeholder for potential update
+                'image_path' => $floor->image_path,
+                'new_image' => null,
             ];
         }
     }
@@ -93,7 +84,7 @@ class EditProperty extends Component
     public function addFloor()
     {
         $this->floors[] = [
-            'id' => 'new_' . Str::random(5), // Temporary ID
+            'id' => 'new_' . Str::random(5),
             'floor_name' => '',
             'area_sqft' => '',
             'rooms' => '',
@@ -105,32 +96,26 @@ class EditProperty extends Component
 
     public function removeFloor($index)
     {
-        // Check if it's a real floor (has numeric ID)
         $floorData = $this->floors[$index];
         if (is_numeric($floorData['id'])) {
-            // Delete from DB immediately
             PropertyFloor::find($floorData['id'])->delete();
         }
-        
         unset($this->floors[$index]);
         $this->floors = array_values($this->floors);
     }
 
-    // Remove a specific existing image
     public function removeImage($key)
     {
         unset($this->existing_images[$key]);
         $this->existing_images = array_values($this->existing_images);
     }
 
-    // --- NEW: Remove Video ---
     public function removeVideo($key)
     {
         unset($this->existing_videos[$key]);
         $this->existing_videos = array_values($this->existing_videos);
     }
 
-    // --- NEW: Remove Document ---
     public function removeDocument($key)
     {
         unset($this->existing_documents[$key]);
@@ -150,22 +135,18 @@ class EditProperty extends Component
     {
         $this->validate([
             'title' => 'required|min:5',
-            'price' => 'required|numeric',
             'type' => 'required',
-            'listing_type' => 'required',
             'new_images.*' => 'nullable|image|max:2048',
             'floors.*.floor_name' => 'required',
         ]);
 
         $property = Property::find($this->propertyId);
 
-        // 1. Update Basic Info
+        // Update Info (Exclude Price/Listing Type)
         $property->update([
             'title' => $this->title,
             'description' => $this->description,
-            'price' => $this->price,
             'type' => $this->type,
-            'listing_type' => $this->listing_type,
             'address' => $this->address,
             'city' => $this->city,
             'state' => $this->state,
@@ -173,8 +154,7 @@ class EditProperty extends Component
             'google_embed_link' => $this->google_embed_link,
         ]);
 
-        // 2. Handle Media Merging (Existing + New)
-        // Add new uploads to the array
+        // Handle Media
         foreach ($this->new_images as $img) {
             $this->existing_images[] = $img->store('properties/images', 'public');
         }
@@ -185,23 +165,19 @@ class EditProperty extends Component
             $this->existing_documents[] = $doc->store('properties/docs', 'public');
         }
 
-        // Save merged arrays back to DB
         $property->update([
-            'images' => $this->existing_images, // This includes old kept ones + new ones
+            'images' => $this->existing_images,
             'videos' => $this->existing_videos,
             'documents' => $this->existing_documents,
         ]);
 
-        // 3. Update/Create Floors
+        // Update Floors
         foreach ($this->floors as $floorData) {
             $path = $floorData['image_path'];
-            
-            // If a new floor image was uploaded, replace the path
             if (isset($floorData['new_image']) && $floorData['new_image']) {
                 $path = $floorData['new_image']->store('properties/floors', 'public');
             }
 
-            // Update or Create
             PropertyFloor::updateOrCreate(
                 ['id' => is_numeric($floorData['id']) ? $floorData['id'] : null],
                 [
@@ -215,10 +191,9 @@ class EditProperty extends Component
             );
         }
 
-        // 4. Sync Amenities
         $property->amenities()->sync($this->selected_amenities);
 
-        session()->flash('message', 'Property updated successfully!');
+        session()->flash('message', 'Project updated successfully!');
         return redirect()->route('vendor.properties');
     }
 

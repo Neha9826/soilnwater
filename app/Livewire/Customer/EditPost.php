@@ -22,16 +22,20 @@ class EditPost extends Component
     public $address, $city, $state;
     public $google_map_link;
     
-    // Media & Amenities
+    // Media
     public $existing_images = [];
     public $new_images = [];
+    
+    // Video
+    public $existing_video;
+    public $new_video;
+
     public $selected_amenities = [];
     public $available_amenities = [];
     public $new_amenity_name = '';
 
     public function mount($id)
     {
-        // Fetch property and ensure ownership
         $property = Property::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
         
         $this->propertyId = $property->id;
@@ -48,6 +52,10 @@ class EditPost extends Component
         $this->google_map_link = $property->google_map_link;
         $this->existing_images = $property->images ?? [];
         
+        // FIX: Read from 'videos' array (take the first one if exists)
+        $videos = $property->videos ?? [];
+        $this->existing_video = is_array($videos) && count($videos) > 0 ? $videos[0] : null;
+        
         $this->available_amenities = Amenity::all();
         $this->selected_amenities = $property->amenities->pluck('id')->toArray();
     }
@@ -62,9 +70,9 @@ class EditPost extends Component
         'city' => 'required',
         'state' => 'required',
         'new_images.*' => 'image|max:5120',
+        'new_video' => 'nullable|mimes:mp4,mov,ogg,qt|max:51200',
     ];
 
-    // Add Custom Amenity Logic
     public function addCustomAmenity()
     {
         $this->validate(['new_amenity_name' => 'required|string|min:2|max:50']);
@@ -88,12 +96,31 @@ class EditPost extends Component
         $this->existing_images = array_values($this->existing_images);
     }
 
+    public function removeVideo()
+    {
+        $this->existing_video = null;
+        $this->new_video = null; 
+    }
+
     public function update()
     {
         $this->validate();
 
         $property = Property::find($this->propertyId);
         
+        // FIX: Prepare 'videos' array for DB
+        $videoPaths = [];
+        
+        // If uploading NEW video, use it
+        if ($this->new_video) {
+            $videoPaths[] = $this->new_video->store('properties/videos', 'public');
+        } 
+        // If NO new video, but we have an EXISTING one, keep it
+        elseif ($this->existing_video) {
+            $videoPaths[] = $this->existing_video;
+        }
+        // If both are null (removed), save empty array
+
         $property->update([
             'title' => $this->title,
             'description' => $this->description,
@@ -106,9 +133,9 @@ class EditPost extends Component
             'city' => $this->city,
             'state' => $this->state,
             'google_map_link' => $this->google_map_link,
+            'videos' => $videoPaths, // FIX: Update 'videos' column
         ]);
 
-        // Handle Images
         $currentImages = $this->existing_images;
         foreach ($this->new_images as $img) {
             $currentImages[] = $img->store('properties/customer', 'public');

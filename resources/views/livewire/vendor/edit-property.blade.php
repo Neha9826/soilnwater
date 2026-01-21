@@ -4,42 +4,29 @@
     <main class="flex-1 w-full overflow-y-auto bg-gray-50 p-4 md:p-8">
         
         <div class="max-w-5xl mx-auto pb-20">
+            
             <div class="mb-8 flex justify-between items-center">
                 <div>
                     <a href="{{ route('vendor.properties') }}" class="text-sm font-bold text-gray-500 hover:text-gray-800 mb-2 inline-block"><i class="fas fa-arrow-left"></i> Back to List</a>
-                    <h1 class="text-3xl font-extrabold text-gray-900">Edit Property</h1>
+                    <h1 class="text-3xl font-extrabold text-gray-900">Edit Project</h1>
+                    <p class="text-sm text-gray-500">Update your portfolio details.</p>
                 </div>
             </div>
 
             <form wire:submit.prevent="update" class="space-y-8">
                 
+                {{-- 1. BASIC DETAILS --}}
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                     <h3 class="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">Basic Details</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         
-                        <div class="col-span-2">
-                            <label class="block text-sm font-bold text-gray-700 mb-1">Property Title *</label>
-                            <input wire:model="title" type="text" placeholder="e.g. 3BHK Luxury Apartment in Rajpur Road" class="w-full border-gray-300 rounded-lg p-2.5 border-2 focus:border-blue-500">
+                        <div class="col-span-2 md:col-span-1">
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Project / Property Title *</label>
+                            <input wire:model="title" type="text" class="w-full border-gray-300 rounded-lg p-2.5 border-2 focus:border-blue-500">
                             @error('title') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
                         
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-1">Price (₹) *</label>
-                            <input wire:model="price" type="number" placeholder="e.g. 8500000" class="w-full border-gray-300 rounded-lg p-2.5 border-2">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-1">Listing Type (Purpose) *</label>
-                            <select wire:model="listing_type" class="w-full border-gray-300 rounded-lg p-2.5 border-2 bg-white focus:ring-blue-500">
-                                <option value="">Select Purpose</option>
-                                <option value="Sale">For Sale</option>
-                                <option value="Rent">For Rent</option>
-                                <option value="PG">PG / Hostel</option>
-                                <option value="Share a Space">Share a Space / Co-living</option>
-                            </select>
-                        </div>
-
-                        <div>
+                        <div class="col-span-2 md:col-span-1">
                             <label class="block text-sm font-bold text-gray-700 mb-1">Property Category *</label>
                             <select wire:model="type" class="w-full border-gray-300 rounded-lg p-2.5 border-2 bg-white focus:ring-blue-500">
                                 <option value="">Select Category</option>
@@ -54,56 +41,57 @@
                         
                         <div class="col-span-2">
                             <label class="block text-sm font-bold text-gray-700 mb-1">Description</label>
-                            <textarea wire:model="description" rows="4" class="w-full border-gray-300 rounded-lg p-2.5 border-2" placeholder="Describe the property layout, surroundings, and key features..."></textarea>
+                            <textarea wire:model="description" rows="4" class="w-full border-gray-300 rounded-lg p-2.5 border-2"></textarea>
                         </div>
                     </div>
                 </div>
 
+                {{-- 2. LOCATION --}}
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                     <h3 class="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">Location & Maps</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="col-span-2">
                             <label class="block text-sm font-bold text-gray-700 mb-1">Address *</label>
-                            <input wire:model="address" type="text" placeholder="e.g. 12/A, Rajpur Road" class="w-full border-gray-300 rounded-lg p-2.5 border-2">
+                            <input wire:model="address" type="text" class="w-full border-gray-300 rounded-lg p-2.5 border-2">
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-1">City</label>
-                            <input wire:model="city" type="text" placeholder="e.g. Dehradun" class="w-full border-gray-300 rounded-lg p-2.5 border-2">
+                            <input wire:model="city" type="text" class="w-full border-gray-300 rounded-lg p-2.5 border-2">
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-1">State</label>
-                            <input wire:model="state" type="text" placeholder="e.g. Uttarakhand" class="w-full border-gray-300 rounded-lg p-2.5 border-2">
+                            <input wire:model="state" type="text" class="w-full border-gray-300 rounded-lg p-2.5 border-2">
                         </div>
                         
                         <div class="col-span-2 border-t mt-2 pt-4">
                             <label class="block text-sm font-bold text-gray-700 mb-1"><i class="fas fa-map-marker-alt text-red-500"></i> Google Map Link (Share Link)</label>
                             <input wire:model="google_map_link" type="url" placeholder="https://maps.app.goo.gl/..." class="w-full border-gray-300 rounded-lg p-2.5 border-2">
-                            <p class="text-xs text-gray-500 mt-1">Paste the "Share" link from Google Maps here.</p>
+                            <p class="text-xs text-gray-400 mt-1">Paste the "Share" link from Google Maps here.</p>
                         </div>
                         
                         <div class="col-span-2">
                             <label class="block text-sm font-bold text-gray-700 mb-1"><i class="fas fa-code text-blue-500"></i> Google Map Embed Code (HTML)</label>
-                            <input wire:model="google_embed_link" type="text" placeholder='<iframe src="..."></iframe>' class="w-full border-gray-300 rounded-lg p-2.5 border-2">
-                            <p class="text-xs text-gray-500 mt-1">Paste the full <code>&lt;iframe&gt;</code> code from Google Maps "Share -> Embed a map".</p>
+                            <input wire:model="google_embed_link" type="text" placeholder='<iframe src="https://www.google.com/maps/embed?..."></iframe>' class="w-full border-gray-300 rounded-lg p-2.5 border-2">
+                            <p class="text-xs text-gray-400 mt-1">Paste the full <code>&lt;iframe&gt;</code> code from Google Maps "Share -> Embed a map".</p>
                         </div>
                     </div>
                 </div>
 
+                {{-- 3. PHOTOS & VIDEOS --}}
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                     <h3 class="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">Photos & Videos</h3>
                     
+                    {{-- Images --}}
                     <div class="mb-8">
                         <label class="block text-sm font-bold text-gray-700 mb-2">Property Images</label>
                         
+                        {{-- Existing Images List --}}
                         @if(count($existing_images) > 0)
                             <div class="flex gap-4 overflow-x-auto pb-4 mb-4">
                                 @foreach($existing_images as $key => $img)
                                     <div class="relative group flex-shrink-0 w-24 h-24">
                                         <img src="{{ asset('storage/'.$img) }}" class="w-full h-full object-cover rounded-lg border shadow-sm">
-                                        
-                                        <button type="button" wire:click="removeImage({{ $key }})" 
-                                                class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 w-6 h-6 flex items-center justify-center text-xs shadow-md hover:bg-red-600 transition z-10 border-2 border-white" 
-                                                title="Remove Image">
+                                        <button type="button" wire:click="removeImage({{ $key }})" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 w-6 h-6 flex items-center justify-center text-xs shadow-md hover:bg-red-600 transition z-10 border-2 border-white">
                                             <i class="fas fa-times"></i>
                                         </button>
                                     </div>
@@ -111,12 +99,14 @@
                             </div>
                         @endif
 
-                        <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:bg-gray-50 relative transition">
+                        <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:bg-gray-50 bg-gray-50 relative">
                             <input wire:model="new_images" type="file" multiple class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
-                            <i class="fas fa-images text-2xl text-gray-400 mb-2"></i>
-                            <p class="text-sm text-gray-600 font-bold">Add New Photos</p>
-                            <p class="text-xs text-gray-400">Click to upload more</p>
+                            <i class="fas fa-images text-3xl text-gray-400 mb-2"></i>
+                            <p class="font-bold text-gray-500 text-sm">Click to Add New Photos</p>
+                            <p class="text-xs text-gray-400 mt-1">Max 2MB per image</p>
                         </div>
+                        
+                        {{-- New Upload Preview --}}
                         @if($new_images)
                             <div class="flex gap-2 mt-2">
                                 @foreach($new_images as $img)
@@ -125,10 +115,12 @@
                             </div>
                         @endif
                     </div>
-
+                    
+                    {{-- Videos --}}
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">Property Videos</label>
                         
+                        {{-- Existing Videos List --}}
                         @if(count($existing_videos) > 0)
                             <div class="space-y-2 mb-4">
                                 @foreach($existing_videos as $key => $vid)
@@ -145,104 +137,42 @@
                             </div>
                         @endif
 
-                        <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:bg-gray-50 relative transition">
+                        <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:bg-gray-50 bg-gray-50 relative">
                             <input wire:model="new_videos" type="file" multiple accept="video/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
-                            <i class="fas fa-video text-2xl text-gray-400 mb-2"></i>
-                            <p class="text-sm text-gray-600 font-bold">Add New Videos</p>
-                            <p class="text-xs text-gray-400">MP4, AVI (Max 20MB)</p>
+                            <i class="fas fa-video text-3xl text-gray-400 mb-2"></i>
+                            <p class="font-bold text-gray-500 text-sm">Click to Add New Videos</p>
+                            <p class="text-xs text-gray-400 mt-1">MP4, AVI (Max 20MB)</p>
                         </div>
                         <div wire:loading wire:target="new_videos" class="text-xs text-blue-500 mt-2 font-bold"><i class="fas fa-spinner fa-spin"></i> Uploading Videos...</div>
                     </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                    <div class="flex justify-between items-center mb-6 pb-2 border-b border-gray-100">
-                        <div>
-                            <h3 class="text-lg font-bold text-gray-900">Floor Plans</h3>
-                            <p class="text-sm text-gray-500">Add details for each floor level.</p>
-                        </div>
-                        <button type="button" wire:click="addFloor" class="text-sm bg-blue-50 text-blue-600 px-4 py-2 rounded-lg font-bold hover:bg-blue-100 transition flex items-center gap-2 border border-blue-200">
-                            <i class="fas fa-plus"></i> Add Floor
-                        </button>
-                    </div>
+                {{-- 4. FLOOR PLANS (Using the Partial we created) --}}
+                @include('livewire.vendor.partials.floor-plans')
 
-                    <div class="space-y-8">
-                        @foreach($floors as $index => $floor)
-                            <div class="p-6 bg-gray-50 rounded-xl border border-gray-300 relative shadow-sm hover:shadow-md transition" wire:key="floor-{{ $index }}">
-                                
-                                <button type="button" wire:click="removeFloor({{ $index }})" 
-                                        class="absolute top-3 right-3 text-gray-400 hover:text-red-600 bg-white hover:bg-red-50 p-2 rounded-lg shadow-sm border border-gray-200 transition z-10"
-                                        title="Remove this floor">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    
-                                    <div class="md:col-span-1">
-                                        <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Floor Name *</label>
-                                        <input wire:model="floors.{{ $index }}.floor_name" type="text" placeholder="e.g. Ground Floor" 
-                                            class="w-full border-gray-300 rounded-lg p-2.5 border text-sm focus:ring-blue-500 focus:border-blue-500 bg-white">
-                                    </div>
-
-                                    <div class="md:col-span-1">
-                                        <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Area (sqft)</label>
-                                        <input wire:model="floors.{{ $index }}.area_sqft" type="text" placeholder="e.g. 1200" 
-                                            class="w-full border-gray-300 rounded-lg p-2.5 border text-sm focus:ring-blue-500 focus:border-blue-500 bg-white">
-                                    </div>
-
-                                    <div class="md:col-span-1">
-                                        <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Rooms</label>
-                                        <input wire:model="floors.{{ $index }}.rooms" type="number" placeholder="e.g. 3" 
-                                            class="w-full border-gray-300 rounded-lg p-2.5 border text-sm focus:ring-blue-500 focus:border-blue-500 bg-white">
-                                    </div>
-
-                                    <div class="md:col-span-3">
-                                        <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Floor Plan Image</label>
-                                        <div class="flex items-center gap-4 bg-white p-3 rounded-lg border border-gray-300">
-                                            
-                                            @if(!empty($floor['image_path']) && empty($floor['new_image']))
-                                                <div class="flex items-center gap-2 text-xs text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100 whitespace-nowrap">
-                                                    <i class="fas fa-check-circle"></i> Saved
-                                                </div>
-                                            @endif
-
-                                            <input wire:model="floors.{{ $index }}.new_image" type="file" 
-                                                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
-                                        </div>
-                                    </div>
-
-                                    <div class="md:col-span-3">
-                                        <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Description</label>
-                                        <textarea wire:model="floors.{{ $index }}.description" rows="2" placeholder="Describe the layout..." 
-                                            class="w-full border-gray-300 rounded-lg p-2.5 border text-sm focus:ring-blue-500 focus:border-blue-500 bg-white"></textarea>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-
+                {{-- 5. AMENITIES --}}
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                     <h3 class="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">Amenities</h3>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                         @foreach($available_amenities as $amenity)
                             <label class="flex items-center space-x-3 cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition">
-                                <input wire:model="selected_amenities" value="{{ $amenity->id }}" type="checkbox" class="rounded text-blue-600 h-5 w-5 border-gray-300">
+                                <input wire:model="selected_amenities" value="{{ $amenity->id }}" type="checkbox" class="rounded text-blue-600 focus:ring-blue-500 h-5 w-5 border-gray-300">
                                 <span class="text-gray-700 text-sm font-medium">{{ $amenity->name }}</span>
                             </label>
                         @endforeach
                     </div>
-                    
                     <div class="flex items-center gap-2 border-t pt-4 bg-gray-50 p-3 rounded-lg">
-                        <input wire:model="new_amenity_name" type="text" placeholder="Can't find it? Add custom amenity..." class="border-gray-300 rounded-lg p-2 text-sm w-full md:w-64">
+                        <input wire:model="new_amenity_name" type="text" placeholder="Add custom amenity..." class="border-gray-300 rounded-lg p-2 text-sm w-full md:w-64">
                         <button type="button" wire:click="createNewAmenity" class="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-900 transition">Add</button>
                     </div>
                 </div>
 
+                {{-- 6. DOCUMENTATION --}}
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                     <h3 class="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">Documentation</h3>
                     <label class="block font-bold text-sm text-gray-700 mb-2">Upload Legal Docs / Brochures</label>
                     
+                    {{-- Existing Docs --}}
                     @if(count($existing_documents) > 0)
                         <div class="space-y-2 mb-4">
                             @foreach($existing_documents as $key => $doc)
@@ -264,6 +194,8 @@
                         <i class="fas fa-file-pdf text-3xl text-red-400 mb-2"></i>
                         <p class="text-sm text-gray-600 font-medium">Drag & Drop PDF/DOCX here</p>
                     </div>
+                    
+                    {{-- New Uploads List --}}
                     @if($new_documents)
                         <ul class="mt-4 space-y-2 bg-white rounded-lg border p-4">
                             @foreach($new_documents as $doc)
@@ -277,7 +209,7 @@
 
                 <div class="flex justify-end pt-4 pb-12">
                     <button type="submit" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-xl hover:bg-blue-700 shadow-lg flex items-center gap-2 transform transition hover:-translate-y-1">
-                        <span wire:loading.remove>Update Property</span>
+                        <span wire:loading.remove>Update Project</span>
                         <span wire:loading><i class="fas fa-spinner fa-spin"></i> Updating...</span>
                     </button>
                 </div>

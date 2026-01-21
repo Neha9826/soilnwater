@@ -149,6 +149,27 @@
                     @endif
                 </div>
 
+                {{-- NEW VIDEO SECTION --}}
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">Video</h3>
+                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center bg-gray-50 hover:bg-gray-100 transition relative">
+                        <input wire:model="video" type="file" accept="video/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                        <div class="text-center">
+                            <i class="fas fa-video text-4xl text-gray-400 mb-3"></i>
+                            <p class="text-sm font-bold text-gray-600">Click to upload a video tour</p>
+                            <p class="text-xs text-gray-500 mt-1">Max 50MB (MP4, MOV)</p>
+                        </div>
+                    </div>
+                    @error('video') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+
+                    @if($video)
+                        <div class="mt-4">
+                            <p class="text-xs text-green-600 font-bold mb-1">Video Selected:</p>
+                            <video src="{{ $video->temporaryUrl() }}" controls class="w-full max-w-xs h-32 rounded-lg border bg-black"></video>
+                        </div>
+                    @endif
+                </div>
+
                 <div class="pt-6">
                     <button type="submit" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 shadow-lg text-lg flex justify-center items-center gap-2 transition transform hover:-translate-y-1">
                         <span wire:loading.remove>Post Property Ad</span>

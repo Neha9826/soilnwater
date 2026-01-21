@@ -14,10 +14,9 @@ class CreateProperty extends Component
 {
     use WithFileUploads;
 
-    // Basic Fields
-    public $title, $description, $price;
+    // Basic Fields (Removed Price & Listing Type)
+    public $title, $description;
     public $type;          // Apartment, Villa, etc.
-    public $listing_type;  // Sale, Rent, PG, Share a Space (NEW)
     
     // Location
     public $address, $city, $state;
@@ -74,9 +73,7 @@ class CreateProperty extends Component
     {
         $this->validate([
             'title' => 'required|min:5',
-            'price' => 'required|numeric',
-            'type' => 'required',          // Validates Property Category
-            'listing_type' => 'required',  // Validates Sale/Rent/Share
+            'type' => 'required',          
             'images.*' => 'image|max:2048',
             'videos.*' => 'mimetypes:video/avi,video/mpeg,video/quicktime,video/mp4|max:20480',
             'documents.*' => 'mimes:pdf,doc,docx|max:5120',
@@ -85,16 +82,20 @@ class CreateProperty extends Component
         ]);
 
         // 1. Create Property
+        // Builders create "Portfolio" items by default.
+        // Price is 0, Sell Via Us is False.
         $property = Property::create([
             'user_id' => Auth::id(),
             'title' => $this->title,
             'slug' => Str::slug($this->title . '-' . uniqid()),
             'description' => $this->description,
-            'price' => $this->price,
             
-            'type' => $this->type,                 // Saved: Apartment/Villa
-            'listing_type' => $this->listing_type, // Saved: Sale/Rent/Share
+            // DEFAULTS FOR BUILDERS
+            'price' => 0,                // Placeholder until they "Sell via Us"
+            'listing_type' => 'Sale',    // Builders always Sell
+            'sell_via_us' => false,      // Not in marketplace yet
             
+            'type' => $this->type,       // Apartment/Villa
             'address' => $this->address,
             'city' => $this->city,
             'state' => $this->state,
@@ -139,7 +140,7 @@ class CreateProperty extends Component
         // 4. Attach Amenities
         $property->amenities()->attach($this->selected_amenities);
 
-        session()->flash('message', 'Property created successfully!');
+        session()->flash('message', 'Property added to your portfolio successfully!');
         return redirect()->route('vendor.properties');
     }
 
