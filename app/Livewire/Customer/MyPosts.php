@@ -44,8 +44,6 @@ class MyPosts extends Component
             ->orderBy('created_at', 'desc')
             ->paginate(9);
 
-        return view('livewire.customer.my-posts', [
-            'posts' => $posts
-        ])->layout('layouts.app');
+        return view('livewire.customer.my-posts', ['posts' => $posts]);
     }
 }

@@ -20,7 +20,7 @@
             </span>
         </a>
 
-        <a href="#" class="bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-300 p-8 border border-gray-200 group text-center cursor-pointer relative overflow-hidden transform hover:-translate-y-2 opacity-75 hover:opacity-100">
+        <a href="{{ route('customer.project.create') }}" class="bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-300 p-8 border border-gray-200 group text-center cursor-pointer relative overflow-hidden transform hover:-translate-y-2 opacity-75 hover:opacity-100">
             <div class="absolute top-0 left-0 w-full h-2 bg-purple-500"></div>
             <div class="bg-purple-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-purple-600 transition-colors duration-300">
                 <i class="fas fa-building text-3xl text-purple-600 group-hover:text-white transition-colors duration-300"></i>

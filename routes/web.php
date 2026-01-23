@@ -108,18 +108,31 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/join-partner', JoinPartner::class)->name('join');
 
     // 9. CUSTOMER AD POSTING SYSTEM
+    // 9. CUSTOMER AD POSTING SYSTEM
+
+    // The Selection Page
     Route::get('/post/choose', \App\Livewire\PostAdSelection::class)
         ->name('post.choose-category');
 
+    // UNIFIED LISTING MANAGER (The new One-Stop Shop)
+    Route::get('/my-listings', \App\Livewire\Customer\ManageListings::class)
+        ->name('customer.listings');
+
+    // -- Forms (Keep these accessible) --
     Route::get('/post/property', \App\Livewire\Customer\PostProperty::class)
         ->name('customer.property.create');
 
-    Route::get('/my-posts', \App\Livewire\Customer\MyPosts::class)
-        ->name('customer.my-posts');
+    Route::get('/post/project', \App\Livewire\Customer\PostProject::class)
+        ->name('customer.project.create');
 
+    // -- Edit Routes (Keep these for the Edit Buttons to work) --
     Route::get('/my-posts/{id}/edit', \App\Livewire\Customer\EditPost::class)
         ->name('customer.post.edit');
 
+    Route::get('/my-projects/{id}/edit', \App\Livewire\Customer\EditProject::class)
+        ->name('customer.project.edit');
+        
+    // -- Old Routes (Optional: You can remove 'customer.my-posts' and 'customer.my-projects' GET routes if you rely solely on the manager) --
 });
 
 /*

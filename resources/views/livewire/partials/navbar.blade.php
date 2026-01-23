@@ -52,7 +52,7 @@
                             
                             {{-- CASE B: Regular Customer --}}
                             {{-- 1. My Posts (New Feature) --}}
-                            <a href="{{ route('customer.my-posts') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+                            <a href="{{ route('customer.listings') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
                                 <i class="fas fa-layer-group w-5 text-center mr-2 text-blue-500"></i> My Posts & Ads
                             </a>
 
