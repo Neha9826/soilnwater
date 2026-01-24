@@ -4,7 +4,7 @@
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 border-b border-gray-200 pb-6">
             
             <div class="w-full md:w-auto">
-                <h1 class="text-3xl font-extrabold text-gray-900">My Ads</h1>
+                <h1 class="text-3xl font-extrabold text-gray-900">My Property Ads</h1>
                 <p class="text-gray-500 text-sm mt-1">Manage your active listings.</p>
             </div>
 
@@ -34,7 +34,7 @@
                     <a href="{{ route('post.choose-category') }}" 
                        class="h-[42px] flex items-center gap-2 bg-blue-600 text-white px-6 rounded-lg text-sm font-bold shadow-md hover:bg-blue-700 transition whitespace-nowrap">
                         <i class="fas fa-plus"></i>
-                        <span>Post New Ad</span>
+                        <span>Post New Property</span>
                     </a>
                 </div>
             </div>
