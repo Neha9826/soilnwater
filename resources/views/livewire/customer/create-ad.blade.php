@@ -1,314 +1,132 @@
-<div class="min-h-screen bg-gray-50 py-8 px-4" 
-     x-data="adBuilder()"
-     @add-image-layer.window="addImageLayer($event.detail.url)">
-    
-    {{-- SCRIPT FOR SCREENSHOTS --}}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+<div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8"> {{-- Root Tag --}}
+    <div class="max-w-7xl mx-auto">
         
-        {{-- LEFT PANEL: SETTINGS & TOOLS --}}
-        <div class="lg:col-span-4 space-y-6">
-            
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                <h2 class="text-xl font-bold text-gray-900 mb-4">Ad Configuration</h2>
+        {{-- Progress Navigation --}}
+        <nav class="flex items-center justify-center mb-10 space-x-4 text-sm font-medium">
+            <span class="{{ $step == 1 ? 'text-orange-600 font-bold' : 'text-gray-400' }}">1. Select Size</span>
+            <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+            <span class="{{ $step == 2 ? 'text-orange-600 font-bold' : 'text-gray-400' }}">2. Choose Design</span>
+            <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+            <span class="{{ $step == 3 ? 'text-orange-600 font-bold' : 'text-gray-400' }}">3. Customize & Save</span>
+        </nav>
+
+        @if($step == 1)
+            {{-- STEP 1: SHAPE & PRICE SELECTOR --}}
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-extrabold text-gray-900">Choose Your Ad Size</h2>
+                <p class="mt-4 text-lg text-gray-600">Select the dimensions and price point for your campaign.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                @foreach($tiers as $tier)
+                    <div wire:key="tier-{{ $tier->id }}" wire:click="selectTier({{ $tier->id }})" 
+                         class="group cursor-pointer bg-white border-2 border-gray-100 hover:border-orange-500 rounded-2xl shadow-sm hover:shadow-xl transition-all p-8 text-center flex flex-col items-center">
+                        
+                        <div class="mb-6 flex items-center justify-center bg-gray-50 rounded-xl p-4 w-full h-40">
+                            @if(Str::contains(strtolower($tier->name), 'square'))
+                                <div class="w-24 h-24 border-4 border-orange-500 rounded shadow-sm bg-white"></div>
+                            @elseif(Str::contains(strtolower($tier->name), 'vertical'))
+                                <div class="w-20 h-32 border-4 border-orange-500 rounded shadow-sm bg-white"></div>
+                            @elseif(Str::contains(strtolower($tier->name), 'horizontal'))
+                                <div class="w-32 h-20 border-4 border-orange-500 rounded shadow-sm bg-white"></div>
+                            @else
+                                <div class="w-24 h-24 border-4 border-dashed border-gray-300 rounded bg-white"></div>
+                            @endif
+                        </div>
+
+                        <h3 class="text-xl font-bold text-gray-800 uppercase tracking-wide">{{ $tier->name }}</h3>
+                        <div class="mt-2 text-4xl font-black text-gray-900">₹{{ $tier->price }}</div>
+                        
+                        <button class="mt-6 w-full bg-gray-900 text-white py-3 rounded-xl font-bold group-hover:bg-orange-600 transition-colors">
+                            Select This Shape
+                        </button>
+                    </div>
+                @endforeach
+            </div>
+
+        {{-- STEP 2: TEMPLATE SELECTOR (ROBUST ISOLATED VERSION) --}}
+@elseif($step == 2)
+    <div class="mb-10">
+        <button wire:click="$set('step', 1)" class="flex items-center text-sm text-orange-600 font-bold hover:underline bg-white px-5 py-2.5 rounded-xl shadow-sm border border-orange-100">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Sizes
+        </button>
+    </div>
+
+    <h2 class="text-3xl font-black text-gray-900 mb-12 text-center uppercase tracking-wider">Select Your Design</h2>
+    
+    {{-- A robust grid with defined columns and gap --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+        @foreach($templates as $template)
+            <div wire:key="template-{{ $template->id }}" wire:click="selectTemplate({{ $template->id }})" 
+                 class="group cursor-pointer bg-white rounded-3xl border-2 border-transparent hover:border-orange-500 transition-all shadow-md hover:shadow-2xl overflow-hidden flex flex-col h-full">
                 
-                {{-- 1. TITLE & LINK --}}
-                <div class="space-y-4 mb-6">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">Ad Title</label>
-                        <input wire:model="title" type="text" class="w-full border-gray-300 rounded-lg p-2.5">
-                        @error('title') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">Target Link (Optional)</label>
-                        <input wire:model="target_link" type="text" placeholder="https://..." class="w-full border-gray-300 rounded-lg p-2.5">
-                    </div>
-                </div>
-
-                {{-- 2. MODE SELECTION --}}
-                <div class="flex gap-4 mb-6">
-                    <button @click="mode = 'upload'; $wire.set('mode', 'upload')" 
-                            :class="mode === 'upload' ? 'bg-blue-600 text-white ring-2 ring-blue-300' : 'bg-gray-100 text-gray-600'"
-                            class="flex-1 py-3 rounded-lg font-bold text-sm transition">
-                        <i class="fas fa-upload mr-2"></i> Upload File
-                    </button>
-                    <button @click="mode = 'builder'; $wire.set('mode', 'builder')" 
-                            :class="mode === 'builder' ? 'bg-orange-600 text-white ring-2 ring-orange-300' : 'bg-gray-100 text-gray-600'"
-                            class="flex-1 py-3 rounded-lg font-bold text-sm transition">
-                        <i class="fas fa-magic mr-2"></i> Ad Builder
-                    </button>
-                </div>
-
-                {{-- UPLOAD MODE CONTENT --}}
-                <div x-show="mode === 'upload'" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center bg-gray-50">
-                    <input wire:model="uploaded_file" type="file" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                    <p class="text-xs text-gray-500 mt-2">Upload your ready-made poster (JPG, PNG)</p>
-                    @if($uploaded_file)
-                        <img src="{{ $uploaded_file->temporaryUrl() }}" class="mt-4 rounded-lg shadow-sm max-h-48 mx-auto">
-                    @endif
-                </div>
-
-                {{-- BUILDER TOOLBAR --}}
-                <div x-show="mode === 'builder'" class="space-y-6">
-                    
-                    {{-- Size Selector --}}
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">1. Select Size</label>
-                        <select x-model="canvasSize" @change="updateCanvasDimensions()" wire:model="canvas_size" class="w-full border-gray-300 rounded-lg p-2.5">
-                            <option value="square">Square Post (1080x1080)</option>
-                            <option value="story">Story / Reel (1080x1920)</option>
-                            <option value="banner">Wide Banner (1200x628)</option>
-                        </select>
-                    </div>
-
-                    {{-- Background Color --}}
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">2. Background Color</label>
-                        <div class="flex items-center gap-2">
-                            <input type="color" x-model="bgColor" wire:model="bg_color" class="h-10 w-14 p-1 rounded border cursor-pointer">
-                            <span class="text-sm text-gray-600" x-text="bgColor"></span>
-                        </div>
-                    </div>
-
-                    {{-- Add Elements --}}
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">3. Add Elements</label>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button @click="addTextLayer()" type="button" class="bg-white border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 font-bold text-sm">
-                                <i class="fas fa-font mr-1 text-blue-500"></i> Add Text
-                            </button>
-                            <div class="relative">
-                                <button type="button" class="w-full bg-white border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 font-bold text-sm relative z-0">
-                                    <i class="fas fa-image mr-1 text-green-500"></i> Add Image
-                                </button>
-                                <input type="file" wire:model.live="temp_layer_image" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- Active Layer Settings --}}
-                    <div x-show="activeLayerIndex !== null" class="bg-orange-50 p-4 rounded-lg border border-orange-100">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-xs font-bold text-orange-800 uppercase">Edit Selected</span>
-                            <button @click="deleteLayer()" class="text-red-500 text-xs font-bold hover:underline">Delete</button>
-                        </div>
-                        
-                        <template x-if="layers[activeLayerIndex]?.type === 'text'">
-                            <div class="space-y-2">
-                                <input type="text" x-model="layers[activeLayerIndex].content" class="w-full text-sm border-gray-300 rounded p-1">
-                                <div class="flex gap-2">
-                                    <input type="color" x-model="layers[activeLayerIndex].color" class="h-8 w-8 p-0 border rounded">
-                                    <input type="number" x-model="layers[activeLayerIndex].fontSize" class="w-16 text-sm border-gray-300 rounded p-1" title="Font Size">
-                                </div>
-                            </div>
-                        </template>
-                        
-                        <template x-if="layers[activeLayerIndex]?.type === 'image'">
-                            <div class="text-xs text-gray-500">
-                                Drag to move. Use corner handle to resize (Future feature).
-                            </div>
-                        </template>
-                    </div>
-
-                </div>
-            </div>
-
-            {{-- SAVE BUTTON --}}
-            <button @click="submitAd()" type="button" class="w-full bg-green-600 text-white font-bold py-4 rounded-xl hover:bg-green-700 shadow-lg text-lg flex justify-center items-center gap-2">
-                <span wire:loading.remove>Publish Ad</span>
-                <span wire:loading><i class="fas fa-spinner fa-spin"></i> Processing...</span>
-            </button>
-
-        </div>
-
-        {{-- RIGHT PANEL: CANVAS AREA --}}
-        <div class="lg:col-span-8 flex justify-center items-start bg-gray-200 rounded-xl p-8 overflow-auto min-h-[600px] border border-gray-300">
-            
-            {{-- THE CANVAS --}}
-            <div x-show="mode === 'builder'"
-                 id="ad-canvas" 
-                 class="relative shadow-2xl transition-all duration-300 overflow-hidden bg-white"
-                 :style="`width: ${width}px; height: ${height}px; background-color: ${bgColor};`"
-                 @click.self="activeLayerIndex = null">
+                {{-- INSERT THE BLOCK HERE --}}
                 
-                {{-- LAYERS LOOP --}}
-                <template x-for="(layer, index) in layers" :key="layer.id">
-                    
-                    {{-- Draggable Container --}}
-                    <div class="absolute cursor-move select-none group"
-                         :style="`left: ${layer.x}px; top: ${layer.y}px;`"
-                         @mousedown="startDrag($event, index)"
-                         @touchstart="startDrag($event, index)">
-                        
-                        {{-- Text Layer --}}
-                        <template x-if="layer.type === 'text'">
-                            <p :style="`color: ${layer.color}; font-size: ${layer.fontSize}px; font-weight: bold; font-family: sans-serif; white-space: nowrap;`"
-                               :class="activeLayerIndex === index ? 'ring-2 ring-blue-500 ring-offset-2 rounded' : 'hover:ring-1 hover:ring-blue-300'"
-                               x-text="layer.content"></p>
-                        </template>
 
-                        {{-- Image Layer --}}
-                        <template x-if="layer.type === 'image'">
-                            <img :src="layer.content" 
-                                 class="w-32 h-auto object-cover rounded pointer-events-none"
-                                 :class="activeLayerIndex === index ? 'ring-2 ring-blue-500 ring-offset-2' : ''">
-                        </template>
+                {{-- Footer Area --}}
+                <div class="p-6 bg-white flex items-center justify-between mt-auto">
+                    <span class="block text-lg font-bold text-gray-900 truncate">{{ $template->name }}</span>
+                    <i class="fas fa-chevron-right text-orange-500"></i>
+                </div>
+            </div>
+        @endforeach
+    </div>
+    
 
+        @elseif($step == 3 && $selectedTemplate)
+            {{-- STEP 3: THE EDITOR & LIVE PREVIEW --}}
+            <div class="mb-6 flex items-center justify-between">
+                <button wire:click="$set('step', 2)" class="flex items-center text-sm text-orange-600 font-bold hover:underline">
+                    <i class="fas fa-arrow-left mr-2"></i> Back to Templates
+                </button>
+                <button wire:click="save" class="bg-orange-600 text-white px-8 py-2 rounded-lg font-bold shadow-md hover:bg-orange-700 transition-colors">
+                    <i class="fas fa-save mr-2"></i> Submit for Approval
+                </button>
+            </div>
+
+            <div class="flex flex-col lg:flex-row gap-10 items-start">
+                <div class="w-full lg:w-1/3 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 sticky top-4">
+                    <h3 class="text-lg font-bold text-gray-800 mb-6 border-b pb-4">Customize Content</h3>
+                    <div class="space-y-6">
+                        @foreach($selectedTemplate->fields as $field)
+                            <div wire:key="field-{{ $field->id }}" class="space-y-2">
+                                <label class="block text-xs font-black text-gray-500 uppercase tracking-widest">{{ $field->label }}</label>
+                                @if($field->type === 'color')
+                                    <input type="color" wire:model.live="inputs.{{ $field->id }}" class="h-10 w-20 cursor-pointer rounded border-gray-200">
+                                @elseif($field->type === 'textarea')
+                                    <textarea wire:model.live="inputs.{{ $field->id }}" rows="3" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-orange-500 text-sm"></textarea>
+                                @elseif($field->type === 'image')
+                                    <input type="file" wire:model="image_uploads.{{ $field->id }}" class="text-xs">
+                                    <div wire:loading wire:target="image_uploads.{{ $field->id }}" class="text-xs text-orange-500 font-bold mt-1">Uploading...</div>
+                                @else
+                                    <input type="text" wire:model.live="inputs.{{ $field->id }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-orange-500 text-sm">
+                                @endif
+                            </div>
+                        @endforeach
                     </div>
-                </template>
-
-                {{-- Watermark (Optional) --}}
-                <div class="absolute bottom-4 right-4 opacity-50 pointer-events-none">
-                    <span class="text-xs font-bold text-gray-400">Powered by SoilNWater</span>
                 </div>
 
+                <div class="w-full lg:w-2/3 flex flex-col items-center sticky top-4">
+                    <div class="bg-gray-800 w-full max-w-[505px] rounded-t-2xl py-3 px-6 flex justify-between items-center shadow-lg">
+                        <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Live Design Canvas</span>
+                    </div>
+                    <div class="bg-gray-200 w-full max-w-[505px] aspect-square rounded-b-2xl shadow-2xl flex items-center justify-center overflow-hidden border-4 border-gray-800">
+                        <div class="transform scale-[1.0] origin-center shadow-2xl">
+                            @php
+                                $previewData = [];
+                                foreach($selectedTemplate->fields as $f) {
+                                    if ($f->type === 'image' && isset($image_uploads[$f->id]) && method_exists($image_uploads[$f->id], 'temporaryUrl')) {
+                                        $previewData[$f->field_name] = $image_uploads[$f->id]->temporaryUrl();
+                                    } else {
+                                        $previewData[$f->field_name] = $inputs[$f->id] ?? $f->default_value;
+                                    }
+                                }
+                            @endphp
+                            @include($selectedTemplate->blade_path, ['data' => $previewData])
+                        </div>
+                    </div>
+                </div>
             </div>
-
-            {{-- Upload Preview Placeholder --}}
-            <div x-show="mode === 'upload'" class="text-gray-400 text-center mt-20">
-                <i class="fas fa-eye text-4xl mb-2"></i>
-                <p>Preview will appear here after upload.</p>
-            </div>
-
-        </div>
+        @endif
     </div>
 </div>
-
-{{-- ALPINE.JS LOGIC --}}
-<script>
-function adBuilder() {
-    return {
-        mode: @entangle('mode'),
-        canvasSize: 'square',
-        width: 500, // Scaled down for UI
-        height: 500,
-        bgColor: '#ffffff',
-        layers: [],
-        activeLayerIndex: null,
-        dragging: false,
-        dragOffsetX: 0,
-        dragOffsetY: 0,
-
-        init() {
-            this.updateCanvasDimensions();
-        },
-
-        updateCanvasDimensions() {
-            if (this.canvasSize === 'square') { this.width = 500; this.height = 500; }
-            if (this.canvasSize === 'story') { this.width = 350; this.height = 622; } // 9:16 approx
-            if (this.canvasSize === 'banner') { this.width = 600; this.height = 314; }
-        },
-
-        addTextLayer() {
-            this.layers.push({
-                id: Date.now(),
-                type: 'text',
-                content: 'Double Click Edit',
-                x: 50,
-                y: 50,
-                color: '#000000',
-                fontSize: 24
-            });
-            this.activeLayerIndex = this.layers.length - 1;
-        },
-
-        addImageLayer(url) {
-            this.layers.push({
-                id: Date.now(),
-                type: 'image',
-                content: url,
-                x: 50,
-                y: 50
-            });
-            this.activeLayerIndex = this.layers.length - 1;
-        },
-
-        deleteLayer() {
-            if (this.activeLayerIndex !== null) {
-                this.layers.splice(this.activeLayerIndex, 1);
-                this.activeLayerIndex = null;
-            }
-        },
-
-        // --- DRAG LOGIC ---
-        startDrag(event, index) {
-            this.activeLayerIndex = index;
-            this.dragging = true;
-            
-            // Calculate offset (click position relative to element)
-            const el = event.target.closest('div.absolute'); // Get the wrapper
-            const rect = el.getBoundingClientRect();
-            const parentRect = document.getElementById('ad-canvas').getBoundingClientRect();
-
-            // Touch or Mouse support
-            const clientX = event.touches ? event.touches[0].clientX : event.clientX;
-            const clientY = event.touches ? event.touches[0].clientY : event.clientY;
-
-            this.dragOffsetX = clientX - rect.left;
-            this.dragOffsetY = clientY - rect.top;
-
-            const onMove = (e) => {
-                if (!this.dragging) return;
-                e.preventDefault(); // Stop scrolling on touch
-
-                const cx = e.touches ? e.touches[0].clientX : e.clientX;
-                const cy = e.touches ? e.touches[0].clientY : e.clientY;
-
-                // New Position relative to canvas
-                let newX = cx - parentRect.left - this.dragOffsetX;
-                let newY = cy - parentRect.top - this.dragOffsetY;
-
-                // Update Alpine Data
-                this.layers[index].x = newX;
-                this.layers[index].y = newY;
-            };
-
-            const onUp = () => {
-                this.dragging = false;
-                window.removeEventListener('mousemove', onMove);
-                window.removeEventListener('mouseup', onUp);
-                window.removeEventListener('touchmove', onMove);
-                window.removeEventListener('touchend', onUp);
-            };
-
-            window.addEventListener('mousemove', onMove);
-            window.addEventListener('mouseup', onUp);
-            window.addEventListener('touchmove', onMove, { passive: false });
-            window.addEventListener('touchend', onUp);
-        },
-
-        // --- SUBMISSION ---
-        async submitAd() {
-            if (this.mode === 'builder') {
-                // Capture Canvas
-                const canvas = document.getElementById('ad-canvas');
-                
-                // Temporarily remove selection rings for screenshot
-                this.activeLayerIndex = null; 
-                await new Promise(r => setTimeout(r, 50)); // Tiny wait for UI update
-
-                try {
-                    const canvasImage = await html2canvas(canvas, {
-                        useCORS: true, // Allow external images
-                        scale: 2 // High Res
-                    });
-                    
-                    const dataURL = canvasImage.toDataURL("image/png");
-                    
-                    // Send to Livewire
-                    @this.set('generated_image_data', dataURL);
-                    @this.set('layers', this.layers); // Save JSON state
-                    @this.call('save');
-                } catch (error) {
-                    alert('Error generating image. Please try again.');
-                    console.error(error);
-                }
-            } else {
-                // Standard Upload Mode
-                @this.call('save');
-            }
-        }
-    };
-}
-</script>

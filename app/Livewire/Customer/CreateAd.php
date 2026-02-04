@@ -5,94 +5,112 @@ namespace App\Livewire\Customer;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\Ad;
+use App\Models\AdTier;
+use App\Models\AdTemplate;
+use App\Models\AdValue;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 
 class CreateAd extends Component
 {
     use WithFileUploads;
 
-    public $mode = 'upload'; // 'upload' or 'builder'
+    public $step = 1;
+    public $tiers;
+    public $templates = [];
+    public $selectedTierId;
+    public $selectedTemplateId;
+    public $selectedTemplate;
     
-    // Common Fields
-    public $title;
-    public $target_link;
+    // Dynamic Inputs
+    public $inputs = [];
+    public $image_uploads = []; // Store multiple images dynamically
 
-    // Mode 1: Upload Pre-designed
-    public $uploaded_file;
-
-    // Mode 2: Builder State
-    public $canvas_size = 'square'; // square (1:1), story (9:16), banner (4:1)
-    public $bg_color = '#ffffff';
-    public $layers = []; // Stores text/image elements
-    public $generated_image_data; // Base64 string from frontend
-
-    // Temporary upload for builder image layers
-    public $temp_layer_image; 
-
-    protected $rules = [
-        'title' => 'required|min:3',
-        'mode' => 'required',
-    ];
-
-    // --- BUILDER ACTIONS ---
-
-    public function updatedTempLayerImage()
+    public function mount()
     {
-        $this->validate(['temp_layer_image' => 'image|max:2048']);
+        $this->tiers = AdTier::all();
+    }
+
+    public function selectTier($id)
+    {
+        $this->selectedTierId = $id;
+        $this->templates = AdTemplate::where('ad_tier_id', $id)->where('is_active', true)->get();
+        $this->step = 2;
+    }
+
+    public function selectTemplate($id)
+    {
+        $this->selectedTemplateId = $id;
+        $this->selectedTemplate = AdTemplate::with('fields')->find($id);
         
-        // Store temporarily and add as a layer
-        $url = $this->temp_layer_image->temporaryUrl();
+        $this->inputs = [];
+        foreach ($this->selectedTemplate->fields as $field) {
+            // PRE-FILL with Admin's Master Content
+            $this->inputs[$field->id] = $field->default_value;
+        }
         
-        // We dispatch an event to Alpine to add this image layer
-        $this->dispatch('add-image-layer', url: $url);
-        
-        // Reset input
-        $this->reset('temp_layer_image');
+        $this->step = 3;
     }
 
     public function save()
     {
-        $this->validate();
-
-        $finalImagePath = null;
-        $designData = null;
-
-        if ($this->mode === 'upload') {
-            $this->validate(['uploaded_file' => 'required|image|max:5120']);
-            $finalImagePath = $this->uploaded_file->store('ads/uploads', 'public');
-        } 
-        else {
-            // Builder Mode
-            $this->validate(['generated_image_data' => 'required']);
-            
-            // 1. Decode Base64 Image
-            $image_parts = explode(";base64,", $this->generated_image_data);
-            $image_type_aux = explode("image/", $image_parts[0]);
-            $image_base64 = base64_decode($image_parts[1]);
-            
-            // 2. Save Image File
-            $filename = 'ads/builder/' . uniqid() . '.png';
-            \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $image_base64);
-            $finalImagePath = $filename;
-
-            // 3. Save Design JSON (Passed from frontend)
-            $designData = $this->layers; 
-        }
-
-        Ad::create([
-            'user_id' => Auth::id(),
-            'title' => $this->title,
-            'type' => $this->mode,
-            'size_format' => $this->canvas_size,
-            'final_image_path' => $finalImagePath,
-            'design_data' => $designData,
-            'target_link' => $this->target_link,
-            'is_active' => true,
+        $this->validate([
+            'selectedTemplateId' => 'required',
+            'inputs.*' => 'nullable' 
         ]);
 
-        session()->flash('message', 'Ad created successfully!');
-        return redirect()->route('customer.listings'); // Redirects to the Tabs page
+        // 1. Create Ad Instance (Header)
+        $ad = Ad::create([
+            'user_id' => Auth::id(),
+            'ad_template_id' => $this->selectedTemplateId,
+            'title' => $this->inputs[$this->selectedTemplate->fields->first()->id] ?? 'New Ad',
+            'status' => 'pending',
+        ]);
+
+        // 2. Save Dynamic Values
+        foreach ($this->selectedTemplate->fields as $field) {
+            $value = $this->inputs[$field->id];
+
+            // Handle Dynamic Image Upload
+            if ($field->type === 'image' && isset($this->image_uploads[$field->id])) {
+                $value = $this->image_uploads[$field->id]->store('ads/content', 'public');
+            }
+
+            AdValue::create([
+                'ad_id' => $ad->id,
+                'field_id' => $field->id,
+                'value' => $value
+            ]);
+        }
+
+        session()->flash('message', 'Ad submitted for approval!');
+        return redirect()->route('customer.listings');
+    }
+
+    public function saveAd()
+    {
+        // 1. Validate the user input based on the template's required fields
+        $this->validate();
+
+        // 2. Handle Image Uploads (Convert temporary paths to permanent storage)
+        $processedData = $this->inputs;
+        foreach ($this->selectedTemplate->fields as $field) {
+            if ($field->type === 'image' && isset($this->inputs[$field->id])) {
+                // Store the file in the 'ads' folder and keep the path
+                $path = $this->inputs[$field->id]->store('ads', 'public');
+                $processedData[$field->id] = $path;
+            }
+        }
+
+        // 3. Create the unique Ad record for the authenticated user
+        auth()->user()->ads()->create([
+            'ad_template_id' => $this->selectedTemplate->id,
+            'ad_tier_id' => $this->selectedTemplate->ad_tier_id,
+            'content_data' => $processedData, // This stores your colors, text, and image paths
+            'status' => 'pending', // Usually goes to "Approvals Center" next
+        ]);
+
+        session()->flash('message', 'Your advertisement has been saved successfully!');
+        return redirect()->route('customer.my-ads');
     }
 
     public function render()

@@ -133,6 +133,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('customer.project.edit');
 
     Route::get('/post/ad', \App\Livewire\Customer\CreateAd::class)->name('customer.ad.create');
+
+    Route::get('/test-view', function () {
+    return view('ads.templates.beauty_square', ['data' => []]);
+});
         
     // -- Old Routes (Optional: You can remove 'customer.my-posts' and 'customer.my-projects' GET routes if you rely solely on the manager) --
 });

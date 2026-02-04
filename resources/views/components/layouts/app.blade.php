@@ -27,7 +27,8 @@
 
     <livewire:partials.navbar />
 
-    <main class="flex-grow">
+    {{-- app.blade.php --}}
+    <main class="flex-grow w-full overflow-x-hidden"> {{-- Added overflow-x-hidden to prevent shaking --}}
         {{ $slot }}
     </main>
 

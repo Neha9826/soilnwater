@@ -16,6 +16,10 @@ class ManageListings extends Component
 
     public function render()
     {
-        return view('livewire.customer.manage-listings')->layout('layouts.app');
+        return view('livewire.customer.manage-listings', [
+            'ads' => \App\Models\Ad::with(['template.tier', 'values.field'])
+                        ->where('user_id', auth()->id())
+                        ->get()
+        ])->layout('layouts.app');
     }
 }
