@@ -15,11 +15,12 @@ class ManageListings extends Component
     }
 
     public function render()
-    {
-        return view('livewire.customer.manage-listings', [
-            'ads' => \App\Models\Ad::with(['template.tier', 'values.field'])
-                        ->where('user_id', auth()->id())
-                        ->get()
-        ])->layout('layouts.app');
-    }
+{
+    return view('livewire.customer.manage-listings', [
+        'ads' => \App\Models\Ad::with(['template', 'values.field']) // Removed .tier to prevent extra crashes
+                    ->where('user_id', auth()->id())
+                    ->latest()
+                    ->get()
+    ])->layout('layouts.app');
+}
 }

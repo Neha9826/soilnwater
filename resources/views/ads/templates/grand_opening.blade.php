@@ -1,76 +1,35 @@
 <div style="width: 500px; height: 500px; background-color: {{ $data['bg_color'] ?? '#ffffff' }}; font-family: 'Poppins', sans-serif; position: relative; overflow: hidden; border: 1px solid #ddd; color: #000;">
     
-    {{-- Top Hero Background Image --}}
     <div style="position: absolute; top: 0; left: 0; width: 100%; height: 260px; overflow: hidden; z-index: 1;">
-        @if(isset($data['image_bg']))
-            <img src="{{ is_string($data['image_bg']) ? asset('storage/' . $data['image_bg']) : $data['image_bg']->temporaryUrl() }}" style="width: 100%; height: 100%; object-fit: cover; filter: brightness(0.7);">
-        @else
-            <div style="width: 100%; height: 100%; background: #333;"></div>
-        @endif
-        {{-- Soft Gradient Overlay --}}
+        <img src="{{ !empty($data['image_bg']) ? (Str::startsWith($data['image_bg'], 'http') ? $data['image_bg'] : asset('storage/' . $data['image_bg'])) : asset('images/placeholder.jpg') }}" style="width: 100%; height: 100%; object-fit: cover; filter: brightness(0.7);">
         <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(255,255,255,0.2), rgba(255,255,255,1) 95%);"></div>
     </div>
 
-    {{-- Header Branding --}}
     <div style="position: absolute; top: 25px; width: 100%; text-align: center; z-index: 50; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
-        <p style="text-transform: uppercase; letter-spacing: 2px; font-weight: 600; font-size: 14px; margin: 0;">
-            {{ $data['name'] ?? 'Fradel and Spies' }}
-        </p>
+        <p style="text-transform: uppercase; letter-spacing: 2px; font-weight: 600; font-size: 14px; margin: 0;">{{ $data['name'] ?? 'Fradel and Spies' }}</p>
     </div>
 
-    {{-- Three Circular Images Section --}}
-    <div style="position: absolute; top: 120px; width: 100%; display: flex; justify-content: center; align-items: flex-end; gap: -20px; z-index: 40; padding: 0 20px; box-sizing: border-box;">
-        {{-- Left Image --}}
+    <div style="position: absolute; top: 120px; width: 100%; display: flex; justify-content: center; align-items: flex-end; z-index: 40; padding: 0 20px; box-sizing: border-box;">
         <div style="width: 140px; height: 140px; border-radius: 50%; border: 4px solid #fff; overflow: hidden; background: #eee; box-shadow: 0 10px 20px rgba(0,0,0,0.15); margin-right: -25px;">
-            @if(isset($data['image_1']))
-                <img src="{{ is_string($data['image_1']) ? asset('storage/' . $data['image_1']) : $data['image_1']->temporaryUrl() }}" style="width: 100%; height: 100%; object-fit: cover;">
-            @endif
+            <img src="{{ !empty($data['image_1']) ? (Str::startsWith($data['image_1'], 'http') ? $data['image_1'] : asset('storage/' . $data['image_1'])) : asset('images/placeholder.jpg') }}" style="width: 100%; height: 100%; object-fit: cover;">
         </div>
-        {{-- Main Center Image --}}
         <div style="width: 190px; height: 190px; border-radius: 50%; border: 6px solid #fff; overflow: hidden; background: #eee; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 45;">
-            @if(isset($data['image_2']))
-                <img src="{{ is_string($data['image_2']) ? asset('storage/' . $data['image_2']) : $data['image_2']->temporaryUrl() }}" style="width: 100%; height: 100%; object-fit: cover;">
-            @endif
+            <img src="{{ !empty($data['image_2']) ? (Str::startsWith($data['image_2'], 'http') ? $data['image_2'] : asset('storage/' . $data['image_2'])) : asset('images/placeholder.jpg') }}" style="width: 100%; height: 100%; object-fit: cover;">
         </div>
-        {{-- Right Image --}}
         <div style="width: 140px; height: 140px; border-radius: 50%; border: 4px solid #fff; overflow: hidden; background: #eee; box-shadow: 0 10px 20px rgba(0,0,0,0.15); margin-left: -25px;">
-            @if(isset($data['image_3']))
-                <img src="{{ is_string($data['image_3']) ? asset('storage/' . $data['image_3']) : $data['image_3']->temporaryUrl() }}" style="width: 100%; height: 100%; object-fit: cover;">
-            @endif
+            <img src="{{ !empty($data['image_3']) ? (Str::startsWith($data['image_3'], 'http') ? $data['image_3'] : asset('storage/' . $data['image_3'])) : asset('images/placeholder.jpg') }}" style="width: 100%; height: 100%; object-fit: cover;">
         </div>
     </div>
 
-    {{-- Text Content Section --}}
     <div style="position: absolute; bottom: 0; width: 100%; height: 210px; background: #fff; z-index: 30; text-align: center; padding-top: 20px;">
-        <h1 style="color: {{ $data['heading_color'] ?? '#000' }}; font-size: 52px; margin: 0; font-weight: 900; line-height: 1; letter-spacing: -1px;">
-            GRAND OPENING
-        </h1>
-        <p style="font-size: 13px; color: #666; width: 80%; margin: 10px auto; line-height: 1.4;">
-            {{ $data['description'] ?? 'We\'re serving up excitement at the grand opening of our brand-new restaurant spot! Come for the food, stay for the flavor.' }}
-        </p>
-
-        {{-- Date/Time Banner --}}
-        <div style="background: #000; color: #fff; display: inline-block; padding: 8px 30px; border-radius: 2px; font-weight: bold; font-size: 14px; margin: 5px 0 15px 0;">
-            {{ $data['date_time'] ?? 'Saturday, 27 June, 2027 | Start at 09:00pm' }}
+        <h1 style="color: {{ $data['heading_color'] ?? '#000' }}; font-size: 52px; margin: 0; font-weight: 900; line-height: 1; letter-spacing: -1px;">GRAND OPENING</h1>
+        <p style="font-size: 13px; color: #666; width: 80%; margin: 10px auto; line-height: 1.4;">{{ $data['description'] ?? 'We\'re serving up excitement at the grand opening!' }}</p>
+        <div style="background: #000; color: #fff; display: inline-block; padding: 8px 30px; border-radius: 2px; font-weight: bold; font-size: 14px; margin: 5px 0 15px 0;">{{ $data['date_time'] ?? 'Saturday, 27 June' }}</div>
+        
+        <div style="position: absolute; bottom: 20px; width: 100%; display: flex; justify-content: center; gap: 15px; font-size: 11px; font-weight: bold; color: #333; z-index: 100;">
+            <span><i class="fas fa-map-marker-alt"></i> {{ $data['address'] ?? '123 Anywhere St.' }}</span>
+            <span><i class="fas fa-phone"></i> {{ $data['phone'] ?? '+123-456' }}</span>
+            <span><i class="fas fa-globe"></i> {{ $data['link'] ?? 'www.reallygreatsite.com' }}</span>
         </div>
-
-        {{-- Footer Contact Icons --}}
-        {{-- Refined Footer Contact Section --}}
-    <div style="position: absolute; bottom: 20px; width: 100%; display: flex; justify-content: center; gap: 15px; font-size: 11px; font-weight: bold; color: #333; z-index: 100; padding: 0 10px; box-sizing: border-box;">
-        <span style="display: flex; align-items: center; gap: 4px;">
-            <i class="fas fa-map-marker-alt"></i> {{ $data['address'] ?? '123 Anywhere St.' }}
-        </span>
-        <span style="display: flex; align-items: center; gap: 4px;">
-            <i class="fas fa-phone"></i> {{ $data['phone'] ?? '+123-456-7890' }}
-        </span>
-        <span style="display: flex; align-items: center; gap: 4px;">
-            <i class="fas fa-globe"></i> {{ $data['link'] ?? 'www.reallygreatsite.com' }}
-        </span>
     </div>
-
-    {{-- Decorative Gold Accents (Kept behind the text) --}}
-    <div style="position: absolute; bottom: -30px; left: -30px; width: 110px; height: 110px; background: {{ $data['accent_gold'] ?? '#c5a059' }}; border-radius: 50%; z-index: 10;"></div>
-    <div style="position: absolute; bottom: -50px; right: -40px; width: 160px; height: 160px; background: {{ $data['accent_gold'] ?? '#c5a059' }}; border-radius: 50%; z-index: 10;"></div>
-    
-    <div style="position: absolute; bottom: 0; right: 0; width: 100%; height: 50px; background: linear-gradient(to right, transparent, {{ $data['accent_gold'] ?? '#c5a059' }}); opacity: 0.3; z-index: 55;"></div>
 </div>

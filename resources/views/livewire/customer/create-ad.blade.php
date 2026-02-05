@@ -44,34 +44,74 @@
                 @endforeach
             </div>
 
-        {{-- STEP 2: TEMPLATE SELECTOR (ROBUST ISOLATED VERSION) --}}
+        {{-- STEP 2: TEMPLATE SELECTOR --}}
 @elseif($step == 2)
-    <div class="mb-10">
-        <button wire:click="$set('step', 1)" class="flex items-center text-sm text-orange-600 font-bold hover:underline bg-white px-5 py-2.5 rounded-xl shadow-sm border border-orange-100">
+    <div class="mb-10 flex items-center justify-between">
+        <button wire:click="$set('step', 1)" class="flex items-center text-sm text-orange-600 font-bold hover:underline bg-white px-4 py-2 rounded-lg shadow-sm">
             <i class="fas fa-arrow-left mr-2"></i> Back to Sizes
         </button>
     </div>
 
-    <h2 class="text-3xl font-black text-gray-900 mb-12 text-center uppercase tracking-wider">Select Your Design</h2>
+    <h2 class="text-2xl font-black text-gray-900 mb-8 text-center uppercase tracking-widest">Select Your Design</h2>
     
-    {{-- A robust grid with defined columns and gap --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+    {{-- PART 1: THE SELECTION GRID (Clean & Fast) --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
         @foreach($templates as $template)
-            <div wire:key="template-{{ $template->id }}" wire:click="selectTemplate({{ $template->id }})" 
-                 class="group cursor-pointer bg-white rounded-3xl border-2 border-transparent hover:border-orange-500 transition-all shadow-md hover:shadow-2xl overflow-hidden flex flex-col h-full">
-                
-                {{-- INSERT THE BLOCK HERE --}}
-                
-
-                {{-- Footer Area --}}
-                <div class="p-6 bg-white flex items-center justify-between mt-auto">
-                    <span class="block text-lg font-bold text-gray-900 truncate">{{ $template->name }}</span>
-                    <i class="fas fa-chevron-right text-orange-500"></i>
+            <div wire:key="select-{{ $template->id }}" wire:click="selectTemplate({{ $template->id }})" 
+                 class="group cursor-pointer bg-white rounded-2xl border-2 border-gray-100 hover:border-orange-500 p-6 shadow-sm hover:shadow-lg transition-all flex items-center justify-between">
+                <div>
+                    <span class="block text-lg font-bold text-gray-800">{{ $template->name }}</span>
+                    <span class="text-[10px] text-orange-500 font-black uppercase tracking-widest">Click to Edit</span>
+                </div>
+                <div class="bg-orange-50 p-3 rounded-full group-hover:bg-orange-600 transition-colors">
+                    <i class="fas fa-magic text-orange-600 group-hover:text-white"></i>
                 </div>
             </div>
         @endforeach
     </div>
+
+    {{-- PART 2: THE VISUAL REFERENCE GALLERY (Under the grid) --}}
+<div class="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 mt-12">
+    <div class="flex items-center justify-between mb-8">
+        <h3 class="text-xl font-bold text-gray-800 flex items-center">
+            <i class="fas fa-eye mr-3 text-orange-500"></i> Design Reference Gallery
+        </h3>
+        <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest bg-gray-50 px-3 py-1 rounded-full">3 Designs Available</span>
+    </div>
     
+    {{-- Grid changed to 3 columns on desktop --}}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        @foreach($templates as $template)
+            <div class="space-y-3 group">
+                {{-- Design Title: Scaled down for better fit --}}
+                <div class="flex items-center gap-2 border-l-4 border-orange-500 pl-3">
+                    <span class="text-[11px] font-bold text-gray-900 uppercase tracking-tight truncate">{{ $template->name }}</span>
+                </div>
+
+                {{-- Design Image Container: aspect-square ensures they all match --}}
+                <div class="relative aspect-square rounded-xl overflow-hidden shadow-lg border border-gray-100 bg-gray-50 group-hover:shadow-2xl transition-all duration-300">
+                    @php
+                        // Mapping to your verified filenames
+                        $imageName = match(trim($template->name)) {
+                            'Beauty Salon Square small' => 'beauty_square.png',
+                            'Grand Opening'             => 'grand_square.png',
+                            'Modern Furniture'          => 'modern_square.png',
+                            default                     => 'placeholder.png'
+                        };
+                    @endphp
+
+                    <img src="{{ asset('images/samples/' . $imageName) }}" 
+                         alt="{{ $template->name }}" 
+                         class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                         onerror="this.src='{{ asset('images/placeholder-ad.jpg') }}'">
+                    
+                    {{-- Soft Overlay --}}
+                    <div class="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-all"></div>
+                </div>
+            </div>
+        @endforeach
+    </div>
+</div>
 
         @elseif($step == 3 && $selectedTemplate)
             {{-- STEP 3: THE EDITOR & LIVE PREVIEW --}}
@@ -79,9 +119,10 @@
                 <button wire:click="$set('step', 2)" class="flex items-center text-sm text-orange-600 font-bold hover:underline">
                     <i class="fas fa-arrow-left mr-2"></i> Back to Templates
                 </button>
-                <button wire:click="save" class="bg-orange-600 text-white px-8 py-2 rounded-lg font-bold shadow-md hover:bg-orange-700 transition-colors">
-                    <i class="fas fa-save mr-2"></i> Submit for Approval
-                </button>
+                <button wire:click="save" class="bg-blue-600 hover:bg-blue-700 text-white px-10 py-3 rounded-xl font-black shadow-[0_4px_20px_rgba(234,88,12,0.4)] transition-all transform hover:scale-105 active:scale-95 flex items-center gap-2">
+    <i class="fas fa-check-circle"></i>
+    <span>SUBMIT FOR APPROVAL</span>
+</button>
             </div>
 
             <div class="flex flex-col lg:flex-row gap-10 items-start">
@@ -106,27 +147,31 @@
                     </div>
                 </div>
 
-                <div class="w-full lg:w-2/3 flex flex-col items-center sticky top-4">
-                    <div class="bg-gray-800 w-full max-w-[505px] rounded-t-2xl py-3 px-6 flex justify-between items-center shadow-lg">
-                        <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Live Design Canvas</span>
-                    </div>
-                    <div class="bg-gray-200 w-full max-w-[505px] aspect-square rounded-b-2xl shadow-2xl flex items-center justify-center overflow-hidden border-4 border-gray-800">
-                        <div class="transform scale-[1.0] origin-center shadow-2xl">
-                            @php
-                                $previewData = [];
-                                foreach($selectedTemplate->fields as $f) {
-                                    if ($f->type === 'image' && isset($image_uploads[$f->id]) && method_exists($image_uploads[$f->id], 'temporaryUrl')) {
-                                        $previewData[$f->field_name] = $image_uploads[$f->id]->temporaryUrl();
-                                    } else {
-                                        $previewData[$f->field_name] = $inputs[$f->id] ?? $f->default_value;
-                                    }
-                                }
-                            @endphp
-                            @include($selectedTemplate->blade_path, ['data' => $previewData])
-                        </div>
-                    </div>
-                </div>
+                {{-- RIGHT SIDE PREVIEW CANVAS in create-ad.blade.php --}}
+<div class="transform scale-[1.0] origin-center shadow-2xl">
+    @php
+        $previewData = [];
+        foreach($selectedTemplate->fields as $f) {
+            // Priority 1: New Image Upload (Temporary URL)
+            if ($f->type === 'image' && isset($image_uploads[$f->id])) {
+                try {
+                    $previewData[$f->field_name] = $image_uploads[$f->id]->temporaryUrl();
+                } catch (\Exception $e) {
+                    $previewData[$f->field_name] = asset('images/placeholder.jpg');
+                }
+            } 
+            // Priority 2: Existing input (text/color) or default value
+            else {
+                $previewData[$f->field_name] = $inputs[$f->id] ?? $f->default_value;
+            }
+        }
+    @endphp
+
+    @include($selectedTemplate->blade_path, ['data' => $previewData])
+</div>
             </div>
-        @endif
+        </div>
+    </div>
+@endif
     </div>
 </div>

@@ -58,7 +58,7 @@ class CreateAd extends Component
             'inputs.*' => 'nullable' 
         ]);
 
-        // 1. Create Ad Instance (Header)
+        // 1. Create Ad Instance
         $ad = Ad::create([
             'user_id' => Auth::id(),
             'ad_template_id' => $this->selectedTemplateId,
@@ -68,10 +68,11 @@ class CreateAd extends Component
 
         // 2. Save Dynamic Values
         foreach ($this->selectedTemplate->fields as $field) {
-            $value = $this->inputs[$field->id];
+            $value = $this->inputs[$field->id] ?? $field->default_value;
 
-            // Handle Dynamic Image Upload
+            // Handle Image Storage
             if ($field->type === 'image' && isset($this->image_uploads[$field->id])) {
+                // Permanently store the temporary file
                 $value = $this->image_uploads[$field->id]->store('ads/content', 'public');
             }
 
@@ -112,6 +113,13 @@ class CreateAd extends Component
         session()->flash('message', 'Your advertisement has been saved successfully!');
         return redirect()->route('customer.my-ads');
     }
+
+    public function updatedImageUploads()
+{
+    // This empty function forces Livewire to refresh the 
+    // component state so the temporaryUrl() becomes available 
+    // for the @include preview instantly.
+}
 
     public function render()
     {

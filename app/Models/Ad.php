@@ -2,22 +2,23 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Ad extends Model
 {
-    use HasFactory;
+    protected $fillable = ['user_id', 'ad_template_id', 'title', 'status'];
 
-    protected $guarded = [];
-
-    protected $casts = [
-        'design_data' => 'array', // Automatically handles JSON
-        'is_active' => 'boolean',
-    ];
-
-    public function user()
+    // This connects the Ad to its Design Template
+    public function template(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(AdTemplate::class, 'ad_template_id');
+    }
+
+    // This connects the Ad to the custom text/images saved in ad_values
+    public function values(): HasMany
+    {
+        return $this->hasMany(AdValue::class, 'ad_id');
     }
 }

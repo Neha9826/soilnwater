@@ -21,22 +21,16 @@ class MyAds extends Component
         $this->resetPage();
     }
 
-    public function delete($id)
+    public function deleteAd($id)
     {
-        $ad = Ad::where('user_id', Auth::id())->findOrFail($id);
+        // 1. Find the ad belonging specifically to the logged-in user
+        $ad = Ad::where('user_id', auth()->id())->findOrFail($id);
 
-        // 1. Delete associated images from storage before deleting database records
-        foreach ($ad->values as $value) {
-            if ($value->field->type === 'image' && $value->value) {
-                Storage::disk('public')->delete($value->value);
-            }
-        }
-
-        // 2. Delete the Ad (Cascade will handle ad_values if set in migration, 
-        // but Eloquent delete is safer for model events)
+        // 2. Delete the record (Cascade will handle AdValues if set in DB)
         $ad->delete();
 
-        session()->flash('message', 'Advertisement deleted successfully.');
+        // 3. Flash a success message for the employer to see
+        session()->flash('message', 'Advertisement deleted successfully!');
     }
 
     public function render()
