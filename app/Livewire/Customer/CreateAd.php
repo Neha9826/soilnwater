@@ -115,14 +115,46 @@ class CreateAd extends Component
     }
 
     public function updatedImageUploads()
-{
-    // This empty function forces Livewire to refresh the 
-    // component state so the temporaryUrl() becomes available 
-    // for the @include preview instantly.
-}
+    {
+        // This empty function forces Livewire to refresh the 
+        // component state so the temporaryUrl() becomes available 
+        // for the @include preview instantly.
+    }
+        // Inside CreateAd.php
+    public function updated($propertyName)
+    {
+        // This forces the component to re-render the @include 
+        // every time any input changes.
+    }
 
     public function render()
     {
-        return view('livewire.customer.create-ad')->layout('layouts.app');
+        $previewData = [];
+
+        if ($this->selectedTemplate) {
+            foreach ($this->selectedTemplate->fields as $field) {
+                // 1. Handle Images: Use temporary URLs for the preview
+                // app/Livewire/Customer/CreateAd.php
+
+                if ($field->type === 'image' && isset($this->image_uploads[$field->id])) {
+                    try {
+                        // Try to get the preview URL
+                        $previewData[$field->field_name] = $this->image_uploads[$field->id]->temporaryUrl();
+                    } catch (\Exception $e) {
+                        // If it fails (like with avif before the config fix), show a placeholder instead of crashing
+                        $previewData[$field->field_name] = asset('images/placeholder.jpg');
+                    }
+                }
+                // 2. Handle Text/Colors: Map the input to the 'field_name'
+                else {
+                    // This maps 'inputs[52]' to 'title_1' so the blade can see it
+                    $previewData[$field->field_name] = $this->inputs[$field->id] ?? $field->default_value;
+                }
+            }
+        }
+
+        return view('livewire.customer.create-ad', [
+            'previewData' => $previewData
+        ])->layout('layouts.app');
     }
 }

@@ -33,23 +33,37 @@ class AdTemplateResource extends Resource
                 ]),
 
             // SECTION: Live Master Preview (For Admin View)
-            Forms\Components\Section::make('Template Master Preview')
-                ->description('This is how the master design looks with your default content.')
-                ->schema([
-                    Forms\Components\Placeholder::make('preview')
-                        ->label('')
-                        ->content(function ($record) {
-                            if (!$record) return "Save the template first to see the preview.";
-                            
-                            $previewData = $record->fields->mapWithKeys(function ($field) {
-                                return [$field->field_name => $field->default_value];
-                            })->toArray();
+            // SECTION: Live Master Preview (For Admin View)
+Forms\Components\Section::make('Template Master Preview')
+    ->description('This is how the master design looks with your current input.')
+    ->schema([
+        Forms\Components\Placeholder::make('preview')
+            ->label('')
+            ->content(function ($get) { // Use $get instead of $record
+                $bladePath = $get('blade_path');
+                if (!$bladePath) return "Enter a Blade Path to see the preview.";
 
-                            return new \Illuminate\Support\HtmlString(
-                                view($record->blade_path, ['data' => $previewData])->render()
-                            );
-                        })
-                ])->columnSpanFull(),
+                // Fetch the live values from the repeater fields
+                $fields = $get('fields') ?? [];
+                
+                $previewData = [];
+                foreach ($fields as $field) {
+                    if (!empty($field['field_name'])) {
+                        // Map the live DB Key to the live Default Content
+                        $previewData[$field['field_name']] = $field['default_value'] ?? '';
+                    }
+                }
+
+                try {
+                    return new \Illuminate\Support\HtmlString(
+                        view($bladePath, ['data' => $previewData])->render()
+                    );
+                } catch (\Exception $e) {
+                    return "Waiting for valid keys... (Error: " . $e->getMessage() . ")";
+                }
+            })
+            ->reactive() // Tells the placeholder to re-render when $get changes
+    ])->columnSpanFull(),
 
             // SECTION: Master Configuration
             Forms\Components\Section::make('Master Configuration')->schema([
@@ -64,27 +78,38 @@ class AdTemplateResource extends Resource
             ])->columns(3),
 
             // SECTION: Dynamic Field Repeater
-            Forms\Components\Section::make('Design the Master Preview')
-                ->description('Admin: Fill these fields to set the default design data.')
-                ->schema([
-                    Forms\Components\Repeater::make('fields')
-                        ->relationship('fields')
-                        ->schema([
-                            Forms\Components\TextInput::make('label')->required()->label('Field Label'),
-                            Forms\Components\TextInput::make('field_name')->required()->label('DB Key'),
-                            Forms\Components\Select::make('type')
-                                ->options([
-                                    'text' => 'Text', 
-                                    'textarea' => 'Long Description', 
-                                    'color' => 'Color', 
-                                    'image' => 'Image'
-                                ])
-                                ->required(),
-                            Forms\Components\Textarea::make('default_value')
-                                ->label('Default Content')
-                                ->placeholder('Admin: Enter default text or color hex here'),
-                        ])->columns(4)
-                ])
+            // app/Filament/Resources/AdTemplateResource.php
+
+// ... inside the static function form(Form $form) method
+
+// SECTION: Dynamic Field Repeater
+Forms\Components\Section::make('Design the Master Preview')
+    ->description('Admin: Fill these fields to set the default design data.')
+    ->schema([
+        Forms\Components\Repeater::make('fields')
+            ->relationship('fields')
+            ->live() // <--- ADD THIS HERE: Tells Filament to refresh the page when fields change
+            ->schema([
+                Forms\Components\TextInput::make('label')
+                    ->required()
+                    ->label('Field Label'),
+                Forms\Components\TextInput::make('field_name')
+                    ->required()
+                    ->label('DB Key'),
+                Forms\Components\Select::make('type')
+                    ->options([
+                        'text' => 'Text', 
+                        'textarea' => 'Long Description', 
+                        'color' => 'Color', 
+                        'image' => 'Image'
+                    ])
+                    ->required(),
+                Forms\Components\Textarea::make('default_value')
+                    ->label('Default Content')
+                    ->live(onBlur: true) // <--- ADD THIS HERE: Refreshes preview when you finish typing
+                    ->placeholder('Admin: Enter default text or color hex here'),
+            ])->columns(4)
+    ])
         ]);
     }
 

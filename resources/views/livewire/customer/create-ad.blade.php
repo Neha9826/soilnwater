@@ -150,24 +150,21 @@
                 {{-- RIGHT SIDE PREVIEW CANVAS in create-ad.blade.php --}}
 <div class="transform scale-[1.0] origin-center shadow-2xl">
     @php
-        $previewData = [];
-        foreach($selectedTemplate->fields as $f) {
-            // Priority 1: New Image Upload (Temporary URL)
-            if ($f->type === 'image' && isset($image_uploads[$f->id])) {
-                try {
-                    $previewData[$f->field_name] = $image_uploads[$f->id]->temporaryUrl();
-                } catch (\Exception $e) {
-                    $previewData[$f->field_name] = asset('images/placeholder.jpg');
-                }
-            } 
-            // Priority 2: Existing input (text/color) or default value
-            else {
-                $previewData[$f->field_name] = $inputs[$f->id] ?? $f->default_value;
-            }
+    $previewData = [];
+    foreach($selectedTemplate->fields as $f) {
+        // 1. Handle Image Previews
+        if ($f->type === 'image' && isset($image_uploads[$f->id])) {
+            $previewData[$f->field_name] = $image_uploads[$f->id]->temporaryUrl();
+        } 
+        // 2. Handle Text/Color/Textarea Previews
+        else {
+            $previewData[$f->field_name] = $inputs[$f->id] ?? $f->default_value;
         }
-    @endphp
+    }
+@endphp
 
-    @include($selectedTemplate->blade_path, ['data' => $previewData])
+{{-- This passes the mapped keys to adventure_trekking.blade.php --}}
+@include($selectedTemplate->blade_path, ['data' => $previewData])
 </div>
             </div>
         </div>
