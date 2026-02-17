@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Ad extends Model
 {
-    protected $fillable = ['user_id', 'ad_template_id', 'title', 'status'];
+    protected $fillable = ['user_id', 'ad_template_id', 'title', 'status', 'preview_image'];
 
     // This connects the Ad to its Design Template
     public function template(): BelongsTo

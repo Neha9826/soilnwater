@@ -9,6 +9,8 @@ use App\Models\AdTier;
 use App\Models\AdTemplate;
 use App\Models\AdValue;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use App\Services\AdPreviewGenerator;
 
 class CreateAd extends Component
 {
@@ -20,10 +22,9 @@ class CreateAd extends Component
     public $selectedTierId;
     public $selectedTemplateId;
     public $selectedTemplate;
-    
-    // Dynamic Inputs
+
     public $inputs = [];
-    public $image_uploads = []; // Store multiple images dynamically
+    public $image_uploads = [];
 
     public function mount()
     {
@@ -33,21 +34,23 @@ class CreateAd extends Component
     public function selectTier($id)
     {
         $this->selectedTierId = $id;
-        $this->templates = AdTemplate::where('ad_tier_id', $id)->where('is_active', true)->get();
+        $this->templates = AdTemplate::where('ad_tier_id', $id)
+            ->where('is_active', true)
+            ->get();
+
         $this->step = 2;
     }
 
     public function selectTemplate($id)
     {
         $this->selectedTemplateId = $id;
-        $this->selectedTemplate = AdTemplate::with('fields')->find($id);
-        
+        $this->selectedTemplate = AdTemplate::with('fields')->findOrFail($id);
+
         $this->inputs = [];
         foreach ($this->selectedTemplate->fields as $field) {
-            // PRE-FILL with Admin's Master Content
             $this->inputs[$field->id] = $field->default_value;
         }
-        
+
         $this->step = 3;
     }
 
@@ -55,31 +58,70 @@ class CreateAd extends Component
     {
         $this->validate([
             'selectedTemplateId' => 'required',
-            'inputs.*' => 'nullable' 
+            'inputs.*' => 'nullable',
         ]);
 
-        // 1. Create Ad Instance
+        /*
+        |--------------------------------------------------------------------------
+        | 1. CREATE AD
+        |--------------------------------------------------------------------------
+        */
         $ad = Ad::create([
-            'user_id' => Auth::id(),
-            'ad_template_id' => $this->selectedTemplateId,
-            'title' => $this->inputs[$this->selectedTemplate->fields->first()->id] ?? 'New Ad',
-            'status' => 'pending',
+            'user_id'         => Auth::id(),
+            'ad_template_id'  => $this->selectedTemplateId,
+            'title'           => $this->selectedTemplate->name . ' - User ' . Auth::id(),
+            'status'          => 'pending',
         ]);
 
-        // 2. Save Dynamic Values
+        /*
+        |--------------------------------------------------------------------------
+        | 2. SAVE AD VALUES
+        |--------------------------------------------------------------------------
+        */
         foreach ($this->selectedTemplate->fields as $field) {
+
             $value = $this->inputs[$field->id] ?? $field->default_value;
 
-            // Handle Image Storage
             if ($field->type === 'image' && isset($this->image_uploads[$field->id])) {
-                // Permanently store the temporary file
-                $value = $this->image_uploads[$field->id]->store('ads/content', 'public');
+                $value = $this->image_uploads[$field->id]
+                    ->store('ads/content', 'public');
             }
 
             AdValue::create([
-                'ad_id' => $ad->id,
+                'ad_id'    => $ad->id,
                 'field_id' => $field->id,
-                'value' => $value
+                'value'    => $value,
+            ]);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | 3. GENERATE PREVIEW IMAGE
+        |--------------------------------------------------------------------------
+        */
+        try {
+            Log::info('AdPreviewGenerator: calling generate()', ['ad_id' => $ad->id]);
+
+            $previewPath = AdPreviewGenerator::generate($ad);
+
+if ($previewPath) {
+    $ad->preview_image = $previewPath;
+    $ad->save();
+
+    \Log::info('Preview image generated & stored', [
+        'ad_id' => $ad->id,
+        'path'  => $previewPath,
+    ]);
+} else {
+    \Log::warning('Preview image generation failed', [
+        'ad_id' => $ad->id,
+    ]);
+}
+
+        } catch (\Throwable $e) {
+            Log::error('Ad preview generation failed', [
+                'ad_id' => $ad->id,
+                'error' => $e->getMessage(),
             ]);
         }
 
@@ -87,44 +129,15 @@ class CreateAd extends Component
         return redirect()->route('customer.listings');
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | LEGACY METHOD (NOT USED – KEEP AS IS)
+    |--------------------------------------------------------------------------
+    */
     public function saveAd()
     {
-        // 1. Validate the user input based on the template's required fields
-        $this->validate();
-
-        // 2. Handle Image Uploads (Convert temporary paths to permanent storage)
-        $processedData = $this->inputs;
-        foreach ($this->selectedTemplate->fields as $field) {
-            if ($field->type === 'image' && isset($this->inputs[$field->id])) {
-                // Store the file in the 'ads' folder and keep the path
-                $path = $this->inputs[$field->id]->store('ads', 'public');
-                $processedData[$field->id] = $path;
-            }
-        }
-
-        // 3. Create the unique Ad record for the authenticated user
-        auth()->user()->ads()->create([
-            'ad_template_id' => $this->selectedTemplate->id,
-            'ad_tier_id' => $this->selectedTemplate->ad_tier_id,
-            'content_data' => $processedData, // This stores your colors, text, and image paths
-            'status' => 'pending', // Usually goes to "Approvals Center" next
-        ]);
-
-        session()->flash('message', 'Your advertisement has been saved successfully!');
-        return redirect()->route('customer.my-ads');
-    }
-
-    public function updatedImageUploads()
-    {
-        // This empty function forces Livewire to refresh the 
-        // component state so the temporaryUrl() becomes available 
-        // for the @include preview instantly.
-    }
-        // Inside CreateAd.php
-    public function updated($propertyName)
-    {
-        // This forces the component to re-render the @include 
-        // every time any input changes.
+        // This is NOT used by your UI
+        // Safe to keep for now
     }
 
     public function render()
@@ -133,28 +146,23 @@ class CreateAd extends Component
 
         if ($this->selectedTemplate) {
             foreach ($this->selectedTemplate->fields as $field) {
-                // 1. Handle Images: Use temporary URLs for the preview
-                // app/Livewire/Customer/CreateAd.php
-
                 if ($field->type === 'image' && isset($this->image_uploads[$field->id])) {
                     try {
-                        // Try to get the preview URL
-                        $previewData[$field->field_name] = $this->image_uploads[$field->id]->temporaryUrl();
+                        $previewData[$field->field_name] =
+                            $this->image_uploads[$field->id]->temporaryUrl();
                     } catch (\Exception $e) {
-                        // If it fails (like with avif before the config fix), show a placeholder instead of crashing
-                        $previewData[$field->field_name] = asset('images/placeholder.jpg');
+                        $previewData[$field->field_name] =
+                            asset('images/placeholder.jpg');
                     }
-                }
-                // 2. Handle Text/Colors: Map the input to the 'field_name'
-                else {
-                    // This maps 'inputs[52]' to 'title_1' so the blade can see it
-                    $previewData[$field->field_name] = $this->inputs[$field->id] ?? $field->default_value;
+                } else {
+                    $previewData[$field->field_name] =
+                        $this->inputs[$field->id] ?? $field->default_value;
                 }
             }
         }
 
         return view('livewire.customer.create-ad', [
-            'previewData' => $previewData
+            'previewData' => $previewData,
         ])->layout('layouts.app');
     }
 }
