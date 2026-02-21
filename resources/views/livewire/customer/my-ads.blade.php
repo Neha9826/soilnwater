@@ -14,36 +14,34 @@
 
         <div class="min-h-[400px]">
             @if($ads->count() > 0)
-                {{-- Standardize on a 4-column base. auto-rows ensures '1 unit' is exactly 180px --}}
-<div class="grid grid-cols-2 md:grid-cols-4 grid-flow-dense gap-6 p-4 auto-rows-[180px]">
+               {{-- Master Container: 4 Columns --}}
+{{-- Reduced auto-rows to 280px for a more compact 'at a glance' view --}}
+<div style="display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            grid-auto-flow: dense; 
+            gap: 15px; 
+            grid-auto-rows: 280px;" 
+     class="w-full p-4">
+     
     @foreach($ads as $ad)
         @php
-            // Pull units directly from the Tier table
-            $w = $ad->template->tier->grid_width ?? 1;
-            $h = $ad->template->tier->grid_height ?? 1;
+            $w = (int)($ad->template->tier->grid_width ?? 1);
+            $h = (int)($ad->template->tier->grid_height ?? 1);
 
-            // Generate specific span classes to prevent 'Banner-to-Rectangle' distortion
-            // Banner (4x1) will take up all 4 columns but only 1 row.
-            // Full Page (4x2) will take up all 4 columns and 2 full rows.
-            $colSpan = "col-span-{$w}";
-            $rowSpan = "row-span-{$h}";
-            
-            // Mobile safety: Ensure wide ads don't exceed the 2-column mobile grid
-            $mobileCol = ($w > 2) ? 'col-span-2' : "col-span-{$w}";
+            // Inline CSS to force the correct spans across all shapes
+            $gridItemStyle = "grid-column: span {$w}; grid-row: span {$h};";
+            $imageFilename = $ad->preview_image ? basename($ad->preview_image) : null;
         @endphp
 
-        <div class="{{ $mobileCol }} md:{{ $colSpan }} {{ $rowSpan }} relative group bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            {{-- Use the generated design image. object-cover ensures it fills the calculated box --}}
-            <img src="{{ asset('storage/' . $ad->preview_image) }}" 
-                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
-                 alt="Ad Design">
-
-            {{-- Action Overlay --}}
-            <div class="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <button class="bg-white text-gray-900 px-5 py-2 rounded-xl font-bold text-xs shadow-lg uppercase tracking-wider">
-                    Edit Ad
-                </button>
-            </div>
+        <div style="{{ $gridItemStyle }}" class="relative group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            @if($imageFilename)
+                <img src="{{ route('ad.display', ['filename' => $imageFilename]) }}" 
+                     class="w-full h-full object-cover">
+            @else
+                <div class="w-full h-full bg-gray-50 flex items-center justify-center text-[10px] font-bold text-gray-400">
+                    Ratio {{ $w }}:{{ $h }}
+                </div>
+            @endif
         </div>
     @endforeach
 </div>
