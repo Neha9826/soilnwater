@@ -1,18 +1,18 @@
 {{-- resources/views/ads/templates/travel_agency.blade.php --}}
-<div style="width: 400px; height: 800px; background: {{ $data['bg_color'] ?? '#2c5266' }}; font-family: 'Poppins', sans-serif; position: relative; overflow: hidden; border: 1px solid #ddd;">
+<div style="width: 100%; height: 100%; background: {{ $data['bg_color'] ?? '#2c5266' }}; font-family: 'Poppins', sans-serif; position: relative; overflow: hidden; border: 1px solid #ddd;">
     
     {{-- Main Background Image (Extended) --}}
     <div style="position: absolute; inset: 0; opacity: 0.3;">
-        <img src="{{ !empty($data['image_main']) ? (Str::startsWith($data['image_main'], ['http', 'blob']) ? $data['image_main'] : asset('storage/' . $data['image_main'])) : 'https://placehold.co/400x800?text=Sky+Background' }}" style="width: 100%; height: 100%; object-fit: cover;">
+        <img src="{{ !empty($data['image_main']) ? (Str::startsWith($data['image_main'], ['http', 'data:', 'blob']) ? $data['image_main'] : route('image.proxy', ['path' => $data['image_main']])) : 'https://placehold.co/400x800' }}" style="width: 100%; height: 100%; object-fit: cover;">
     </div>
 
     {{-- Smartphone Frame (Shifted Higher) --}}
     <div style="position: absolute; top: 80px; right: 20px; width: 250px; height: 500px; border: 12px solid #111; border-radius: 40px; overflow: hidden; z-index: 10; background: #fff; box-shadow: 0 25px 50px rgba(0,0,0,0.4);">
-        <img src="{{ !empty($data['image_phone']) ? (Str::startsWith($data['image_phone'], ['http', 'blob']) ? $data['image_phone'] : asset('storage/' . $data['image_phone'])) : 'https://placehold.co/250x500?text=Destination' }}" style="width: 100%; height: 100%; object-fit: cover;">
+        <img src="{{ !empty($data['image_phone']) ? (Str::startsWith($data['image_phone'], ['http', 'data:', 'blob']) ? $data['image_phone'] : route('image.proxy', ['path' => $data['image_phone']])) : 'https://placehold.co/250x500' }}" style="width: 100%; height: 100%; object-fit: cover;">
         
         {{-- Larger Torn Paper Circle Overlay --}}
-        <div style="position: absolute; bottom: -30px; right: -30px; width: 180px; height: 180px; border-radius: 50%; border: 10px solid #fff; overflow: hidden; background: #eee; box-shadow: 0 8px 20px rgba(0,0,0,0.2);">
-            <img src="{{ !empty($data['image_circle']) ? (Str::startsWith($data['image_circle'], ['http', 'blob']) ? $data['image_circle'] : asset('storage/' . $data['image_circle'])) : 'https://placehold.co/180x180?text=Person' }}" style="width: 100%; height: 100%; object-fit: cover;">
+        <div style="position: absolute; bottom: -30px; right: -30px; width: 180px; height: 180px; border-radius: 50%; border: 10px solid #fff; background: #eee; box-shadow: 0 8px 20px rgba(0,0,0,0.2);">
+            <img src="{{ !empty($data['image_circle']) ? (Str::startsWith($data['image_circle'], ['http', 'data:', 'blob']) ? $data['image_circle'] : route('image.proxy', ['path' => $data['image_circle']])) : 'https://placehold.co/180x180' }}" style="width: 100%; height: 100%; object-fit: cover;">
         </div>
     </div>
 

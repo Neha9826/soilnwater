@@ -1,16 +1,23 @@
-<div style="width: 800px; height: 400px; background: #fff; font-family: 'Arial Black', sans-serif; position: relative; overflow: hidden; border: 1px solid #ddd;">
+<div style="width: 100%; height: 100%; background: #fff; font-family: 'Arial Black', sans-serif; position: relative; overflow: hidden; border: 1px solid #ddd;">
     {{-- Background Collage Layers --}}
+    {{-- Image 1: Top Left --}}
     <div style="position: absolute; top: 20px; left: 20px; width: 140px; height: 200px; overflow: hidden; border-radius: 4px;">
-        <img src="{{ $data['image_1'] ?? 'https://placehold.co/140x200' }}" style="width: 100%; height: 100%; object-fit: cover;">
+        <img src="{{ Str::startsWith($data['image_1'] ?? '', ['http', 'data:', 'blob']) ? $data['image_1'] : route('image.proxy', ['path' => $data['image_1'] ?? '']) }}" style="width: 100%; height: 100%; object-fit: cover;">
     </div>
+
+    {{-- Image 2: Bottom Left --}}
     <div style="position: absolute; bottom: 20px; left: 80px; width: 180px; height: 140px; overflow: hidden; border-radius: 4px;">
-        <img src="{{ $data['image_2'] ?? 'https://placehold.co/180x140' }}" style="width: 100%; height: 100%; object-fit: cover;">
+        <img src="{{ Str::startsWith($data['image_2'] ?? '', ['http', 'data:', 'blob']) ? $data['image_2'] : route('image.proxy', ['path' => $data['image_2'] ?? '']) }}" style="width: 100%; height: 100%; object-fit: cover;">
     </div>
+
+    {{-- Image 3: Top Right --}}
     <div style="position: absolute; top: 40px; right: 20px; width: 140px; height: 180px; overflow: hidden; border-radius: 4px;">
-        <img src="{{ $data['image_3'] ?? 'https://placehold.co/140x180' }}" style="width: 100%; height: 100%; object-fit: cover;">
+        <img src="{{ Str::startsWith($data['image_3'] ?? '', ['http', 'data:', 'blob']) ? $data['image_3'] : route('image.proxy', ['path' => $data['image_3'] ?? '']) }}" style="width: 100%; height: 100%; object-fit: cover;">
     </div>
+
+    {{-- Image 4: Bottom Right --}}
     <div style="position: absolute; bottom: 30px; right: 60px; width: 200px; height: 150px; overflow: hidden; border-radius: 4px;">
-        <img src="{{ $data['image_4'] ?? 'https://placehold.co/200x150' }}" style="width: 100%; height: 100%; object-fit: cover;">
+        <img src="{{ Str::startsWith($data['image_4'] ?? '', ['http', 'data:', 'blob']) ? $data['image_4'] : route('image.proxy', ['path' => $data['image_4'] ?? '']) }}" style="width: 100%; height: 100%; object-fit: cover;">
     </div>
 
     {{-- Center Content --}}

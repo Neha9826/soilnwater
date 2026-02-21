@@ -2,56 +2,93 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Ad Preview</title>
 
     <style>
         body {
             margin: 0;
-            padding: 0;
             width: 1080px;
             height: 1080px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             background: #ffffff;
             font-family: Arial, Helvetica, sans-serif;
         }
 
-        .ad-box {
-            width: 1000px;
-            height: 1000px;
-            border: 2px solid #ddd;
-            padding: 40px;
+        .wrapper {
+            width: 100%;
+            height: 100%;
+            padding: 60px;
             box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
-        h1 {
-            font-size: 48px;
+        .title {
+            font-size: 52px;
+            font-weight: bold;
+            color: #111;
             margin-bottom: 20px;
         }
 
-        p {
-            font-size: 28px;
-            line-height: 1.4;
+        .content {
+            display: flex;
+            gap: 40px;
         }
 
-        img {
-            max-width: 100%;
-            margin-top: 30px;
+        .text {
+            flex: 1;
+            font-size: 28px;
+            line-height: 1.4;
+            color: #333;
+        }
+
+        .image {
+            width: 420px;
+            height: 420px;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .footer {
+            font-size: 22px;
+            color: #666;
+            text-align: right;
         }
     </style>
 </head>
 <body>
-    <div class="ad-box">
-        <h1>{{ $ad->title }}</h1>
 
-        @foreach ($values as $value)
-            @if(Str::startsWith($value->value, 'ads/'))
-                <img src="{{ public_path('storage/' . $value->value) }}">
-            @else
-                <p>{{ $value->value }}</p>
+<div class="wrapper">
+    <div>
+        <div class="title">{{ $ad->title }}</div>
+
+        <div class="content">
+            <div class="text">
+                @foreach ($data as $key => $value)
+                    @if(!Str::startsWith($value, 'ads/'))
+                        <div><strong>{{ ucfirst(str_replace('_',' ', $key)) }}:</strong> {{ $value }}</div>
+                        <br>
+                    @endif
+                @endforeach
+            </div>
+
+            @if($image)
+                <div class="image">
+                    <img src="{{ $image }}">
+                </div>
             @endif
-        @endforeach
+        </div>
     </div>
+
+    <div class="footer">
+        Powered by Soil & Water
+    </div>
+</div>
+
 </body>
 </html>

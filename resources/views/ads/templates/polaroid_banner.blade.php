@@ -1,15 +1,11 @@
-<div style="width: 800px; height: 200px; background: #fff; font-family: 'Poppins', sans-serif; position: relative; overflow: hidden; display: flex; border: 1px solid #eee;">
+<div style="width: 100%; height: 100%; background: #fff; font-family: 'Poppins', sans-serif; position: relative; overflow: hidden; display: flex; border: 1px solid #eee;">
     {{-- Left: Stacked Polaroids --}}
     <div style="width: 45%; height: 100%; position: relative; background: #e8dcc4;">
-        <div style="position: absolute; top: 20px; left: 30px; width: 110px; height: 130px; background: #fff; padding: 8px; transform: rotate(-10deg); box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 1;">
-            <img src="{{ $data['image_1'] ?? 'https://placehold.co/100x100' }}" style="width: 100%; height: 80%; object-fit: cover;">
-        </div>
-        <div style="position: absolute; top: 35px; left: 110px; width: 110px; height: 130px; background: #fff; padding: 8px; transform: rotate(5deg); box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 2;">
-            <img src="{{ $data['image_2'] ?? 'https://placehold.co/100x100' }}" style="width: 100%; height: 80%; object-fit: cover;">
-        </div>
-        <div style="position: absolute; top: 15px; left: 200px; width: 110px; height: 130px; background: #fff; padding: 8px; transform: rotate(-5deg); box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 3;">
-            <img src="{{ $data['image_3'] ?? 'https://placehold.co/100x100' }}" style="width: 100%; height: 80%; object-fit: cover;">
-        </div>
+        @foreach(['image_1' => 'rotate(-10deg); top: 20px; left: 30px;', 'image_2' => 'rotate(5deg); top: 35px; left: 110px;', 'image_3' => 'rotate(-5deg); top: 15px; left: 200px;'] as $imgKey => $rotate)
+            <div style="position: absolute; width: 110px; height: 130px; background: #fff; padding: 8px; transform: {{ $rotate }}; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                <img src="{{ !empty($data[$imgKey]) ? (Str::startsWith($data[$imgKey], ['http', 'data:', 'blob']) ? $data[$imgKey] : route('image.proxy', ['path' => $data[$imgKey]])) : 'https://placehold.co/100x100' }}" style="width: 100%; height: 80%; object-fit: cover;">
+            </div>
+        @endforeach
     </div>
 
     {{-- Right: Content --}}

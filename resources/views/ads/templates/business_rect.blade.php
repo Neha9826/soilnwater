@@ -2,7 +2,7 @@
     {{-- Image Side (50% Width) --}}
     <div class="w-1/2 h-full overflow-hidden">
         @if(isset($data['main_image']))
-            <img src="{{ asset('storage/' . $data['main_image']) }}" class="w-full h-full object-cover">
+            <img src="{{ Str::startsWith($data['main_image'], ['http', 'data:', 'blob']) ? $data['main_image'] : route('image.proxy', ['path' => $data['main_image']]) }}" class="w-full h-full object-cover">
         @else
             <div class="w-full h-full bg-gray-100 flex items-center justify-center text-gray-300">
                 <i class="fas fa-image text-5xl"></i>

@@ -103,6 +103,7 @@ class CreateAd extends Component
             Log::info('AdPreviewGenerator: calling generate()', ['ad_id' => $ad->id]);
 
             $previewPath = AdPreviewGenerator::generate($ad);
+            $ad->update(['preview_image' => $previewPath]);
 
 if ($previewPath) {
     $ad->preview_image = $previewPath;
@@ -141,28 +142,29 @@ if ($previewPath) {
     }
 
     public function render()
-    {
-        $previewData = [];
+{
+    $previewData = [];
 
-        if ($this->selectedTemplate) {
-            foreach ($this->selectedTemplate->fields as $field) {
-                if ($field->type === 'image' && isset($this->image_uploads[$field->id])) {
-                    try {
-                        $previewData[$field->field_name] =
-                            $this->image_uploads[$field->id]->temporaryUrl();
-                    } catch (\Exception $e) {
-                        $previewData[$field->field_name] =
-                            asset('images/placeholder.jpg');
-                    }
-                } else {
-                    $previewData[$field->field_name] =
-                        $this->inputs[$field->id] ?? $field->default_value;
+    if ($this->selectedTemplate) {
+        foreach ($this->selectedTemplate->fields as $field) {
+            // Check if this field is an image and if a file has been uploaded
+            if ($field->type === 'image' && isset($this->image_uploads[$field->id])) {
+                try {
+                    // We use temporaryUrl() for the Livewire browser preview
+                    $previewData[$field->field_name] = $this->image_uploads[$field->id]->temporaryUrl();
+                } catch (\Exception $e) {
+                    // Fallback if temporary URL generation fails
+                    $previewData[$field->field_name] = asset('images/placeholder.jpg');
                 }
+            } else {
+                // Use input value or the template's default value for text/colors
+                $previewData[$field->field_name] = $this->inputs[$field->id] ?? $field->default_value;
             }
         }
-
-        return view('livewire.customer.create-ad', [
-            'previewData' => $previewData,
-        ])->layout('layouts.app');
     }
+
+    return view('livewire.customer.create-ad', [
+        'previewData' => $previewData,
+    ])->layout('layouts.app');
+}
 }

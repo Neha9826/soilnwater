@@ -3,86 +3,76 @@
 namespace App\Services;
 
 use App\Models\Ad;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class AdPreviewGenerator
 {
+    /**
+     * Generates a high-quality PNG preview using an external API.
+     */
     public static function generate(Ad $ad): ?string
     {
-        $directory = 'ads/previews';
-        Storage::disk('public')->makeDirectory($directory);
+        try {
+            $tier = $ad->template->tier;
+            
+            // We use 400px as the base unit to match your Trekking design's math
+            // This ensures a 1x2 ad becomes 400x800 and a 1x1 becomes 400x400
+            $width = $tier->grid_width * 400;
+            $height = $tier->grid_height * 400;
 
-        $filename = 'ad_' . $ad->id . '_' . Str::random(6) . '.png';
-        $path = $directory . '/' . $filename;
+            $data = $ad->values->load('field')->mapWithKeys(function($item) {
+                $val = $item->value;
+                if ($item->field->type === 'image' && !empty($val)) {
+                    if (Storage::disk('public')->exists($val)) {
+                        $imageData = Storage::disk('public')->get($val);
+                        $mimeType = Storage::disk('public')->mimeType($val);
+                        // Base64 encoding ensures images load regardless of server path issues
+                        $val = 'data:' . $mimeType . ';base64,' . base64_encode($imageData);
+                    }
+                }
+                return [$item->field->field_name => $val];
+            })->toArray();
 
-        // Canvas size (square default)
-        $width  = 600;
-        $height = 600;
+            $rawHtml = view($ad->template->blade_path, ['data' => $data])->render();
+            
+            // Clean HTML wrapper with zero margins to prevent thin white borders
+            $html = "<html>
+                 <head>
+                    <script src='https://cdn.tailwindcss.com'></script>
+                    <style>
+                        body, html { margin: 0; padding: 0; overflow: hidden; background: white; }
+                        /* Ensure the container matches the template's pixel expectations */
+                        .ad-container { width: {$width}px; height: {$height}px; position: relative; overflow: hidden; }
+                    </style>
+                 </head>
+                 <body>
+                    <div class='ad-container'>{$rawHtml}</div>
+                 </body>
+                 </html>";
 
-        // Create image
-        $img = imagecreatetruecolor($width, $height);
+        $response = Http::withBasicAuth(config('services.hcti.id'), config('services.hcti.key'))
+    ->post('https://hcti.io/v1/image', [
+        'html' => $html,
+        'selector' => '.ad-container',
+        'width' => $width,  // CRITICAL: Tells API to produce a wide banner image
+        'height' => $height // CRITICAL: Tells API to produce a tall full-page image
+    ]);
 
-        // Colors
-        $white = imagecolorallocate($img, 255, 255, 255);
-        $black = imagecolorallocate($img, 20, 20, 20);
-        $gray  = imagecolorallocate($img, 120, 120, 120);
-
-        // Background
-        imagefilledrectangle($img, 0, 0, $width, $height, $white);
-
-        // Title
-        imagestring($img, 5, 20, 20, $ad->title, $black);
-
-        // Load ad values
-        $y = 70;
-        foreach ($ad->values()->with('field')->get() as $value) {
-
-            // Skip images here (handled below)
-            if ($value->field->type === 'image') {
-                continue;
+            if ($response->successful()) {
+                $filename = 'ads/previews/ad_' . $ad->id . '_' . time() . '.png';
+                Storage::disk('public')->put($filename, Http::get($response->json()['url'])->body());
+                return $filename;
             }
 
-            $text = $value->field->field_name . ': ' . strval($value->value);
-            imagestring($img, 3, 20, $y, substr($text, 0, 60), $gray);
-            $y += 22;
+            Log::error('HCTI API Error: ' . $response->body());
+            return null;
+
+        } catch (\Exception $e) {
+            Log::error('Ad Preview Error: ' . $e->getMessage());
+            return null;
         }
-
-        // Handle first image field (if any)
-        $imageValue = $ad->values()
-            ->whereHas('field', fn ($q) => $q->where('type', 'image'))
-            ->first();
-
-        if ($imageValue && Storage::disk('public')->exists($imageValue->value)) {
-
-            $imagePath = storage_path('app/public/' . $imageValue->value);
-            $ext = strtolower(pathinfo($imagePath, PATHINFO_EXTENSION));
-
-            $src = match ($ext) {
-                'jpg', 'jpeg' => imagecreatefromjpeg($imagePath),
-                'png' => imagecreatefrompng($imagePath),
-                default => null
-            };
-
-            if ($src) {
-                imagecopyresampled(
-                    $img,
-                    $src,
-                    350, 350,
-                    0, 0,
-                    220, 220,
-                    imagesx($src),
-                    imagesy($src)
-                );
-                imagedestroy($src);
-            }
-        }
-
-        // Save image
-        $absolute = storage_path('app/public/' . $path);
-        imagepng($img, $absolute);
-        imagedestroy($img);
-
-        return $path;
-    }
+    }   
 }

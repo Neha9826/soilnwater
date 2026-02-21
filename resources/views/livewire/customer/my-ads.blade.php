@@ -14,54 +14,39 @@
 
         <div class="min-h-[400px]">
             @if($ads->count() > 0)
-                {{-- DYNAMIC GRID: Using auto-rows to prevent overlap --}}
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-8 auto-rows-[350px]">
-                    @foreach($ads as $ad)
-                        @php
-                            $w = $ad->template->tier->grid_width ?? 1;
-                            $h = $ad->template->tier->grid_height ?? 1;
-                            
-                            $spanClass = ($w > 1 ? 'md:col-span-'.$w : 'col-span-1') . ' ' . 
-                                         ($h > 1 ? 'md:row-span-'.$h : 'row-span-1');
+                {{-- Standardize on a 4-column base. auto-rows ensures '1 unit' is exactly 180px --}}
+<div class="grid grid-cols-2 md:grid-cols-4 grid-flow-dense gap-6 p-4 auto-rows-[180px]">
+    @foreach($ads as $ad)
+        @php
+            // Pull units directly from the Tier table
+            $w = $ad->template->tier->grid_width ?? 1;
+            $h = $ad->template->tier->grid_height ?? 1;
 
-                            // Mapping dynamic user values
-                            $data = $ad->values->mapWithKeys(function ($item) {
-                                return [$item->field->field_name => $item->value];
-                            })->toArray();
-                        @endphp
+            // Generate specific span classes to prevent 'Banner-to-Rectangle' distortion
+            // Banner (4x1) will take up all 4 columns but only 1 row.
+            // Full Page (4x2) will take up all 4 columns and 2 full rows.
+            $colSpan = "col-span-{$w}";
+            $rowSpan = "row-span-{$h}";
+            
+            // Mobile safety: Ensure wide ads don't exceed the 2-column mobile grid
+            $mobileCol = ($w > 2) ? 'col-span-2' : "col-span-{$w}";
+        @endphp
 
-                        <div class="{{ $spanClass }} bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden relative group flex flex-col">
-                            
-                            {{-- THE SCALED PREVIEW: Scaling 500px down to fit container --}}
-                            <div class="relative flex-1 bg-gray-100 flex items-center justify-center overflow-hidden">
-                                <div style="transform: scale(0.55); transform-origin: center;" class="pointer-events-none">
-                                    @include($ad->template->blade_path, ['data' => $data])
-                                </div>
+        <div class="{{ $mobileCol }} md:{{ $colSpan }} {{ $rowSpan }} relative group bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            {{-- Use the generated design image. object-cover ensures it fills the calculated box --}}
+            <img src="{{ asset('storage/' . $ad->preview_image) }}" 
+                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+                 alt="Ad Design">
 
-                                {{-- Action Overlay: Now clearly visible on top --}}
-                                <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-4 z-50">
-                                    <span class="bg-white text-gray-900 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-sm">
-                                        Status: {{ $ad->status }}
-                                    </span>
-                                    
-                                    {{-- Fixed Delete Button --}}
-                                    {{-- In my-ads.blade.php --}}
-<button wire:click="deleteAd({{ $ad->id }})" 
-        wire:confirm="Are you sure you want to delete this design?"
-        class="bg-red-600 text-white p-2 rounded-lg hover:bg-red-700">
-    <i class="fas fa-trash"></i>
-</button>
-                                </div>
-                            </div>
-
-                            {{-- Title Info Bar --}}
-                            <div class="p-3 border-t border-gray-100 bg-white">
-                                <h4 class="text-xs font-bold text-gray-800 truncate">{{ $ad->title }}</h4>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-                
+            {{-- Action Overlay --}}
+            <div class="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <button class="bg-white text-gray-900 px-5 py-2 rounded-xl font-bold text-xs shadow-lg uppercase tracking-wider">
+                    Edit Ad
+                </button>
+            </div>
+        </div>
+    @endforeach
+</div>
                 <div class="mt-8">{{ $ads->links() }}</div>
             @else
                 {{-- EMPTY STATE (Kept as is) --}}

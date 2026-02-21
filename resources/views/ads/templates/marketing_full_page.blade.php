@@ -1,4 +1,4 @@
-<div style="width: 800px; height: 400px; background: #fff; font-family: 'Poppins', sans-serif; position: relative; overflow: hidden; display: flex;">
+<div style="width: 100%; height: 100%; background: #fff; font-family: 'Poppins', sans-serif; position: relative; overflow: hidden; display: flex;">
     {{-- Left: Content --}}
     <div style="width: 50%; padding: 60px; display: flex; flex-direction: column; justify-content: center;">
         <h1 style="font-size: 56px; line-height: 0.9; font-weight: 900; margin: 0; letter-spacing: -2px;">DIGITAL<br>MARKETING</h1>
@@ -24,7 +24,7 @@
         
         <div style="position: absolute; top: 60px; right: 60px; width: 280px; height: 280px; transform: rotate(30deg); overflow: hidden; border: 10px solid #fff; box-shadow: 0 20px 40px rgba(0,0,0,0.2); clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
              <div style="transform: rotate(-30deg) scale(1.4); width: 100%; height: 100%;">
-                <img src="{{ $data['image_main'] ?? 'https://placehold.co/400x400' }}" style="width: 100%; height: 100%; object-fit: cover;">
+                <img src="{{ Str::startsWith($data['image_main'] ?? '', ['http', 'data:', 'blob']) ? $data['image_main'] : route('image.proxy', ['path' => $data['image_main'] ?? '']) }}" style="width: 100%; height: 100%; object-fit: cover;">
             </div>
         </div>
     </div>

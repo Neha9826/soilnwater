@@ -1,17 +1,17 @@
-<div style="width: 800px; height: 200px; background: #fff; font-family: 'Montserrat', sans-serif; position: relative; overflow: hidden; border: 1px solid #ddd;">
+<div style="width: 100%; height: 100%; background: #fff; font-family: 'Montserrat', sans-serif; position: relative; overflow: hidden; border: 1px solid #ddd;">
     {{-- Background Center --}}
     <div style="position: absolute; inset: 0; z-index: 1; opacity: 0.2;">
-        <img src="{{ $data['image_bg'] ?? 'https://placehold.co/800x200' }}" style="width: 100%; height: 100%; object-fit: cover;">
+        <img src="{{ !empty($data['image_bg']) ? (Str::startsWith($data['image_bg'], ['http', 'data:', 'blob']) ? $data['image_bg'] : route('image.proxy', ['path' => $data['image_bg']])) : 'https://placehold.co/800x200' }}" style="width: 100%; height: 100%; object-fit: cover;">
     </div>
 
     {{-- Left Curve --}}
     <div style="position: absolute; left: -50px; top: -10px; width: 220px; height: 220px; border-radius: 50%; border: 8px solid #fff; overflow: hidden; z-index: 5;">
-        <img src="{{ $data['image_left'] ?? 'https://placehold.co/220x220' }}" style="width: 100%; height: 100%; object-fit: cover;">
+        <img src="{{ !empty($data['image_left']) ? (Str::startsWith($data['image_left'], ['http', 'data:', 'blob']) ? $data['image_left'] : route('image.proxy', ['path' => $data['image_left']])) : 'https://placehold.co/220x220' }}" style="width: 100%; height: 100%; object-fit: cover;">
     </div>
 
     {{-- Right Curve --}}
     <div style="position: absolute; right: -50px; top: -10px; width: 220px; height: 220px; border-radius: 50%; border: 8px solid #fff; overflow: hidden; z-index: 5;">
-        <img src="{{ $data['image_right'] ?? 'https://placehold.co/220x220' }}" style="width: 100%; height: 100%; object-fit: cover;">
+        <img src="{{ !empty($data['image_right']) ? (Str::startsWith($data['image_right'], ['http', 'data:', 'blob']) ? $data['image_right'] : route('image.proxy', ['path' => $data['image_right']])) : 'https://placehold.co/220x220' }}" style="width: 100%; height: 100%; object-fit: cover;">
     </div>
 
     {{-- Center Content --}}

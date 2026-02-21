@@ -1,4 +1,4 @@
-<div style="width: 800px; height: 400px; background: #fff; font-family: 'Poppins', sans-serif; position: relative; overflow: hidden; border: 1px solid #eee; display: flex;">
+<div style="width: 100%; height: 100%; background: #fff; font-family: 'Poppins', sans-serif; position: relative; overflow: hidden; border: 1px solid #eee; display: flex;">
     
     {{-- 1. Left Side: Content Section --}}
     <div style="width: 50%; padding: 40px 0 40px 50px; z-index: 10; display: flex; flex-direction: column; justify-content: center;">
@@ -51,7 +51,7 @@
         {{-- Main Hero Hexagon (Parallel to beams) --}}
         <div style="position: absolute; top: 60px; right: 60px; width: 280px; height: 280px; transform: rotate(30deg); overflow: hidden; z-index: 10; border: 10px solid #fff; box-shadow: 0 20px 40px rgba(0,0,0,0.2); clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
             <div style="transform: rotate(-30deg) scale(1.4); width: 100%; height: 100%;">
-                <img src="{{ !empty($data['image_main']) ? (Str::startsWith($data['image_main'], ['http', 'blob']) ? $data['image_main'] : asset('storage/' . $data['image_main'])) : 'https://placehold.co/400x400?text=Team+Meeting' }}" 
+                <img src="{{ !empty($data['image_main']) ? (Str::startsWith($data['image_main'], ['http', 'data:', 'blob']) ? $data['image_main'] : route('image.proxy', ['path' => $data['image_main']])) : 'https://placehold.co/400x400?text=Team+Meeting' }}" 
                      style="width: 100%; height: 100%; object-fit: cover;">
             </div>
         </div>

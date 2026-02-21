@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'hcti' => [
+        'id'  => env('HCTI_USER_ID'),
+        'key' => env('HCTI_API_KEY'),
+    ],
+
 ];
