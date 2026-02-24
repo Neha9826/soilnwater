@@ -14,7 +14,7 @@
 
                 <div class="h-48 bg-gray-100">
                     @if($offer->image)
-                        <img src="{{ asset('storage/' . $offer->image) }}" class="w-full h-full object-cover">
+                        <img src="{{ $offer->image ? route('ad.display', ['filename' => basename($offer->image)]) : '' }}" class="w-full h-full object-cover">
                     @else
                         <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-100">
                             <span class="text-4xl">🎁</span>

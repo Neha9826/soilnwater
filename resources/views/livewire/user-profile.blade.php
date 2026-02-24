@@ -77,7 +77,7 @@
                         @if ($store_logo) 
                             <img src="{{ $store_logo->temporaryUrl() }}" class="h-16 w-16 rounded-full object-cover border">
                         @elseif($existing_logo)
-                            <img src="{{ asset('storage/'.$existing_logo) }}" class="h-16 w-16 rounded-full object-cover border">
+                            <img src="{{ $existing_logo ? route('ad.display', ['filename' => basename($existing_logo)]) : '' }}" class="h-16 w-16 rounded-full object-cover border">
                         @else
                             <div class="h-16 w-16 bg-gray-200 rounded-full flex items-center justify-center text-gray-400">📷</div>
                         @endif

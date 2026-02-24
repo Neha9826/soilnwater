@@ -20,11 +20,13 @@
     </div>
     @endforeach
 
-    <div style="position: absolute; bottom: 20px; left: 25px; width: 180px; z-index: 100;">
-        <div style="background: {{ $data['accent_color'] ?? '#8d5524' }}; color: #fff; padding: 3px 10px; font-size: 11px; font-weight: 800; display: inline-block;">MORE INFO</div>
-        <div style="font-size: 13px; font-weight: 700; color: #402a23; margin-top: 5px;">
+    <div style="position: absolute; bottom: 20px; left: 25px; width: 180px; background: transparent; padding: 15px; border-radius: 6px; z-index: 100;">
+        <div style="background: {{ $data['accent_color'] ?? '#8d5524' }}; color: #fff; padding: 3px 10px; display: inline-block; font-size: 11px; font-weight: 800; border-radius: 2px; margin-bottom: 8px;">MORE INFO</div>
+        <div style="font-size: 13px; font-weight: 700; color: #402a23; line-height: 1.3;">
             {{ $data['phone'] ?? '+91-0987654321' }}<br>
-            <span style="font-weight: 500; font-size: 12px;">{{ $data['address'] ?? 'Your Address Here' }}</span>
+            <span style="color: #402a23; font-weight: 500; font-size: 12px;">{{ $data['address'] ?? 'Your Address Here' }}</span><br>
+            <span style="font-size: 11px; font-weight: 600;">{{ $data['link'] ?? 'www.reallygreatsite.com' }}</span>
         </div>
     </div>
+
 </div>

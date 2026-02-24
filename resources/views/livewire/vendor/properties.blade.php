@@ -59,7 +59,7 @@
                         
                         <div class="h-48 w-full bg-gray-200 relative overflow-hidden">
                             @if(!empty($property->images) && count($property->images) > 0)
-                                <img src="{{ asset('storage/'.$property->images[0]) }}" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-500">
+                                <img src="{{ !empty($property->images) ? route('ad.display', ['filename' => basename($property->images[0])]) : asset('images/placeholder.png') }}" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-500">
                             @else
                                 <div class="w-full h-full flex items-center justify-center text-gray-400"><i class="fas fa-image text-4xl"></i></div>
                             @endif

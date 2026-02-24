@@ -200,8 +200,18 @@ Route::post('/login-manual', function (Request $request) {
     ]);
 })->name('login.manual');
 
-Route::get('/display-ad/{filename}', function ($filename) {
-    $path = 'ads/previews/' . $filename;
-    if (!Storage::disk('public')->exists($path)) abort(404);
+// Route::get('/display-ad/{filename}', function ($filename) {
+//     $path = 'ads/previews/' . $filename;
+//     if (!Storage::disk('public')->exists($path)) abort(404);
+//     return response()->file(storage_path('app/public/' . $path));
+// })->name('ad.display');
+
+Route::get('/display-media', function (Request $request) {
+    $path = $request->query('path');
+    
+    if (!$path || !Storage::disk('public')->exists($path)) {
+        abort(404);
+    }
+
     return response()->file(storage_path('app/public/' . $path));
 })->name('ad.display');

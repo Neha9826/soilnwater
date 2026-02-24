@@ -8,7 +8,7 @@
                 
                 <div class="md:w-1/3 bg-gray-200 relative">
                      @if($project->images)
-                        <img src="{{ asset('storage/' . $project->images[0]) }}" class="w-full h-full object-cover">
+                        <img src="{{ $project->images ? route('ad.display', ['filename' => basename($project->images[0])]) : asset('images/placeholder.png') }}" class="w-full h-full object-cover">
                     @endif
                     <span class="absolute top-4 left-4 bg-black bg-opacity-70 text-white text-xs px-3 py-1 rounded uppercase tracking-wider">
                         {{ $project->status }}

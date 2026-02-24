@@ -94,7 +94,7 @@
                                                 @endphp
                                                 <div class="h-12 w-12 rounded-lg bg-gray-100 border border-gray-200 overflow-hidden">
                                                     @if($img)
-                                                        <img src="{{ asset('storage/'.$img) }}" class="h-full w-full object-cover">
+                                                        <img src="{{ $img ? route('ad.display', ['filename' => basename($img)]) : asset('images/placeholder.png') }}" class="h-full w-full object-cover">
                                                     @else
                                                         <div class="h-full w-full flex items-center justify-center text-gray-400"><i class="fas fa-image"></i></div>
                                                     @endif
@@ -155,7 +155,7 @@
                                 <div class="h-48 bg-gray-100 relative">
                                     @php $img = is_array($product->images) && !empty($product->images) ? $product->images[0] : null; @endphp
                                     @if($img)
-                                        <img src="{{ asset('storage/'.$img) }}" class="h-full w-full object-cover">
+                                        <img src="{{ $img ? route('storage.bridge', ['path' => $img]) : asset('images/placeholder.png') }}" class="h-full w-full object-cover">
                                     @else
                                         <div class="h-full w-full flex items-center justify-center text-gray-300"><i class="fas fa-image text-3xl"></i></div>
                                     @endif

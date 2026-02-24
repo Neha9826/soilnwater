@@ -137,30 +137,36 @@
                 </div>
 
                 {{-- RIGHT SIDE: LIVE PREVIEW CANVAS --}}
-                <div class="w-full lg:w-2/3 flex justify-center bg-gray-100 p-8 rounded-3xl min-h-[600px] border-2 border-dashed border-gray-200">
-                    {{-- DYNAMIC PREVIEW CONTAINER: Bypasses squeezing by calculating correct aspect ratio --}}
-                    @php
-                        $baseUnit = 400; // Match the unit used in AdPreviewGenerator for consistency
-                        $previewWidth = $selectedTemplate->tier->grid_width * $baseUnit;
-                        $previewHeight = $selectedTemplate->tier->grid_height * $baseUnit;
-                        
-                        // Handle data mapping for the preview
-                        $previewData = [];
-                        foreach($selectedTemplate->fields as $f) {
-                            if ($f->type === 'image' && isset($image_uploads[$f->id])) {
-                                $previewData[$f->field_name] = $image_uploads[$f->id]->temporaryUrl();
-                            } else {
-                                $previewData[$f->field_name] = $inputs[$f->id] ?? $f->default_value;
-                            }
-                        }
-                    @endphp
+                {{-- RIGHT SIDE PREVIEW CANVAS --}}
+<div class="w-full lg:w-2/3 flex justify-center items-start bg-gray-100 p-4 sm:p-8 rounded-3xl min-h-[500px] border-2 border-dashed border-gray-200 overflow-hidden">
+    @php
+        // 1. Get the real generation dimensions
+        $baseUnit = 400; 
+        $actualW = (int)($selectedTemplate->tier->grid_width * $baseUnit);
+        $actualH = (int)($selectedTemplate->tier->grid_height * $baseUnit);
+        
+        // 2. Calculate the scale factor to prevent overflowing
+        // We want the preview to be roughly 500px-600px wide maximum in the UI
+        $maxUiWidth = 600; 
+        $scaleFactor = $actualW > $maxUiWidth ? ($maxUiWidth / $actualW) : 1;
 
-                    {{-- Scale container down for UI fit but maintain internal aspect ratio --}}
-                    <div class="shadow-2xl bg-white overflow-hidden origin-top scale-[0.6] sm:scale-[0.8] md:scale-[1.0]" 
-                         style="width: {{ $previewWidth }}px; height: {{ $previewHeight }}px;">
-                        @include($selectedTemplate->blade_path, ['data' => $previewData])
-                    </div>
-                </div>
+        // 3. Map Data for the include
+        $previewData = [];
+        foreach($selectedTemplate->fields as $f) {
+            if ($f->type === 'image' && isset($image_uploads[$f->id])) {
+                $previewData[$f->field_name] = $image_uploads[$f->id]->temporaryUrl();
+            } else {
+                $previewData[$f->field_name] = $inputs[$f->id] ?? $f->default_value;
+            }
+        }
+    @endphp
+
+    {{-- The 'Container' stays the REAL size, but 'transform' shrinks it for the eye --}}
+    <div style="width: {{ $actualW }}px; height: {{ $actualH }}px; transform: scale({{ $scaleFactor }}); transform-origin: top center; transition: all 0.3s ease-in-out;" 
+         class="shadow-2xl bg-white flex-shrink-0">
+        @include($selectedTemplate->blade_path, ['data' => $previewData])
+    </div>
+</div>
             </div>
         @endif
     </div>

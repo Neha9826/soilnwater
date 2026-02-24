@@ -70,14 +70,19 @@ class AdPreviewGenerator
                 'ms_delay' => 1000  // Increased delay to ensure wide layouts render
             ]);
 
+        // AdPreviewGenerator.php - update the response check
         if ($response->successful()) {
             $filename = 'ads/previews/ad_' . $ad->id . '_' . time() . '.png';
             Storage::disk('public')->put($filename, Http::get($response->json()['url'])->body());
             return $filename;
+        } else {
+            // If the API fails (limit reached), we still return a valid string path
+            // This allows the Ad record to be saved in your database
+            Log::warning('HCTI API Limit likely reached or error occurred: ' . $response->body());
+            
+            // Return a generic placeholder so the 'My Ads' page still loads
+            return 'ads/previews/placeholder.png'; 
         }
-
-        Log::error('HCTI API Error: ' . $response->body());
-        return null;
 
     } catch (\Exception $e) {
         Log::error('Ad Preview Error: ' . $e->getMessage());

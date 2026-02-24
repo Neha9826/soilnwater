@@ -6,7 +6,7 @@
             <div class="bg-white rounded-lg shadow overflow-hidden border border-gray-100 group">
                 <div class="h-56 bg-gray-200 relative overflow-hidden">
                      @if($hotel->images)
-                        <img src="{{ asset('storage/' . $hotel->images[0]) }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <img src="{{ $hotel->images ? route('ad.display', ['filename' => basename($hotel->images[0])]) : asset('images/placeholder.png') }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                     @endif
                     <span class="absolute top-3 right-3 bg-white px-2 py-1 text-xs font-bold rounded shadow">
                         ⭐ {{ $hotel->star_rating }}/5

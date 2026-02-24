@@ -14,7 +14,7 @@
         <div class="text-center">
             <p class="text-xs text-gray-400 mb-2">Scan to Share</p>
             @if($vendor->qr_code_path)
-                <img src="{{ asset('storage/' . $vendor->qr_code_path) }}" class="w-24 h-24 border border-gray-200 p-1">
+                <img src="{{ $vendor->qr_code_path ? route('ad.display', ['filename' => basename($vendor->qr_code_path)]) : '' }}" class="w-24 h-24 border border-gray-200 p-1">
             @endif
         </div>
     </div>

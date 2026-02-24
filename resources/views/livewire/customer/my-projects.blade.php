@@ -61,7 +61,7 @@
                                 <a href="{{ route('customer.project.edit', $project->id) }}" class="block flex-1">
                                     <div class="h-64 w-full bg-gray-200 relative overflow-hidden">
                                         @if(!empty($project->images) && isset($project->images[0]))
-                                            <img src="{{ asset('storage/'.$project->images[0]) }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                                            <img src="{{ (!empty($project->images) && isset($project->images[0])) ? route('ad.display', ['path' => $project->images[0]]) : asset('images/placeholder.png') }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
                                         @else
                                             <div class="w-full h-full flex flex-col items-center justify-center text-gray-400 bg-gray-100">
                                                 <i class="fas fa-building text-4xl mb-2 opacity-30"></i><span class="text-xs">No Image</span>
@@ -93,7 +93,7 @@
                             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col md:flex-row group hover:shadow-md transition">
                                 <a href="{{ route('customer.project.edit', $project->id) }}" class="w-full md:w-56 h-48 md:h-auto bg-gray-200 relative flex-shrink-0">
                                     @if(!empty($project->images) && isset($project->images[0]))
-                                        <img src="{{ asset('storage/'.$project->images[0]) }}" class="w-full h-full object-cover">
+                                        <img src="{{ (!empty($project->images) && isset($project->images[0])) ? route('ad.display', ['path' => $project->images[0]]) : asset('images/placeholder.png') }}" class="w-full h-full object-cover">
                                     @else
                                         <div class="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100"><i class="fas fa-building text-3xl opacity-30"></i></div>
                                     @endif

@@ -80,7 +80,7 @@
             <div class="absolute bottom-[-4rem] left-6 md:left-12 z-20">
                 <div class="h-32 w-32 md:h-40 md:w-40 bg-white rounded-2xl shadow-2xl p-2 border-4 border-white hover-shake transition-transform duration-300">
                     @if($vendor->logo)
-                        <img src="{{ asset('storage/'.$vendor->logo) }}" class="w-full h-full object-cover rounded-xl bg-gray-50">
+                        <img src="{{ $vendor->logo ? route('ad.display', ['path' => $vendor->logo]) : '' }}" class="w-full h-full object-cover rounded-xl bg-gray-50">
                     @else
                          <div class="w-full h-full bg-gray-800 rounded-xl flex items-center justify-center text-4xl font-bold text-white uppercase">
                             {{ substr($vendor->name, 0, 1) }}
@@ -118,7 +118,7 @@
                         <div class="flex-1 w-full">
                             <div class="aspect-video bg-gray-100 rounded-3xl overflow-hidden shadow-xl border border-gray-100 relative group cursor-pointer">
                                  @if(isset($section['image_path']) && $section['image_path'])
-                                    <img src="{{ asset('storage/'.$section['image_path']) }}" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700 ease-in-out">
+                                    <img src="{{ (isset($section['image_path']) && $section['image_path']) ? route('ad.display', ['path' => $section['image_path']]) : '' }}" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700 ease-in-out">
                                  @else
                                     <div class="absolute inset-0 bg-gradient-to-tr from-gray-100 to-white flex items-center justify-center">
                                         <i class="fas fa-image text-gray-300 text-6xl"></i>
@@ -142,26 +142,28 @@
                 @else
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                         @foreach($products as $item)
-                            <div class="bg-white rounded-2xl p-4 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer border border-gray-100">
-                                <div class="h-56 bg-gray-100 rounded-xl overflow-hidden mb-4 relative">
-                                     @php
-                                         $pImages = $item->images;
-                                         if (is_string($pImages)) {
-                                             $pImages = json_decode($pImages, true);
-                                         }
-                                         $firstImage = $pImages[0] ?? null;
-                                     @endphp
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <div class="h-56 bg-gray-100 rounded-xl overflow-hidden mb-4 relative">
+             @php
+                 // Decode the JSON array from the database
+                 $pImages = is_string($item->images) ? json_decode($item->images, true) : $item->images;
+                 $firstImagePath = (is_array($pImages) && !empty($pImages)) ? $pImages[0] : null;
+             @endphp
 
-                                     @if($firstImage)
-                                         <img src="{{ asset('storage/'.$firstImage) }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-                                     @else
-                                         <div class="w-full h-full flex items-center justify-center text-gray-300"><i class="fas fa-box text-3xl"></i></div>
-                                     @endif
-                                </div>
-                                <h3 class="font-bold text-lg text-gray-900 mb-1 line-clamp-1">{{ $item->name ?? $item->title }}</h3>
-                                <p class="text-blue-600 font-bold text-xl">₹{{ number_format($item->price) }}</p>
-                            </div>
-                        @endforeach
+             @if($firstImagePath)
+                 {{-- Pass the full path to the bridge --}}
+                 <img src="{{ route('ad.display', ['path' => $firstImagePath]) }}" 
+                      class="w-full h-full object-cover">
+             @else
+                 <div class="w-full h-full flex items-center justify-center text-gray-300">
+                    <i class="fas fa-box text-3xl"></i>
+                 </div>
+             @endif
+        </div>
+        <h3 class="font-bold text-lg text-gray-900 mb-1">{{ $item->name ?? $item->title }}</h3>
+        <p class="text-blue-600 font-bold text-xl">₹{{ number_format($item->price) }}</p>
+    </div>
+@endforeach
                     </div>
                     <div class="mt-12 flex justify-center">{{ $products->links() }}</div>
                 @endif
