@@ -1,105 +1,96 @@
-<div class="bg-white shadow-md sticky top-0 z-50">
-    <div class="max-w-[1400px] mx-auto px-4 py-3 flex items-center gap-6">
+<div class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="max-w-[1440px] mx-auto px-6 py-4 flex items-center gap-8">
         
-        <a href="/" class="text-2xl font-bold text-blue-700 flex-shrink-0">
-            Soil<span class="text-green-600">N</span>Water
+        {{-- Updated Logo --}}
+        <a href="/" class="flex-shrink-0">
+            <img src="{{ asset('images/logo_soilnwater.png') }}" alt="SoilNWater" class="h-14 w-auto">
         </a>
 
-        <div class="flex-grow relative">
-            <div class="flex">
-                <input 
-    type="text" 
-    name="query" 
-    placeholder="Search for 'Cement', 'Drill Machine', '3BHK'..." 
-    class="w-full border border-gray-300 rounded-l-md px-4 py-2.5 focus:outline-none focus:border-blue-500 text-sm"
->
-                <button class="bg-orange-500 text-white px-8 rounded-r-md font-bold hover:bg-orange-600">
+        {{-- Search Bar: Updated to Blue-Green Theme --}}
+        <div class="flex-grow relative max-w-2xl hidden md:block">
+            <div class="flex group">
+                <input type="text" name="query" placeholder="Search for 'Cement', 'Drill Machine', '3BHK'..." 
+                    class="w-full border-2 border-gray-100 bg-gray-50 rounded-l-2xl px-5 py-3 focus:outline-none focus:border-[#4CAF50] focus:bg-white transition-all text-sm">
+                <button class="bg-[#4CAF50] text-white px-8 rounded-r-2xl font-bold hover:bg-[#388E3C] transition-colors shadow-md">
                     <i class="fas fa-search"></i>
                 </button>
             </div>
         </div>
 
-        <div class="flex items-center gap-6 text-gray-600 text-sm font-medium flex-shrink-0">
+        <div class="flex items-center gap-8 text-gray-600 text-sm font-bold flex-shrink-0">
             
-            <a href="{{ route('post.choose-category') }}" class="hidden md:flex bg-gradient-to-r from-orange-500 to-red-500 text-white px-5 py-2.5 rounded-full font-bold shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition items-center gap-2">
+            {{-- POST AD: Matches 'Soil' Green --}}
+            <a href="{{ route('post.choose-category') }}" class="hidden lg:flex bg-[#2D5A27] text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition transform items-center gap-2">
                 <i class="fas fa-plus-circle"></i>
                 <span>POST AD</span>
             </a>
 
             @auth
                 <div class="relative group">
-                    <button class="flex flex-col items-center hover:text-blue-600 focus:outline-none">
-                        <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold mb-1">
+                    <button class="flex items-center gap-2 hover:text-[#4CAF50] focus:outline-none py-2">
+                        <div class="h-10 w-10 rounded-full bg-green-50 border-2 border-[#4CAF50] flex items-center justify-center text-[#2D5A27] font-black">
                             {{ substr(Auth::user()->name, 0, 1) }}
                         </div>
-                        <span>Account</span>
+                        <span class="hidden sm:inline">My Account</span>
+                        <i class="fas fa-chevron-down text-[10px] opacity-50"></i>
                     </button>
                     
-                    <div class="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 hidden group-hover:block border border-gray-100 z-50">
-                        <div class="px-4 py-3 border-b text-xs text-gray-500">
-                            Signed in as<br>
-                            <span class="font-bold text-gray-900 truncate block text-sm mt-0.5">{{ Auth::user()->name }}</span>
+                    {{-- Dropdown: Preserving your existing logic --}}
+                    <div class="absolute right-0 mt-1 w-64 bg-white rounded-2xl shadow-2xl py-2 hidden group-hover:block border border-gray-100 z-50 overflow-hidden">
+                        <div class="px-5 py-4 bg-gray-50 border-b text-xs text-gray-400 uppercase tracking-widest">
+                            Authorized User<br>
+                            <span class="font-black text-[#2D5A27] truncate block text-sm mt-1 capitalize">{{ Auth::user()->name }}</span>
                         </div>
                         
                         @if(Auth::user()->profile_type != 'customer')
-                            
-                            {{-- CASE A: Vendor / Builder / Consultant --}}
-                            <a href="{{ route('dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
-                                <i class="fas fa-tachometer-alt w-5 text-center mr-2 text-gray-400"></i> My Dashboard
+                            <a href="{{ route('dashboard') }}" class="block px-5 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-[#4CAF50] transition">
+                                <i class="fas fa-tachometer-alt w-6 text-[#2D5A27]"></i> My Dashboard
                             </a>
-
                         @else
-                            
-                            {{-- CASE B: Regular Customer --}}
-                            {{-- 1. My Posts (New Feature) --}}
-                            <a href="{{ route('customer.listings') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
-                                <i class="fas fa-layer-group w-5 text-center mr-2 text-blue-500"></i> My Posts & Ads
+                            <a href="{{ route('customer.listings') }}" class="block px-5 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-[#4CAF50] transition">
+                                <i class="fas fa-layer-group w-6 text-blue-500"></i> My Posts & Ads
                             </a>
-
-                            {{-- 2. Join Partner --}}
-                            <a href="{{ route('join') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
-                                <i class="fas fa-handshake w-5 text-center mr-2 text-green-500"></i> Join as Partner
+                            <a href="{{ route('join') }}" class="block px-5 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-[#4CAF50] transition">
+                                <i class="fas fa-handshake w-6 text-green-500"></i> Join as Partner
                             </a>
-
                         @endif
 
                         <div class="border-t border-gray-100 my-1"></div>
-
-                        <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
-                            <i class="fas fa-cog w-5 text-center mr-2 text-gray-400"></i> Profile Settings
+                        <a href="{{ route('profile.edit') }}" class="block px-5 py-3 text-sm text-gray-700 hover:bg-gray-50 transition">
+                            <i class="fas fa-cog w-6 text-gray-400"></i> Profile Settings
                         </a>
                         
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" class="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-red-50">
-                                <i class="fas fa-sign-out-alt w-5 text-center mr-2"></i> Logout
+                            <button type="submit" class="w-full text-left block px-5 py-3 text-sm text-red-500 hover:bg-red-50 font-bold">
+                                <i class="fas fa-sign-out-alt w-6"></i> Logout
                             </button>
                         </form>
                     </div>
                 </div>
-
             @else
-                <a href="{{ route('login') }}" class="flex flex-col items-center hover:text-blue-600">
-                    <i class="fas fa-user text-lg mb-1"></i>
+                <a href="{{ route('login') }}" class="flex items-center gap-2 hover:text-[#4CAF50] transition">
+                    <i class="fas fa-user-circle text-xl"></i>
                     <span>Login</span>
                 </a>
             @endauth
 
-            <a href="#" class="flex flex-col items-center hover:text-blue-600">
-                <i class="fas fa-shopping-cart text-lg mb-1"></i>
-                <span>Cart</span>
+            <a href="#" class="relative hover:text-[#2196F3] transition">
+                <i class="fas fa-shopping-bag text-xl"></i>
+                <span class="absolute -top-2 -right-2 bg-blue-500 text-white text-[10px] h-4 w-4 rounded-full flex items-center justify-center">0</span>
             </a>
         </div>
     </div>
 
-    <div class="border-t border-gray-200">
-        <div class="max-w-[1400px] mx-auto px-4 py-2 flex gap-8 text-sm text-gray-700 font-medium overflow-x-auto whitespace-nowrap scrollbar-hide">
-            <a href="#" class="hover:text-blue-600 transition">Safety</a>
-            <a href="#" class="hover:text-blue-600 transition">Power Tools</a>
-            <a href="#" class="hover:text-blue-600 transition">Pumps & Motors</a>
-            <a href="#" class="hover:text-blue-600 transition">Real Estate</a>
-            <a href="#" class="hover:text-blue-600 transition">Office Supplies</a>
-            <a href="#" class="hover:text-blue-600 text-orange-600 font-bold ml-auto">View All Categories &rarr;</a>
+    {{-- Sub-nav: Soil Color --}}
+    <div class="bg-[#2D5A27] shadow-inner">
+        <div class="max-w-[1440px] mx-auto px-6 py-3 flex gap-10 text-xs text-white/90 font-black uppercase tracking-widest overflow-x-auto whitespace-nowrap scrollbar-hide">
+            <a href="#" class="hover:text-green-300 transition">Power Tools</a>
+            <a href="#" class="hover:text-green-300 transition">Pumps & Motors</a>
+            <a href="#" class="hover:text-green-300 transition">Real Estate</a>
+            <a href="#" class="hover:text-green-300 transition">Office Supplies</a>
+            <a href="#" class="hover:text-green-300 transition">Construction</a>
+            <a href="#" class="text-green-400 ml-auto border-b border-green-400">View All Categories &rarr;</a>
         </div>
     </div>
 </div>

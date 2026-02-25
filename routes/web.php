@@ -22,6 +22,7 @@ use App\Livewire\OffersPage;
 use App\Livewire\ClassifiedList;
 use App\Livewire\EditPublicProfile;
 use App\Livewire\ShowPublicProfile;
+use App\Livewire\Public\AllAds;
 
 /*
 |--------------------------------------------------------------------------
@@ -215,3 +216,5 @@ Route::get('/display-media', function (Request $request) {
 
     return response()->file(storage_path('app/public/' . $path));
 })->name('ad.display');
+
+Route::get('/promotions', AllAds::class)->name('public.ads.index');
