@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Product extends Model
 {
@@ -12,19 +13,19 @@ class Product extends Model
 
     protected $guarded = [];
 
-    // FIX: This tells Laravel to handle these fields as JSON Arrays automatically
     protected $casts = [
         'images' => 'array',
         'colors' => 'array',
         'sizes' => 'array',
         'specifications' => 'array',
-        'tiered_pricing' => 'array', // <--- ADD THIS
+        'tiered_pricing' => 'array', // Crucial for B2B Repeater sync
         'price' => 'decimal:2',
-        'discounted_price' => 'decimal:2', // <--- ADD THIS
+        'discounted_price' => 'decimal:2',
         'is_active' => 'boolean',
-        'is_sellable' => 'boolean', // <--- ADD THIS
-        'has_special_offer' => 'boolean', // <--- ADD THIS
+        'is_sellable' => 'boolean',
+        'has_special_offer' => 'boolean', // Kept in model for DB compatibility, but form is commented out
         'stock_quantity' => 'integer',
+        'is_approved' => 'boolean', // Added for Admin/User sync
     ];
 
     protected static function boot()
@@ -41,18 +42,24 @@ class Product extends Model
     }
 
     // Relationships
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function category()
+    /**
+     * Updated to point to dedicated ProductCategory model
+     */
+    public function category(): BelongsTo
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(ProductCategory::class, 'product_category_id');
     }
 
-    public function subcategory()
+    /**
+     * Updated to point to dedicated ProductSubCategory model
+     */
+    public function subCategory(): BelongsTo
     {
-        return $this->belongsTo(Category::class, 'subcategory_id');
+        return $this->belongsTo(ProductSubCategory::class, 'product_sub_category_id');
     }
 }

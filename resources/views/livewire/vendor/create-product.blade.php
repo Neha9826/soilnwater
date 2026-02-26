@@ -86,40 +86,40 @@
                                 </div>
 
                                 <div class="bg-blue-50 p-5 rounded-xl border border-blue-200">
-    <div class="flex justify-between items-center mb-3">
-        <label class="block text-sm font-bold text-blue-900"><i class="fas fa-layer-group"></i> Bulk Quantity Pricing (B2B)</label>
-        <button type="button" wire:click="addTier" class="text-xs font-bold text-white bg-blue-600 px-3 py-1 rounded hover:bg-blue-700 shadow">+ Add Tier</button>
-    </div>
-    
-    @foreach($tiered_pricing as $index => $tier)
-    <div class="flex gap-3 mb-2 items-center">
-        <div class="flex-1 flex items-center gap-2">
-            <span class="text-xs text-gray-600 font-bold">Buy Min</span>
-            
-            <input wire:model="tiered_pricing.{{ $index }}.min_qty" 
-                   wire:change="calculateTierPrice({{ $index }})"
-                   type="number" 
-                   placeholder="10" 
-                   class="w-full border-2 border-white focus:border-blue-500 rounded p-2 text-sm">
-        </div>
-        <div class="flex-1 flex items-center gap-2">
-            <span class="text-xs text-gray-600 font-bold">Price ₹</span>
-            <input wire:model="tiered_pricing.{{ $index }}.unit_price" 
-                   type="number" 
-                   placeholder="Unit Price" 
-                   class="w-full border-2 border-white focus:border-blue-500 rounded p-2 text-sm">
-        </div>
-        @if($index > 0)
-            <button type="button" wire:click="removeTier({{ $index }})" class="text-red-500 hover:text-red-700 bg-white p-2 rounded border border-gray-200"><i class="fas fa-trash"></i></button>
-        @endif
-    </div>
-@endforeach
-    <p class="text-xs text-blue-600 mt-2">Example: Buy 10+ @ ₹90/unit (Discounted from Base Price)</p>
-</div>
+                                    <div class="flex justify-between items-center mb-3">
+                                        <label class="block text-sm font-bold text-blue-900"><i class="fas fa-layer-group"></i> Bulk Quantity Pricing (B2B)</label>
+                                        <button type="button" wire:click="addTier" class="text-xs font-bold text-white bg-blue-600 px-3 py-1 rounded hover:bg-blue-700 shadow">+ Add Tier</button>
+                                    </div>
+                                    
+                                    @foreach($tiered_pricing as $index => $tier)
+                                    <div class="flex gap-3 mb-2 items-center">
+                                        <div class="flex-1 flex items-center gap-2">
+                                            <span class="text-xs text-gray-600 font-bold">Buy Min</span>
+                                            
+                                            <input wire:model="tiered_pricing.{{ $index }}.min_qty" 
+                                                wire:change="calculateTierPrice({{ $index }})"
+                                                type="number" 
+                                                placeholder="10" 
+                                                class="w-full border-2 border-white focus:border-blue-500 rounded p-2 text-sm">
+                                        </div>
+                                        <div class="flex-1 flex items-center gap-2">
+                                            <span class="text-xs text-gray-600 font-bold">Price ₹</span>
+                                            <input wire:model="tiered_pricing.{{ $index }}.unit_price" 
+                                                type="number" 
+                                                placeholder="Unit Price" 
+                                                class="w-full border-2 border-white focus:border-blue-500 rounded p-2 text-sm">
+                                        </div>
+                                        @if($index > 0)
+                                            <button type="button" wire:click="removeTier({{ $index }})" class="text-red-500 hover:text-red-700 bg-white p-2 rounded border border-gray-200"><i class="fas fa-trash"></i></button>
+                                        @endif
+                                    </div>
+                                @endforeach
+                                    <p class="text-xs text-blue-600 mt-2">Example: Buy 10+ @ ₹90/unit (Discounted from Base Price)</p>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="bg-white shadow-sm rounded-xl border border-gray-200 p-6">
+                        <!-- <div class="bg-white shadow-sm rounded-xl border border-gray-200 p-6">
                             <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Special Offer</h3>
                             
                             <div class="space-y-4">
@@ -134,7 +134,7 @@
                                     <p class="text-xs text-gray-500 mt-1">Enter promotion details here. Check the box above to activate it on the website.</p>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
 
                         <div class="bg-white shadow-sm rounded-xl border border-gray-200 p-6">
                             <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Media</h3>
@@ -175,34 +175,41 @@
                     <div class="space-y-8">
                         
                         <div class="bg-white shadow-sm rounded-xl border border-gray-200 p-6">
-                            <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Categorization</h3>
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="block text-sm font-bold text-gray-700 mb-1">Category *</label>
-                                    <select wire:model.live="category_id" class="w-full border-2 border-gray-300 rounded-lg p-2.5">
-                                        <option value="">Select Category</option>
-                                        @foreach($categories as $cat)
-                                            <option value="{{ $cat->id }}">{{ $cat->name }}</option>
-                                        @endforeach
-                                        <option value="other" class="font-bold text-blue-600">+ Other</option>
-                                    </select>
-                                </div>
-                                @if($is_other_category)
-                                    <input wire:model="new_category_name" type="text" placeholder="New Category Name" class="w-full border-2 border-blue-300 rounded-lg p-2">
-                                @endif
-                                @if(!$is_other_category && !empty($subcategories))
-                                    <div>
-                                        <label class="block text-sm font-bold text-gray-700 mb-1">Subcategory</label>
-                                        <select wire:model="subcategory_id" class="w-full border-2 border-gray-300 rounded-lg p-2.5">
-                                            <option value="">Select Subcategory</option>
-                                            @foreach($subcategories as $sub)
-                                                <option value="{{ $sub->id }}">{{ $sub->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
+    <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Categorization</h3>
+    <div class="space-y-4">
+        <div>
+            <label class="block text-sm font-bold text-gray-700 mb-1">Category *</label>
+            {{-- Updated wire:model to match new property name --}}
+            <select wire:model.live="product_category_id" class="w-full border-2 border-gray-300 rounded-lg p-2.5">
+                <option value="">Select Category</option>
+                @foreach($categories as $cat)
+                    <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                @endforeach
+                <option value="other" class="font-bold text-blue-600">+ Other</option>
+            </select>
+            @error('product_category_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+        </div>
+
+        @if($is_other_category)
+            <input wire:model="new_category_name" type="text" placeholder="New Category Name" class="w-full border-2 border-blue-300 rounded-lg p-2">
+            @error('new_category_name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+        @endif
+
+        {{-- Activate subcategory selection only if parent category is selected --}}
+        @if(!$is_other_category && !empty($subcategories))
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1">Subcategory</label>
+                {{-- Updated wire:model to match new property name --}}
+                <select wire:model="product_sub_category_id" class="w-full border-2 border-gray-300 rounded-lg p-2.5">
+                    <option value="">Select Subcategory</option>
+                    @foreach($subcategories as $sub)
+                        <option value="{{ $sub->id }}">{{ $sub->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+        @endif
+    </div>
+</div>
 
                         <div class="bg-white shadow-sm rounded-xl border border-gray-200 p-6">
                             <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Variations</h3>

@@ -14,6 +14,8 @@ use Filament\Forms\Components\Group;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Illuminate\Support\Str;
+use App\Models\ProductCategory;
+use App\Models\ProductSubCategory;
 
 class ProductResource extends Resource
 {
@@ -120,16 +122,16 @@ class ProductResource extends Resource
                     ]),
 
                     // 4. Special Offers
-                    Section::make('Promotions')->schema([
-                        Forms\Components\Toggle::make('has_special_offer')
-                            ->label('Active Special Offer')
-                            ->live(),
+                    // Section::make('Promotions')->schema([
+                    //     Forms\Components\Toggle::make('has_special_offer')
+                    //         ->label('Active Special Offer')
+                    //         ->live(),
                         
-                        Forms\Components\TextInput::make('special_offer_text')
-                            ->label('Offer Details')
-                            ->placeholder('e.g. Buy 2 Get 1 Free')
-                            ->hidden(fn (Get $get) => !$get('has_special_offer')),
-                    ]),
+                    //     Forms\Components\TextInput::make('special_offer_text')
+                    //         ->label('Offer Details')
+                    //         ->placeholder('e.g. Buy 2 Get 1 Free')
+                    //         ->hidden(fn (Get $get) => !$get('has_special_offer')),
+                    // ]),
 
                 ])->columnSpan(2), // Takes up 2/3 of screen
 
@@ -157,19 +159,18 @@ class ProductResource extends Resource
 
                     // 2. Categorization
                     Section::make('Organization')->schema([
-                        Forms\Components\Select::make('category_id')
-                            ->relationship('category', 'name') // Fixes the JSON issue
-                            ->searchable()
-                            ->preload()
-                            ->required()
-                            ->createOptionForm([
-                                Forms\Components\TextInput::make('name')->required(),
-                                Forms\Components\TextInput::make('slug')->required(),
-                            ]),
+    Forms\Components\Select::make('product_category_id')
+        ->label('Category')
+        ->options(ProductCategory::all()->pluck('name', 'id'))
+        ->reactive() // Enables sub-category filtering
+        ->required(),
 
-                        Forms\Components\TextInput::make('brand')
-                            ->label('Brand Name'),
-                    ]),
+    Forms\Components\Select::make('product_sub_category_id')
+        ->label('Sub Category')
+        ->options(fn (Get $get) => ProductSubCategory::where('product_category_id', $get('product_category_id'))->pluck('name', 'id'))
+        ->disabled(fn (Get $get) => !$get('product_category_id')) // Activation logic
+        ->required(),
+]),
 
                     // 3. Inventory & Shipping
                     Section::make('Inventory & Shipping')->schema([

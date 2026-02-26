@@ -50,11 +50,11 @@ class HomePage extends Component
                                   ->take(5)
                                   ->get(),
             // Fetch Featured Experts
-        'experts' => \App\Models\User::whereIn('profile_type', ['consultant', 'vendor'])
-            ->whereNotNull('store_name')
-            ->inRandomOrder()
-            ->take(6)
-            ->get(),
+            'experts' => \App\Models\User::whereIn('profile_type', ['consultant', 'vendor'])
+                                ->whereNotNull('store_name')
+                                ->inRandomOrder()
+                                ->take(6)
+                                ->get(),
         ]);
     }
 }

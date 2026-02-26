@@ -179,7 +179,50 @@
             </div>
         </div>
 
-        
+        {{-- FEATURED SERVICE PROVIDERS & CONSULTANTS --}}
+        <section class="max-w-[1440px] mx-auto px-6 py-20 border-t border-gray-100">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-black text-gray-900">Featured on SoilNWater</h2>
+                <p class="text-gray-500 mt-2">Connect with verified experts for your construction and design needs.</p>
+                <div class="h-1.5 w-24 bg-[#4CAF50] mx-auto mt-4 rounded-full"></div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-10">
+                @foreach($experts as $expert)
+                    <a href="{{ route('public.store', $expert->store_slug) }}" class="group flex flex-col items-center text-center">
+                        {{-- Circular Profile Image --}}
+                        <div class="h-32 w-32 rounded-full p-1.5 border-2 border-transparent group-hover:border-[#4CAF50] transition-all duration-500 mb-4 bg-white shadow-md">
+                            <div class="h-full w-full rounded-full overflow-hidden bg-gray-50 border border-gray-100">
+                                @if($expert->store_logo)
+                                    {{-- Use secure route for live server --}}
+                                    <img src="{{ route('ad.display', ['path' => $expert->store_logo]) }}" 
+                                        class="h-full w-full object-cover group-hover:scale-110 transition duration-500">
+                                @else
+                                    <div class="h-full w-full flex items-center justify-center text-[#2D5A27] font-black text-2xl">
+                                        {{ substr($expert->store_name, 0, 1) }}
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+
+                        {{-- Expert Details --}}
+                        <h4 class="font-bold text-gray-900 group-hover:text-[#4CAF50] transition-colors line-clamp-1">
+                            {{ $expert->store_name }}
+                        </h4>
+                        <p class="text-[10px] font-black text-blue-500 uppercase tracking-widest mt-1">
+                            {{ $expert->service_category ?? 'Expert' }}
+                        </p>
+                        
+                        {{-- Verified Badge --}}
+                        <div class="mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span class="bg-green-50 text-green-700 text-[9px] font-black px-2 py-0.5 rounded-full border border-green-100">
+                                <i class="fas fa-check-circle mr-1"></i>VERIFIED
+                            </span>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+        </section>
 
         {{-- REAL ESTATE SECTION --}}
         <div class="mb-20">
