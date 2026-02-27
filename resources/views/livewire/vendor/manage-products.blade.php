@@ -94,7 +94,7 @@
                                                 @endphp
                                                 <div class="h-12 w-12 rounded-lg bg-gray-100 border border-gray-200 overflow-hidden">
                                                     @if($img)
-                                                        <img src="{{ $img ? route('ad.display', ['filename' => basename($img)]) : asset('images/placeholder.png') }}" class="h-full w-full object-cover">
+                                                        <img src="{{ route('ad.display', ['path' => $img]) }}" class="h-full w-full object-cover">
                                                     @else
                                                         <div class="h-full w-full flex items-center justify-center text-gray-400"><i class="fas fa-image"></i></div>
                                                     @endif
@@ -130,7 +130,7 @@
 
                                             <td class="p-4 text-right">
                                                 <div class="flex items-center justify-end gap-3">
-                                                    <a href="#" class="text-blue-600 hover:text-blue-800 bg-blue-50 p-2 rounded-lg transition" title="Edit">
+                                                    <a href="{{ route('vendor.products.edit', $product->id) }}" class="text-blue-600 hover:text-blue-800 bg-blue-50 p-2 rounded-lg transition" title="Edit">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
                                                     <button wire:click="deleteProduct({{ $product->id }})" 
@@ -183,7 +183,9 @@
                                         <i class="fas fa-eye"></i> Visibility
                                     </button>
                                     <div class="flex gap-2">
-                                        <a href="#" class="text-blue-600 hover:bg-blue-100 p-1.5 rounded"><i class="fas fa-edit"></i></a>
+                                        <a href="{{ route('vendor.products.edit', $product->id) }}" class="text-blue-600 hover:text-blue-800">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
                                         <button wire:click="deleteProduct({{ $product->id }})" wire:confirm="Delete this item?" class="text-red-500 hover:bg-red-100 p-1.5 rounded"><i class="fas fa-trash-alt"></i></button>
                                     </div>
                                 </div>

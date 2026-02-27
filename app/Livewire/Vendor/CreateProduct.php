@@ -5,7 +5,6 @@ namespace App\Livewire\Vendor;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\Product;
-// 1. REPLACE: Use the new ProductCategory and SubCategory models
 use App\Models\ProductCategory;
 use App\Models\ProductSubCategory;
 use Illuminate\Support\Facades\Auth;
@@ -18,8 +17,10 @@ class CreateProduct extends Component
     // Basic
     public $name, $brand, $price, $stock_quantity, $sku, $description;
     
-    // 2. RENAME: Change property names to match your new DB columns
-    public $product_category_id, $product_sub_category_id, $new_category_name, $is_other_category = false;
+    // Categorization
+    public $product_category_id, $product_sub_category_id, $new_category_name, $new_subcategory_name;
+    public $is_other_category = false;
+    public $is_other_subcategory = false;
     
     public $categories = [], $subcategories = [];
     public $images = [], $video, $video_url, $colors, $sizes, $weight, $dimensions;
@@ -28,8 +29,6 @@ class CreateProduct extends Component
     
     // Toggles
     public $is_sellable = false;
-    // 3. COMMENTED OUT: Removed as requested for promotions cleanup
-    // public $has_special_offer = false, $special_offer_text = '';
     
     // B2B Pricing
     public $tiered_pricing = [
@@ -38,7 +37,6 @@ class CreateProduct extends Component
 
     public function mount()
     {
-        // 4. REPLACE: Fetch from the new dedicated table
         $this->categories = ProductCategory::where('is_approved', true)->get();
     }
 
@@ -68,19 +66,24 @@ class CreateProduct extends Component
         }
     }
 
-    // 5. RENAME: Ensure this matches the wire:model in your blade
     public function updatedProductCategoryId($value)
     {
         if ($value === 'other') {
             $this->is_other_category = true;
+            $this->is_other_subcategory = true; // Force other subcategory if category is new
             $this->subcategories = [];
         } else {
             $this->is_other_category = false;
-            // 6. REPLACE: Fetch subcategories belonging to the specific parent
+            $this->is_other_subcategory = false;
             $this->subcategories = ProductSubCategory::where('product_category_id', $value)->get();
         }
         
         $this->product_sub_category_id = null; 
+    }
+
+    public function updatedProductSubCategoryId($value)
+    {
+        $this->is_other_subcategory = ($value === 'other');
     }
 
     public function addTier() { $this->tiered_pricing[] = ['min_qty' => '', 'unit_price' => '']; }
@@ -93,22 +96,50 @@ class CreateProduct extends Component
         $this->validate([
             'name' => 'required|min:3',
             'price' => 'required|numeric',
-            'product_category_id' => 'required', // 7. RENAME
+            'product_category_id' => 'required',
             'video' => 'nullable|mimes:mp4,mov,ogg|max:20480',
         ]);
 
+        // Handle Category with Duplicate Prevention
         $finalCatId = $this->product_category_id;
         if ($this->product_category_id === 'other') {
             $this->validate(['new_category_name' => 'required|string|min:3']);
+            $slug = Str::slug($this->new_category_name);
             
-            // 8. REPLACE: Use ProductCategory model
-            $newCat = ProductCategory::create([
-                'name' => $this->new_category_name,
-                'slug' => Str::slug($this->new_category_name),
-                'is_approved' => false, 
-                'created_by' => Auth::id()
-            ]);
-            $finalCatId = $newCat->id;
+            // Check for existing unapproved or approved category to avoid duplicates
+            $category = ProductCategory::where('slug', $slug)->first();
+            
+            if (!$category) {
+                $category = ProductCategory::create([
+                    'name' => $this->new_category_name,
+                    'slug' => $slug,
+                    'is_approved' => false, 
+                    'created_by' => Auth::id()
+                ]);
+            }
+            $finalCatId = $category->id;
+        }
+
+        // Handle Subcategory with Duplicate Prevention
+        $finalSubCatId = is_numeric($this->product_sub_category_id) ? $this->product_sub_category_id : null;
+        if ($this->is_other_subcategory || $this->product_sub_category_id === 'other') {
+            $this->validate(['new_subcategory_name' => 'required|string|min:2']);
+            $subSlug = Str::slug($this->new_subcategory_name);
+
+            // Check if this subcategory already exists under this parent
+            $subCategory = ProductSubCategory::where('slug', $subSlug)
+                ->where('product_category_id', $finalCatId)
+                ->first();
+
+            if (!$subCategory) {
+                $subCategory = ProductSubCategory::create([
+                    'product_category_id' => $finalCatId,
+                    'name' => $this->new_subcategory_name,
+                    'slug' => $subSlug,
+                    // Note: Subcategories are linked to the parent's approval status in this flow
+                ]);
+            }
+            $finalSubCatId = $subCategory->id;
         }
 
         $imagePaths = [];
@@ -136,9 +167,8 @@ class CreateProduct extends Component
             'shipping_charges' => $this->shipping_charges,
             'sku' => $this->sku ?? strtoupper(Str::random(10)),
             'brand' => $this->brand,
-            // 9. RENAME: Map to new dedicated columns
             'product_category_id' => $finalCatId,
-            'product_sub_category_id' => is_numeric($this->product_sub_category_id) ? $this->product_sub_category_id : null,
+            'product_sub_category_id' => $finalSubCatId,
             'images' => $imagePaths,
             'video_path' => $videoPath,
             'video_url' => $this->video_url,

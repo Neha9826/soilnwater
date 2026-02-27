@@ -23,6 +23,7 @@ use App\Livewire\ClassifiedList;
 use App\Livewire\EditPublicProfile;
 use App\Livewire\ShowPublicProfile;
 use App\Livewire\Public\AllAds;
+use App\Livewire\Vendor\EditProduct;
 
 /*
 |--------------------------------------------------------------------------
@@ -112,6 +113,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/vendor/properties', Properties::class)->name('vendor.properties');
     Route::get('/vendor/properties/create', \App\Livewire\Vendor\CreateProperty::class)->name('vendor.properties.create');
     Route::get('/vendor/properties/{id}/edit', \App\Livewire\Vendor\EditProperty::class)->name('vendor.properties.edit');
+    // Ensure this is inside your 'vendor' middleware group
+    Route::get('/vendor/products/{id}/edit', EditProduct::class)->name('vendor.products.edit');
 
     // Branches
     Route::get('/my-branches', \App\Livewire\Vendor\ManageBranches::class)->name('vendor.branches');
