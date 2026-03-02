@@ -38,6 +38,7 @@ use App\Livewire\Vendor\EditBusinessPage;
 use App\Livewire\Vendor\ManageProducts;
 use App\Livewire\Vendor\Properties;
 use App\Models\Ad;
+use App\Livewire\Vendor\CreateOffer;
 
 /*
 |--------------------------------------------------------------------------
@@ -143,10 +144,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/my-projects/{id}/edit', \App\Livewire\Customer\EditProject::class)->name('customer.project.edit');
     Route::get('/post/ad', \App\Livewire\Customer\CreateAd::class)->name('customer.ad.create');
 
+    Route::get('/post/offer', CreateOffer::class)->name('public.offer.create');
+
     // Template test
     Route::get('/test-view', function () {
         return view('ads.templates.beauty_square', ['data' => []]);
     });
+
 });
 
 /*

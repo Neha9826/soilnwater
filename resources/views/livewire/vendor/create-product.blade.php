@@ -175,52 +175,52 @@
                     <div class="space-y-8">
                         
                         <div class="bg-white shadow-sm rounded-xl border border-gray-200 p-6">
-    <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Categorization</h3>
-    <div class="space-y-4">
-        <div>
-            <label class="block text-sm font-bold text-gray-700 mb-1">Category *</label>
-            <select wire:model.live="product_category_id" class="w-full border-2 border-gray-300 rounded-lg p-2.5">
-                <option value="">Select Category</option>
-                @foreach($categories as $cat)
-                    <option value="{{ $cat->id }}">{{ $cat->name }}</option>
-                @endforeach
-                <option value="other" class="font-bold text-blue-600">+ Other (Suggest New)</option>
-            </select>
-            @error('product_category_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-        </div>
+                            <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Categorization</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-1">Category *</label>
+                                    <select wire:model.live="product_category_id" class="w-full border-2 border-gray-300 rounded-lg p-2.5">
+                                        <option value="">Select Category</option>
+                                        @foreach($categories as $cat)
+                                            <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                                        @endforeach
+                                        <option value="other" class="font-bold text-blue-600">+ Other (Suggest New)</option>
+                                    </select>
+                                    @error('product_category_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                </div>
 
-        @if($is_other_category)
-            <div>
-                <label class="block text-sm font-bold text-blue-700 mb-1">New Category Name</label>
-                <input wire:model="new_category_name" type="text" placeholder="e.g. Industrial Machinery" class="w-full border-2 border-blue-300 rounded-lg p-2 font-bold animate-pulse">
-                @error('new_category_name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-            </div>
-        @endif
+                                @if($is_other_category)
+                                    <div>
+                                        <label class="block text-sm font-bold text-blue-700 mb-1">New Category Name</label>
+                                        <input wire:model="new_category_name" type="text" placeholder="e.g. Industrial Machinery" class="w-full border-2 border-blue-300 rounded-lg p-2 font-bold animate-pulse">
+                                        @error('new_category_name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                    </div>
+                                @endif
 
-        {{-- Activate subcategory selection only if parent category is selected and not "other" --}}
-        @if(!$is_other_category && $product_category_id)
-            <div>
-                <label class="block text-sm font-bold text-gray-700 mb-1">Subcategory</label>
-                <select wire:model.live="product_sub_category_id" class="w-full border-2 border-gray-300 rounded-lg p-2.5">
-                    <option value="">Select Subcategory</option>
-                    @foreach($subcategories as $sub)
-                        <option value="{{ $sub->id }}">{{ $sub->name }}</option>
-                    @endforeach
-                    <option value="other" class="font-bold text-blue-600">+ Other (Suggest New)</option>
-                </select>
-            </div>
-        @endif
+                                {{-- Activate subcategory selection only if parent category is selected and not "other" --}}
+                                @if(!$is_other_category && $product_category_id)
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1">Subcategory</label>
+                                        <select wire:model.live="product_sub_category_id" class="w-full border-2 border-gray-300 rounded-lg p-2.5">
+                                            <option value="">Select Subcategory</option>
+                                            @foreach($subcategories as $sub)
+                                                <option value="{{ $sub->id }}">{{ $sub->name }}</option>
+                                            @endforeach
+                                            <option value="other" class="font-bold text-blue-600">+ Other (Suggest New)</option>
+                                        </select>
+                                    </div>
+                                @endif
 
-        {{-- Show subcategory input if "other" is selected OR if the category itself is new --}}
-        @if($is_other_subcategory)
-            <div>
-                <label class="block text-sm font-bold text-blue-700 mb-1">New Subcategory Name</label>
-                <input wire:model="new_subcategory_name" type="text" placeholder="e.g. Hydraulic Pumps" class="w-full border-2 border-blue-300 rounded-lg p-2 font-bold animate-pulse">
-                @error('new_subcategory_name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-            </div>
-        @endif
-    </div>
-</div>
+                                {{-- Show subcategory input if "other" is selected OR if the category itself is new --}}
+                                @if($is_other_subcategory)
+                                    <div>
+                                        <label class="block text-sm font-bold text-blue-700 mb-1">New Subcategory Name</label>
+                                        <input wire:model="new_subcategory_name" type="text" placeholder="e.g. Hydraulic Pumps" class="w-full border-2 border-blue-300 rounded-lg p-2 font-bold animate-pulse">
+                                        @error('new_subcategory_name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
 
                         <div class="bg-white shadow-sm rounded-xl border border-gray-200 p-6">
                             <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Variations</h3>

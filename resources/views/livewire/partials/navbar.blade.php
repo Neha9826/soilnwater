@@ -7,7 +7,7 @@
         </a>
 
         {{-- Search Bar: Updated to Blue-Green Theme --}}
-        <div class="flex-grow relative max-w-2xl hidden md:block">
+        <div class="flex-grow relative max-w-2xl block">
             <div class="flex group">
                 <input type="text" name="query" placeholder="Search for 'Cement', 'Drill Machine', '3BHK'..." 
                     class="w-full border-2 border-gray-100 bg-gray-50 rounded-l-2xl px-5 py-3 focus:outline-none focus:border-[#4CAF50] focus:bg-white transition-all text-sm">
@@ -19,6 +19,14 @@
 
         <div class="flex items-center gap-8 text-gray-600 text-sm font-bold flex-shrink-0">
             
+            {{-- POST OFFER: Only for Vendors and Builders --}}
+            
+                    <a href="{{ route('public.offer.create') }}" class="hidden lg:flex bg-gradient-to-r from-[#6A1B9A] to-[#1E88E5] text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition transform items-center gap-2">
+                        <i class="fas fa-bolt"></i>
+                        <span>POST OFFER</span>
+                    </a>
+                
+
             {{-- POST AD: Matches 'Soil' Green --}}
             <a href="{{ route('post.choose-category') }}" class="hidden lg:flex bg-[#2D5A27] text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition transform items-center gap-2">
                 <i class="fas fa-plus-circle"></i>
@@ -83,7 +91,7 @@
     </div>
 
     {{-- Sub-nav: Soil Color --}}
-    <div class="bg-[#2D5A27] shadow-inner">
+    <div class="bg-[#2D5A27] shadow-inner relative z-40">
         <div class="max-w-[1440px] mx-auto px-6 py-3 flex gap-10 text-xs text-white/90 font-black uppercase tracking-widest overflow-x-auto whitespace-nowrap scrollbar-hide">
             <a href="#" class="hover:text-green-300 transition">Power Tools</a>
             <a href="#" class="hover:text-green-300 transition">Pumps & Motors</a>

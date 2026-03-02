@@ -8,6 +8,6 @@ class PostAdSelection extends Component
 {
     public function render()
     {
-        return view('livewire.post-ad-selection');
+       return view('livewire.post-ad-selection')->layout('layouts.app');
     }
 }
