@@ -93,6 +93,9 @@
     {{-- Sub-nav: Soil Color --}}
     <div class="bg-[#2D5A27] shadow-inner relative z-40">
         <div class="max-w-[1440px] mx-auto px-6 py-3 flex gap-10 text-xs text-white/90 font-black uppercase tracking-widest overflow-x-auto whitespace-nowrap scrollbar-hide">
+            <a href="{{ route('public.products.index') }}" class="text-yellow-400 hover:text-white transition flex items-center gap-2">
+                <i class="fas fa-store"></i> SHOP MARKETPLACE
+            </a>
             <a href="#" class="hover:text-green-300 transition">Power Tools</a>
             <a href="#" class="hover:text-green-300 transition">Pumps & Motors</a>
             <a href="#" class="hover:text-green-300 transition">Real Estate</a>

@@ -39,6 +39,8 @@ use App\Livewire\Vendor\ManageProducts;
 use App\Livewire\Vendor\Properties;
 use App\Models\Ad;
 use App\Livewire\Vendor\CreateOffer;
+use App\Livewire\Public\ProductListing;
+use App\Livewire\Public\ProductDetail;
 
 /*
 |--------------------------------------------------------------------------
@@ -225,3 +227,9 @@ Route::get('/display-media', function (Request $request) {
 })->name('ad.display');
 
 Route::get('/promotions', AllAds::class)->name('public.ads.index');
+
+// Public Marketplace Route
+Route::get('/marketplace', ProductListing::class)->name('public.products.index');
+
+// Public Product Detail Route
+Route::get('/product/{slug}', ProductDetail::class)->name('public.product.detail');
