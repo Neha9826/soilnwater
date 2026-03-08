@@ -50,9 +50,36 @@
                                 @endif
                             </div>
                             
-                            <button class="w-full mt-4 bg-[#2D5A27] text-white font-black py-3 rounded-xl hover:bg-[#1E461A] transition transform active:scale-95 shadow-md flex items-center justify-center gap-2">
-                                <i class="fas fa-shopping-cart text-sm"></i> BUY NOW
-                            </button>
+                            {{-- Updated Button with wire:click --}}
+                            @php
+    // Check if the product is already in the cart for the logged-in user
+    $cartItem = auth()->check() 
+        ? \App\Models\Cart::where('user_id', auth()->id())->where('product_id', $product->id)->first() 
+        : null;
+@endphp
+
+<div class="w-full mt-4">
+    @if($cartItem)
+        {{-- Quantity Controls --}}
+        <div class="flex items-center justify-between bg-gray-100 rounded-xl p-1 border-2 border-[#2D5A27]">
+            <button wire:click="decrement({{ $cartItem->id }})" class="w-10 h-10 flex items-center justify-center bg-white rounded-lg shadow-sm font-black text-[#2D5A27]">-</button>
+            <span class="font-black text-lg">{{ $cartItem->quantity }}</span>
+            <button wire:click="increment({{ $cartItem->id }})" class="w-10 h-10 flex items-center justify-center bg-white rounded-lg shadow-sm font-black text-[#2D5A27]">+</button>
+        </div>
+    @else
+        {{-- Add to Cart Button --}}
+        <button 
+    wire:click="addToCart({{ $product->id }})" 
+    wire:loading.attr="disabled"
+    wire:target="addToCart({{ $product->id }})" {{-- CRITICAL: Only target this specific ID --}}
+    class="w-full mt-4 bg-[#2D5A27] text-white font-black py-3 rounded-xl hover:bg-[#1E461A] transition transform active:scale-95 shadow-md flex items-center justify-center gap-2"
+>
+    <i class="fas fa-shopping-cart text-sm" wire:loading.remove wire:target="addToCart({{ $product->id }})"></i>
+    <i class="fas fa-spinner fa-spin text-sm" wire:loading wire:target="addToCart({{ $product->id }})"></i>
+    <span>Add to Cart</span>
+</button>
+    @endif
+</div>
                         </div>
                     </div>
                 </div>

@@ -32,4 +32,42 @@ class ProductDetail extends Component
     {
         return view('livewire.public.product-detail')->layout('layouts.app');
     }
+
+    public function addToWishlist()
+    {
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
+
+        \App\Models\Wishlist::updateOrCreate([
+            'user_id' => auth()->id(),
+            'product_id' => $this->product->id,
+        ]);
+
+        session()->flash('message', 'Added to wishlist!');
+    }
+
+    public function addToCart($productId)
+    {
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
+
+        $cart = \App\Models\Cart::where('user_id', auth()->id())
+            ->where('product_id', $productId)
+            ->first();
+
+        if ($cart) {
+            $cart->increment('quantity');
+        } else {
+            \App\Models\Cart::create([
+                'user_id' => auth()->id(),
+                'product_id' => $productId,
+                'quantity' => 1
+            ]);
+        }
+
+        $this->dispatch('cartUpdated'); // Refresh the navbar counter
+        session()->flash('message', 'Item added to cart!');
+    }
 }

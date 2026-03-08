@@ -57,4 +57,21 @@ class HomePage extends Component
                                 ->get(),
         ]);
     }
+
+    public function addToCart($productId)
+{
+    if (!auth()->check()) {
+        return redirect()->route('login');
+    }
+
+    \App\Models\Cart::updateOrCreate(
+        ['user_id' => auth()->id(), 'product_id' => $productId],
+        ['quantity' => \Illuminate\Support\Facades\DB::raw('quantity + 1')]
+    );
+
+    // This refreshes the cart count in your navbar
+    $this->dispatch('cartUpdated'); 
+
+    session()->flash('message', 'Product added to cart!');
+}
 }

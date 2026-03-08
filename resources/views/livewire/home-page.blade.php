@@ -75,7 +75,7 @@
         <div class="max-w-[1440px] mx-auto px-6 pb-12">
             <div class="flex justify-between items-center mb-8">
                 <h2 class="text-3xl font-black text-gray-900">Trending Industrial Products</h2>
-                <a href="#" class="text-sm font-bold text-[#4CAF50] hover:underline">SEE ALL PRODUCTS</a>
+                <a href="{{ route('public.products.index') }}" class="text-sm font-bold text-[#4CAF50] hover:underline">SEE ALL PRODUCTS</a>
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-5 gap-6">
@@ -86,7 +86,6 @@
                             <img src="{{ !empty($pImg) ? route('ad.display', ['path' => $pImg[0]]) : asset('images/placeholder.png') }}" 
                                 class="max-h-full max-w-full object-contain group-hover:scale-110 transition duration-500">
                         </div>
-
                         <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{{ $product->brand ?? 'Industrial' }}</div>
                         <h3 class="text-sm font-bold text-gray-900 line-clamp-2 h-10 leading-tight mb-3">{{ $product->name }}</h3>
 
@@ -95,9 +94,6 @@
                             <span class="text-[10px] text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded">20% OFF</span>
                         </div>
 
-                        <button class="w-full py-2.5 border-2 border-[#4CAF50] text-[#4CAF50] rounded-xl font-bold text-xs hover:bg-[#4CAF50] hover:text-white transition-all transform active:scale-95">
-                            ADD TO CART
-                        </button>
                     </div>
                 @endforeach
             </div>

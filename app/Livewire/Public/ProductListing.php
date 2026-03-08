@@ -27,4 +27,41 @@ class ProductListing extends Component
             'categories' => ProductCategory::where('is_approved', true)->get() //
         ])->layout('layouts.app');
     }
+
+    // Add these methods inside your ProductListing class
+
+public function increment($id)
+{
+    \App\Models\Cart::where('id', $id)->where('user_id', auth()->id())->increment('quantity');
+    $this->dispatch('cartUpdated'); // Notify the navbar
+}
+
+public function decrement($id)
+{
+    $cart = \App\Models\Cart::where('id', $id)->where('user_id', auth()->id())->first();
+    
+    if ($cart) {
+        if ($cart->quantity > 1) {
+            $cart->decrement('quantity');
+        } else {
+            $cart->delete();
+        }
+    }
+    
+    $this->dispatch('cartUpdated'); // Notify the navbar
+}
+
+    public function addToCart($productId)
+{
+    if (!auth()->check()) {
+        return redirect()->route('login');
+    }
+
+    \App\Models\Cart::updateOrCreate(
+        ['user_id' => auth()->id(), 'product_id' => $productId],
+        ['quantity' => 1]
+    );
+
+    $this->dispatch('cartUpdated');
+}
 }

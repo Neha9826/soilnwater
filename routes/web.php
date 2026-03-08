@@ -41,6 +41,12 @@ use App\Models\Ad;
 use App\Livewire\Vendor\CreateOffer;
 use App\Livewire\Public\ProductListing;
 use App\Livewire\Public\ProductDetail;
+// use App\Livewire\Public\CartPage;
+// use App\Livewire\Customer\MyOrders;
+use App\Livewire\Public\CartPage;
+use App\Livewire\Public\CheckoutPage;
+use App\Livewire\Public\OrderSuccess;
+use App\Livewire\Customer\MyOrders;
 
 /*
 |--------------------------------------------------------------------------
@@ -152,6 +158,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/test-view', function () {
         return view('ads.templates.beauty_square', ['data' => []]);
     });
+
+    Route::get('/cart', CartPage::class)->name('cart.index');
+    Route::get('/wishlist', function() { 
+        return "Wishlist Page Coming Soon"; 
+    })->name('wishlist.index');
+
+    Route::get('/checkout', \App\Livewire\Public\CheckoutPage::class)->name('checkout.index');
+
+    Route::get('/my-orders', MyOrders::class)->name('customer.orders');
 
 });
 

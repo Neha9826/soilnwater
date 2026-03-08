@@ -54,6 +54,9 @@
                             <a href="{{ route('dashboard') }}" class="block px-5 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-[#4CAF50] transition">
                                 <i class="fas fa-tachometer-alt w-6 text-[#2D5A27]"></i> My Dashboard
                             </a>
+                            <a href="{{ route('customer.orders') }}" class="block px-5 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-[#4CAF50] transition">
+                                <i class="fas fa-box w-6 text-orange-500"></i> My Orders
+                            </a>
                         @else
                             <a href="{{ route('customer.listings') }}" class="block px-5 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-[#4CAF50] transition">
                                 <i class="fas fa-layer-group w-6 text-blue-500"></i> My Posts & Ads
@@ -83,9 +86,11 @@
                 </a>
             @endauth
 
-            <a href="#" class="relative hover:text-[#2196F3] transition">
+            <a href="{{ route('cart.index') }}" class="relative hover:text-[#2196F3] transition">
                 <i class="fas fa-shopping-bag text-xl"></i>
-                <span class="absolute -top-2 -right-2 bg-blue-500 text-white text-[10px] h-4 w-4 rounded-full flex items-center justify-center">0</span>
+                <span class="absolute -top-2 -right-2 bg-blue-500 text-white text-[10px] h-4 w-4 rounded-full flex items-center justify-center font-bold">
+    {{ auth()->check() ? \App\Models\Cart::where('user_id', auth()->id())->sum('quantity') : 0 }}
+</span>
             </a>
         </div>
     </div>
