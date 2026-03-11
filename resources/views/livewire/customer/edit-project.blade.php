@@ -108,6 +108,10 @@
                 </div>
 
                 <div class="pt-6">
+                    {{-- This button lets you exit back to your listings --}}
+                    <!-- <a href="{{ route('customer.listings') }}" class="px-6 py-3 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-50">
+                        Cancel
+                    </a> -->
                     <button type="submit" class="w-full bg-purple-700 text-white font-bold py-4 rounded-xl hover:bg-purple-800 shadow-lg text-lg flex justify-center items-center gap-2">
                         <span wire:loading.remove>Update Project</span>
                         <span wire:loading>Processing...</span>

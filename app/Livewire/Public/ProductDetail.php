@@ -4,6 +4,8 @@ namespace App\Livewire\Public;
 
 use Livewire\Component;
 use App\Models\Product;
+use App\Models\Cart;
+use Illuminate\Support\Facades\Auth;
 
 class ProductDetail extends Component
 {
@@ -13,24 +15,79 @@ class ProductDetail extends Component
     public function mount($slug)
     {
         $this->product = Product::where('slug', $slug)
-            ->where('is_approved', true) // Security: Only show approved items
-            ->where('is_active', true)   // Ensure vendor hasn't hidden it
+            ->where('is_approved', true)
+            ->where('is_active', true)
             ->firstOrFail();
 
-        // Set the first image as default main image
-        $this->mainImage = is_array($this->product->images) && count($this->product->images) > 0 
+        // Decode JSON colors and sizes from the DB
+        $this->availableColors = is_array($this->product->colors) ? $this->product->colors : json_decode($this->product->colors, true) ?? [];
+        $this->availableSizes = is_array($this->product->sizes) ? $this->product->sizes : json_decode($this->product->sizes, true) ?? [];
+
+        $this->mainImage = (is_array($this->product->images) && count($this->product->images) > 0) 
             ? $this->product->images[0] 
-            : null;
+            : 'default.jpg';
     }
 
-    public function setMainImage($path)
+    public function increment($cartId)
     {
-        $this->mainImage = $path;
+        Cart::where('id', $cartId)->where('user_id', Auth::id())->increment('quantity');
+        $this->dispatch('cartUpdated');
+    }
+
+    public function decrement($cartId)
+    {
+        $cart = Cart::where('id', $cartId)->where('user_id', Auth::id())->first();
+        if ($cart) {
+            if ($cart->quantity > 1) {
+                $cart->decrement('quantity');
+            } else {
+                $cart->delete();
+            }
+        }
+        $this->dispatch('cartUpdated');
+    }
+
+    public function addToCart($productId)
+    {
+        if (!Auth::check()) return redirect()->route('login');
+
+        Cart::updateOrCreate(
+            ['user_id' => Auth::id(), 'product_id' => $productId],
+            ['quantity' => 1]
+        );
+
+        $this->dispatch('cartUpdated');
+        $this->dispatch('notify', ['message' => 'Added to cart!', 'type' => 'success']);
+    }
+
+    public function selectBulkTier($qty)
+    {
+        if (!Auth::check()) return redirect()->route('login');
+        
+        Cart::updateOrCreate(
+            ['user_id' => Auth::id(), 'product_id' => $this->product->id],
+            ['quantity' => $qty]
+        );
+        
+        $this->dispatch('cartUpdated');
     }
 
     public function render()
     {
-        return view('livewire.public.product-detail')->layout('layouts.app');
+        $cartItem = Auth::check() 
+            ? Cart::where('user_id', Auth::id())->where('product_id', $this->product->id)->first() 
+            : null;
+
+        $price = $this->product->discounted_price ?? $this->product->price;
+        $currentQty = $cartItem ? $cartItem->quantity : 1;
+        $subtotal = $price * $currentQty;
+        $gst = $subtotal * 0.18; // 18% GST
+
+        return view('livewire.public.product-detail', [
+            'cartItem' => $cartItem,
+            'totalAmount' => $subtotal + $gst,
+            'gst' => $gst
+        ])->layout('layouts.app');
     }
 
     public function addToWishlist()
@@ -45,29 +102,5 @@ class ProductDetail extends Component
         ]);
 
         session()->flash('message', 'Added to wishlist!');
-    }
-
-    public function addToCart($productId)
-    {
-        if (!auth()->check()) {
-            return redirect()->route('login');
-        }
-
-        $cart = \App\Models\Cart::where('user_id', auth()->id())
-            ->where('product_id', $productId)
-            ->first();
-
-        if ($cart) {
-            $cart->increment('quantity');
-        } else {
-            \App\Models\Cart::create([
-                'user_id' => auth()->id(),
-                'product_id' => $productId,
-                'quantity' => 1
-            ]);
-        }
-
-        $this->dispatch('cartUpdated'); // Refresh the navbar counter
-        session()->flash('message', 'Item added to cart!');
     }
 }

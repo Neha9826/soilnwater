@@ -59,6 +59,28 @@ class EditProduct extends Component
         }
     }
 
+    public function addTier() 
+    { 
+        $this->tiered_pricing[] = ['min_qty' => '', 'unit_price' => '']; 
+    }
+
+    public function removeTier($index) 
+    { 
+        unset($this->tiered_pricing[$index]); 
+        $this->tiered_pricing = array_values($this->tiered_pricing); 
+    }
+
+    public function updatedPrice() { $this->calculateDiscount(); }
+    public function updatedDiscountPercentage() { $this->calculateDiscount(); }
+
+    protected function calculateDiscount()
+    {
+        if(is_numeric($this->price) && is_numeric($this->discount_percentage)) {
+            $discount = ($this->price * $this->discount_percentage) / 100;
+            $this->discounted_price = $this->price - $discount;
+        }
+    }
+
     // Reuse your calculation and updated hooks from CreateProduct
     public function updatedProductCategoryId($value)
     {
@@ -155,7 +177,7 @@ class EditProduct extends Component
             $finalSubCatId = $subCategory->id;
         }
 
-        return redirect()->route('vendor.products')->with('message', 'Product updated successfully!');
+        session()->flash('message', 'Product updated successfully!');
     }
 
     public function render() {

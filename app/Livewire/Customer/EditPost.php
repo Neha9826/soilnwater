@@ -145,7 +145,8 @@ class EditPost extends Component
         $property->amenities()->sync($this->selected_amenities);
 
         session()->flash('message', 'Ad updated successfully!');
-        return redirect()->route('customer.my-posts');
+        // New code matching your web.php
+        return redirect()->route('customer.listings')->with('success', 'Property updated successfully!');
     }
 
     public function delete()

@@ -14,19 +14,24 @@ class ProductListing extends Component
     public $search = '';
     public $category = '';
 
-    public function render()
-    {
-        $query = Product::where('is_sellable', true) // Only listed for 'Buy Now'
-            ->where('is_active', true)              // Not hidden by vendor
-            ->where('is_approved', true)            // Approved by Admin
-            ->when($this->search, fn($q) => $q->where('name', 'like', '%' . $this->search . '%'))
-            ->when($this->category, fn($q) => $q->where('product_category_id', $this->category));
+    // Inside ProductListing.php - Update the render method
+public function render()
+{
+    $query = Product::where('is_sellable', true)
+        ->where('is_active', true)
+        ->where('is_approved', true)
+        ->when($this->search, fn($q) => $q->where('name', 'like', '%' . $this->search . '%'))
+        ->when($this->category, fn($q) => $q->where('product_category_id', $this->category));
 
-        return view('livewire.public.product-listing', [
-            'products' => $query->latest()->paginate(12),
-            'categories' => ProductCategory::where('is_approved', true)->get() //
-        ])->layout('layouts.app');
-    }
+    return view('livewire.public.product-listing', [
+        'products' => $query->latest()->paginate(12),
+        'categories' => ProductCategory::where('is_approved', true)->get(),
+        // Fetching 1x1 Square Ads for the top banner
+        'bannerAds' => \App\Models\Ad::whereHas('template.tier', function($query) {
+            $query->where('grid_width', 1)->where('grid_height', 1);
+        })->latest()->take(8)->get() 
+    ])->layout('layouts.app');
+}
 
     // Add these methods inside your ProductListing class
 

@@ -6,7 +6,7 @@
                 <h1 class="text-3xl font-extrabold text-gray-900">Edit Property</h1>
                 <p class="mt-2 text-gray-600">Update your ad details.</p>
             </div>
-            <a href="{{ route('customer.my-posts') }}" class="text-gray-500 hover:text-gray-800 font-bold flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200">
+            <a href="{{ route('customer.listings') }}" class="text-gray-500 hover:text-gray-800 font-bold flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200">
                 <i class="fas fa-times"></i> Close
             </a>
         </div>

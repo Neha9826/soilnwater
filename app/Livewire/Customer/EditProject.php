@@ -69,7 +69,9 @@ class EditProject extends Component
     public function update()
     {
         $this->validate();
-        $project = Project::find($this->projectId);
+        $project = Project::where('id', $this->projectId)
+        ->where('user_id', auth()->id())
+        ->firstOrFail();
 
         // Merge Media
         foreach ($this->new_images as $img) $this->existing_images[] = $img->store('projects/images', 'public');
@@ -86,13 +88,14 @@ class EditProject extends Component
             'state' => $this->state,
             'google_map_link' => $this->google_map_link,
             'images' => $this->existing_images,
+            // 'image' => $this->image,
             'videos' => $this->existing_videos,
         ]);
 
         $project->amenities()->sync($this->selected_amenities);
 
         session()->flash('message', 'Project updated successfully!');
-        return redirect()->route('customer.my-projects');
+        return redirect()->route('customer.listings')->with('success', 'Project updated successfully!');
     }
 
     public function removeImage($index)

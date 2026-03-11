@@ -3,6 +3,14 @@
 
     <main class="flex-1 w-full overflow-y-auto bg-gray-50 p-4 md:p-8">
         <div class="max-w-7xl mx-auto pb-20">
+
+            {{-- Success Message Alert --}}
+            @if (session()->has('message'))
+                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded shadow-sm">
+                    <p class="font-bold">Success</p>
+                    <p>{{ session('message') }}</p>
+                </div>
+            @endif
             
             <div class="flex justify-between items-center mb-8 border-b pb-6">
                 <div>

@@ -47,6 +47,9 @@ use App\Livewire\Public\CartPage;
 use App\Livewire\Public\CheckoutPage;
 use App\Livewire\Public\OrderSuccess;
 use App\Livewire\Customer\MyOrders;
+use App\Livewire\Customer\MyPosts;
+use App\Livewire\Customer\EditPost;
+use App\Livewire\Customer\ManageListings;
 
 /*
 |--------------------------------------------------------------------------
@@ -145,12 +148,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::get('/post/choose', \App\Livewire\PostAdSelection::class)->name('post.choose-category');
-    Route::get('/my-listings', \App\Livewire\Customer\ManageListings::class)->name('customer.listings');
-    Route::get('/post/property', \App\Livewire\Customer\PostProperty::class)->name('customer.property.create');
-    Route::get('/post/project', \App\Livewire\Customer\PostProject::class)->name('customer.project.create');
-    Route::get('/my-posts/{id}/edit', \App\Livewire\Customer\EditPost::class)->name('customer.post.edit');
-    Route::get('/my-projects/{id}/edit', \App\Livewire\Customer\EditProject::class)->name('customer.project.edit');
-    Route::get('/post/ad', \App\Livewire\Customer\CreateAd::class)->name('customer.ad.create');
+    // Move your customer routes into a group to ensure they are prefixed with 'customer.'
+    Route::name('customer.')->group(function () {
+
+        Route::get('/my-listings', ManageListings::class)->name('listings');
+
+        // Use 'listings' as the name so route('customer.listings') works in your navbar
+        // Route::get('/my-listings', MyPosts::class)->name('listings');
+        
+        Route::get('/my-posts/{id}/edit', EditPost::class)->name('post.edit');
+        Route::get('/my-projects/{id}/edit', \App\Livewire\Customer\EditProject::class)->name('project.edit');
+        
+        Route::get('/post/property', \App\Livewire\Customer\PostProperty::class)->name('property.create');
+        Route::get('/post/project', \App\Livewire\Customer\PostProject::class)->name('project.create');
+        Route::get('/post/ad', \App\Livewire\Customer\CreateAd::class)->name('ad.create');
+    });;
 
     Route::get('/post/offer', CreateOffer::class)->name('public.offer.create');
 

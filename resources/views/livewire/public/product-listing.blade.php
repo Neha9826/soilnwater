@@ -1,98 +1,85 @@
-<div class="bg-gray-50 min-h-screen pb-20">
-    <div class="max-w-[1440px] mx-auto px-6 py-10">
-        
-        {{-- Header & Filters --}}
-        <div class="flex flex-col md:flex-row justify-between items-end mb-10 gap-6">
-            <div>
-                <h1 class="text-4xl font-black text-gray-900 uppercase">Marketplace</h1>
-                <p class="text-gray-500 font-bold">Verified industrial tools and construction materials.</p>
+<div class="min-h-screen bg-[#f4f7f6] pb-20">
+    {{-- 1. ADS BANNER (Fetched from Ads table) --}}
+    <div class="bg-white border-b border-gray-200 py-6 mb-8 shadow-sm">
+        <div class="max-w-[1440px] mx-auto px-6">
+            <h3 class="text-[11px] font-black uppercase text-gray-400 mb-4 tracking-[0.2em]">Featured Promotions</h3>
+            <div class="flex gap-4 overflow-x-auto pb-4 no-scrollbar snap-x">
+                @foreach($bannerAds as $ad)
+                <div class="flex-none w-48 h-48 rounded-2xl overflow-hidden snap-start shadow-sm border border-gray-100 hover:border-leaf-green transition-all">
+                    <img src="{{ route('ad.display', ['path' => $ad->preview_image]) }}" class="w-full h-full object-cover">
+                </div>
+                @endforeach
             </div>
-            
-            <div class="flex gap-4 w-full md:w-auto">
-                <select wire:model.live="category" class="bg-white border-2 border-gray-100 rounded-2xl px-6 py-3 font-bold text-sm outline-none focus:border-[#4CAF50]">
-                    <option value="">All Categories</option>
+        </div>
+    </div>
+
+    <div class="max-w-[1440px] mx-auto flex gap-8 px-6">
+        {{-- 2. STICKY SIDEBAR --}}
+        <aside class="w-1/4 hidden lg:block">
+            <div class="sticky top-28 bg-white rounded-[2rem] border border-gray-200 p-8 shadow-sm z-30">
+                <h3 class="text-xs font-black uppercase mb-8 flex items-center gap-3">
+                    <i class="fas fa-sliders-h text-leaf-green"></i> Filter Gallery
+                </h3>
+                <div class="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
                     @foreach($categories as $cat)
-                        <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                        <label class="flex items-center gap-3 cursor-pointer group py-1">
+                            <input type="checkbox" wire:model.live="category" value="{{ $cat->id }}" class="rounded text-leaf-green focus:ring-leaf-green border-gray-300">
+                            <span class="text-xs font-bold text-gray-600 group-hover:text-leaf-green transition uppercase">{{ $cat->name }}</span>
+                        </label>
                     @endforeach
-                </select>
+                </div>
             </div>
+        </aside>
+
+        {{-- 3. PRODUCT GRID --}}
+        <main class="w-full lg:w-4/5">
+            {{-- Main Grid --}}
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+    @foreach($products as $product)
+        <div class="bg-white rounded-xl border border-gray-200 hover:border-leaf-green hover:shadow-md transition-all p-2 flex flex-col group relative">
+            <div class="absolute top-2 left-2 bg-red-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded z-10 italic">30% OFF</div>
+            
+            <a href="{{ route('public.product.detail', $product->slug) }}" class="block w-full h-32 overflow-hidden rounded-lg bg-gray-50 mb-2">
+                <img src="{{ route('ad.display', ['path' => $product->images[0] ?? '']) }}" 
+                     class="h-full w-full object-contain p-2 group-hover:scale-105 transition duration-300">
+            </a>
+
+            <div class="flex-grow px-1">
+                <h3 class="text-[10px] font-bold text-gray-800 line-clamp-2 leading-tight min-h-[24px] mb-2">{{ $product->name }}</h3>
+                <div class="flex items-center gap-1.5 mb-3">
+                    <span class="text-sm font-black text-leaf-green">₹{{ number_format($product->price) }}</span>
+                    <span class="text-[8px] text-gray-400 line-through">₹{{ number_format($product->price * 1.3) }}</span>
+                </div>
+            </div>
+
+            {{-- RESTORED QUANTITY CONTROL FOR LISTING --}}
+            @php
+                $cartItem = auth()->check() 
+                    ? \App\Models\Cart::where('user_id', auth()->id())->where('product_id', $product->id)->first() 
+                    : null;
+            @endphp
+
+            @if($cartItem)
+                <div class="flex items-center justify-between bg-gray-50 rounded-lg p-0.5 border border-leaf-green">
+                    <button wire:click="decrement({{ $cartItem->id }})" class="w-8 h-8 flex items-center justify-center bg-white rounded shadow-sm font-black text-leaf-green hover:bg-leaf-green hover:text-white transition">-</button>
+                    <span class="font-black text-xs">{{ $cartItem->quantity }}</span>
+                    <button wire:click="increment({{ $cartItem->id }})" class="w-8 h-8 flex items-center justify-center bg-white rounded shadow-sm font-black text-leaf-green hover:bg-leaf-green hover:text-white transition">+</button>
+                </div>
+            @else
+                <button wire:click="addToCart({{ $product->id }})" 
+                    wire:loading.attr="disabled"
+                    wire:target="addToCart({{ $product->id }})"
+                    class="w-full bg-[#2D5A27] text-white text-[9px] font-black py-2.5 rounded-lg hover:bg-soil-green transition flex items-center justify-center gap-2"
+                >
+                    <i class="fas fa-shopping-cart" wire:loading.remove wire:target="addToCart({{ $product->id }})"></i>
+                    <i class="fas fa-spinner fa-spin" wire:loading wire:target="addToCart({{ $product->id }})"></i>
+                    ADD TO CART
+                </button>
+            @endif
         </div>
-
-        {{-- Product Grid --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            @forelse($products as $product)
-                <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden group hover:shadow-xl transition-all duration-500 flex flex-col">
-                    {{-- Image Area --}}
-                    <div class="relative h-64 overflow-hidden bg-gray-50">
-                        @php $img = is_array($product->images) && count($product->images) > 0 ? $product->images[0] : null; @endphp
-                        <img src="{{ $img ? route('ad.display', ['path' => $img]) : asset('images/placeholder.png') }}" 
-                             class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
-                        
-                        @if($product->discount_percentage > 0)
-                            <div class="absolute top-4 left-4 bg-red-600 text-white text-xs font-black px-3 py-1 rounded-full shadow-lg">
-                                {{ $product->discount_percentage }}% OFF
-                            </div>
-                        @endif
-                    </div>
-
-                    {{-- Info Area --}}
-                    <div class="p-6 flex-grow flex flex-col">
-                        <span class="text-[10px] font-black text-[#4CAF50] uppercase tracking-widest mb-1">{{ $product->category->name ?? 'General' }}</span>
-                        <a href="{{ route('public.product.detail', $product->slug) }}" class="block">
-                            <h3 class="text-lg font-bold text-gray-900 mb-2 truncate">{{ $product->name }}</h3>
-                        </a>
-                        
-                        <div class="mt-auto">
-                            <div class="flex items-baseline gap-2">
-                                <span class="text-2xl font-black text-gray-900">₹{{ number_format($product->discounted_price ?: $product->price) }}</span>
-                                @if($product->discounted_price)
-                                    <span class="text-sm text-gray-400 line-through">₹{{ number_format($product->price) }}</span>
-                                @endif
-                            </div>
-                            
-                            {{-- Updated Button with wire:click --}}
-                            @php
-    // Check if the product is already in the cart for the logged-in user
-    $cartItem = auth()->check() 
-        ? \App\Models\Cart::where('user_id', auth()->id())->where('product_id', $product->id)->first() 
-        : null;
-@endphp
-
-<div class="w-full mt-4">
-    @if($cartItem)
-        {{-- Quantity Controls --}}
-        <div class="flex items-center justify-between bg-gray-100 rounded-xl p-1 border-2 border-[#2D5A27]">
-            <button wire:click="decrement({{ $cartItem->id }})" class="w-10 h-10 flex items-center justify-center bg-white rounded-lg shadow-sm font-black text-[#2D5A27]">-</button>
-            <span class="font-black text-lg">{{ $cartItem->quantity }}</span>
-            <button wire:click="increment({{ $cartItem->id }})" class="w-10 h-10 flex items-center justify-center bg-white rounded-lg shadow-sm font-black text-[#2D5A27]">+</button>
-        </div>
-    @else
-        {{-- Add to Cart Button --}}
-        <button 
-    wire:click="addToCart({{ $product->id }})" 
-    wire:loading.attr="disabled"
-    wire:target="addToCart({{ $product->id }})" {{-- CRITICAL: Only target this specific ID --}}
-    class="w-full mt-4 bg-[#2D5A27] text-white font-black py-3 rounded-xl hover:bg-[#1E461A] transition transform active:scale-95 shadow-md flex items-center justify-center gap-2"
->
-    <i class="fas fa-shopping-cart text-sm" wire:loading.remove wire:target="addToCart({{ $product->id }})"></i>
-    <i class="fas fa-spinner fa-spin text-sm" wire:loading wire:target="addToCart({{ $product->id }})"></i>
-    <span>Add to Cart</span>
-</button>
-    @endif
+    @endforeach
 </div>
-                        </div>
-                    </div>
-                </div>
-            @empty
-                <div class="col-span-4 text-center py-20 bg-white rounded-[3rem] border-2 border-dashed border-gray-200">
-                    <i class="fas fa-box-open text-6xl text-gray-200 mb-4"></i>
-                    <h2 class="text-2xl font-black text-gray-400 uppercase">No Products Found</h2>
-                </div>
-            @endforelse
-        </div>
-
-        <div class="mt-12">
-            {{ $products->links() }}
-        </div>
+            <div class="mt-8">{{ $products->links() }}</div>
+        </main>
     </div>
 </div>
