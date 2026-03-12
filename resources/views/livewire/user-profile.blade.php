@@ -31,12 +31,47 @@
                     @error('email') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                 </div>
 
+                {{-- Phone Number --}}
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+            <input wire:model="phone" type="text" placeholder="e.g. 9876543210" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 border">
+            @error('phone') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+        </div>
+
                 <div class="col-span-1 md:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 mb-1">New Password (Optional)</label>
                     <input wire:model="new_password" type="password" placeholder="Leave blank to keep current password" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 border">
                 </div>
 
             </div>
+        </div>
+
+        <div class="bg-white shadow rounded-lg p-6 mt-6">
+            <h2 class="text-xl font-bold mb-4 border-b pb-2">Shipping Addresses</h2>
+            
+            @foreach($addresses as $addr)
+            <div class="border rounded-xl p-4 mb-3 flex justify-between items-start">
+                <div>
+                    <p class="font-bold uppercase text-xs">{{ $addr->name }} | {{ $addr->phone }}</p>
+                    <p class="text-sm text-gray-600">{{ $addr->address }}, {{ $addr->city }}, {{ $addr->state }} - {{ $addr->pincode }}</p>
+                </div>
+                <button type="button" wire:click="deleteAddress({{ $addr->id }})" class="text-red-500 text-xs font-bold uppercase">Delete</button>
+            </div>
+            @endforeach
+
+            <button type="button" @click="$wire.set('showAddressForm', true)" class="text-blue-600 font-bold text-sm">+ Add New Address</button>
+
+            @if($showAddressForm)
+                <div class="grid grid-cols-2 gap-4 mt-4 p-4 bg-gray-50 rounded-xl">
+                    <input wire:model="newAddr.name" placeholder="Receiver Name" class="p-2 border rounded-lg">
+                    <input wire:model="newAddr.phone" placeholder="Phone Number" class="p-2 border rounded-lg">
+                    <input wire:model="newAddr.pincode" placeholder="Pincode" class="p-2 border rounded-lg">
+                    <input wire:model="newAddr.city" placeholder="City" class="p-2 border rounded-lg">
+                    <select wire:model="newAddr.state" class="p-2 border rounded-lg"><option>Select State</option><option>Odisha</option><option>Uttarakhand</option></select>
+                    <textarea wire:model="newAddr.address" class="col-span-2 p-2 border rounded-lg" placeholder="Full Address"></textarea>
+                    <button type="button" wire:click="addAddress" class="bg-blue-600 text-white p-2 rounded-lg font-bold">Save Address</button>
+                </div>
+            @endif
         </div>
 
         @if($is_business_account)

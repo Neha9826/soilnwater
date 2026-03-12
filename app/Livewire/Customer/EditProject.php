@@ -7,6 +7,7 @@ use Livewire\WithFileUploads;
 use App\Models\Project;
 use App\Models\Amenity;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class EditProject extends Component
 {
@@ -20,7 +21,6 @@ class EditProject extends Component
     public $existing_videos = [], $new_videos = [];
     
     public $selected_amenities = [];
-    public $available_amenities = [];
     public $new_amenity_name = '';
 
     public function mount($id)
@@ -38,10 +38,10 @@ class EditProject extends Component
         $this->state = $project->state;
         $this->google_map_link = $project->google_map_link;
         
-        $this->existing_images = $project->images ?? [];
-        $this->existing_videos = $project->videos ?? [];
+        // Ensure these are arrays
+        $this->existing_images = is_array($project->images) ? $project->images : json_decode($project->images, true) ?? [];
+        $this->existing_videos = is_array($project->videos) ? $project->videos : json_decode($project->videos, true) ?? [];
         
-        $this->available_amenities = Amenity::all();
         $this->selected_amenities = $project->amenities->pluck('id')->toArray();
     }
 
@@ -56,11 +56,13 @@ class EditProject extends Component
     {
         $this->validate(['new_amenity_name' => 'required|string|min:2|max:50']);
         $existing = Amenity::where('name', 'LIKE', $this->new_amenity_name)->first();
+        
         if ($existing) {
-            if (!in_array($existing->id, $this->selected_amenities)) $this->selected_amenities[] = $existing->id;
+            if (!in_array($existing->id, $this->selected_amenities)) {
+                $this->selected_amenities[] = $existing->id;
+            }
         } else {
             $new = Amenity::create(['name' => ucfirst(trim($this->new_amenity_name))]);
-            $this->available_amenities = Amenity::all();
             $this->selected_amenities[] = $new->id;
         }
         $this->new_amenity_name = '';
@@ -69,14 +71,30 @@ class EditProject extends Component
     public function update()
     {
         $this->validate();
+
         $project = Project::where('id', $this->projectId)
-        ->where('user_id', auth()->id())
-        ->firstOrFail();
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
 
-        // Merge Media
-        foreach ($this->new_images as $img) $this->existing_images[] = $img->store('projects/images', 'public');
-        foreach ($this->new_videos as $vid) $this->existing_videos[] = $vid->store('projects/videos', 'public');
+        // 1. Process New Images
+        // We loop through the temporary file objects and store them
+        if (!empty($this->new_images)) {
+            foreach ($this->new_images as $img) {
+                // Store the file and add the path to our existing array
+                $path = $img->store('projects/images', 'public');
+                $this->existing_images[] = $path;
+            }
+        }
 
+        // 2. Process New Videos (Similar logic)
+        if (!empty($this->new_videos)) {
+            foreach ($this->new_videos as $vid) {
+                $path = $vid->store('projects/videos', 'public');
+                $this->existing_videos[] = $path;
+            }
+        }
+
+        // 3. Update the Database
         $project->update([
             'title' => $this->title,
             'description' => $this->description,
@@ -87,25 +105,36 @@ class EditProject extends Component
             'city' => $this->city,
             'state' => $this->state,
             'google_map_link' => $this->google_map_link,
-            'images' => $this->existing_images,
-            // 'image' => $this->image,
+            'images' => $this->existing_images, // This now contains both old and new paths
             'videos' => $this->existing_videos,
         ]);
 
+        // 4. Sync Amenities
         $project->amenities()->sync($this->selected_amenities);
 
+        // Clear the temporary upload arrays so they don't show up again if the user stays on the page
+        $this->new_images = [];
+        $this->new_videos = [];
+
         session()->flash('message', 'Project updated successfully!');
-        return redirect()->route('customer.listings')->with('success', 'Project updated successfully!');
+    
+        // Optional: Refresh the project instance to ensure the view sees the latest DB data
+        $this->project = $project->fresh();
     }
 
     public function removeImage($index)
     {
-        unset($this->existing_images[$index]);
-        $this->existing_images = array_values($this->existing_images);
+        if (isset($this->existing_images[$index])) {
+            // Optional: Storage::disk('public')->delete($this->existing_images[$index]);
+            unset($this->existing_images[$index]);
+            $this->existing_images = array_values($this->existing_images);
+        }
     }
 
     public function render()
     {
-        return view('livewire.customer.edit-project')->layout('layouts.app');
+        return view('livewire.customer.edit-project', [
+            'available_amenities' => Amenity::all() // Pass it here to avoid undefined variable error
+        ])->layout('layouts.app');
     }
 }

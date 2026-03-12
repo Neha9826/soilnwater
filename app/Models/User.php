@@ -58,4 +58,9 @@ class User extends Authenticatable implements FilamentUser
         // Only allow Super Admins to access the Filament Admin Panel
         return $this->profile_type === 'super_admin';
     }
+
+    public function addresses()
+    {
+        return $this->hasMany(Address::class);
+    }
 }

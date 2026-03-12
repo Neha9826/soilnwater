@@ -95,7 +95,7 @@ class PostProject extends Component
         $project->amenities()->attach($this->selected_amenities);
 
         session()->flash('message', 'Project Posted Successfully!');
-        return redirect()->route('customer.my-projects');
+        return redirect()->route('customer.projects.index'); // This matches your web.php
     }
 
     public function render()

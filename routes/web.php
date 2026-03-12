@@ -180,6 +180,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/my-orders', MyOrders::class)->name('customer.orders');
 
+    Route::get('/order-success/{order_number}', OrderSuccess::class)->name('order.success');
+
+    Route::get('/my-orders/{order_number}', \App\Livewire\Public\OrderDetail::class)->name('order.detail');
+
 });
 
 /*

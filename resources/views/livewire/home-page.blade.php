@@ -59,14 +59,26 @@
                     <h2 class="text-xl font-black uppercase mb-4">Trending Products</h2>
                     <div class="grid grid-cols-2 lg:grid-cols-6 gap-3">
                         @foreach($trendingProducts as $product)
-                            <a href="{{ route('public.product.detail', $product->slug) }}" class="group flex flex-col items-center">
-                                <div class="w-full h-24 bg-gray-50 rounded-2xl overflow-hidden mb-2 p-2">
-                                    <img src="{{ route('ad.display', ['path' => $product->images[0] ?? '']) }}" class="h-full w-full object-contain">
-                                </div>
-                                <h4 class="text-[9px] font-bold line-clamp-1 text-center">{{ $product->name }}</h4>
-                                <span class="text-xs font-black text-leaf-green">₹{{ number_format($product->price) }}</span>
-                            </a>
-                        @endforeach
+    <div class="bg-white rounded-2xl border border-gray-100 p-3 hover:shadow-lg transition flex flex-col">
+        <div class="aspect-square rounded-xl overflow-hidden bg-gray-50 mb-3">
+            @php 
+                // Safely handle both array and JSON string formats for product images
+                $images = $product->images;
+                $imagesArray = is_string($images) ? json_decode($images, true) : $images;
+                $firstProductImage = (is_array($imagesArray) && count($imagesArray) > 0) ? $imagesArray[0] : null;
+            @endphp
+
+            <img src="{{ $firstProductImage ? route('ad.display', ['path' => $firstProductImage]) : asset('images/placeholder.png') }}" 
+                 class="w-full h-full object-contain">
+        </div>
+
+        <div class="flex-grow">
+            <h3 class="text-xs font-bold text-gray-900 truncate uppercase">{{ $product->name }}</h3>
+            <p class="text-[10px] font-black text-leaf-green mt-1">₹{{ number_format($product->price) }}</p>
+        </div>
+
+    </div>
+@endforeach
                     </div>
                 </div>
 
@@ -195,13 +207,23 @@
                     <a href="#" class="text-xs font-bold text-blue-600 uppercase underline">View All</a>
                 </div>
                 {{-- Change 'thumbnail' to 'image' and 'starting_price' to 'price' --}}
-<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-    @foreach($upcomingProjects as $project)
-        <div class="bg-white rounded-[1.5rem] p-3 border border-gray-100 shadow-sm flex gap-3 items-center hover:shadow-md transition">
-            <div class="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0">
-                {{-- SQL shows column is 'image', not 'thumbnail' --}}
-                <img src="{{ route('ad.display', ['path' => $project->image]) }}" class="w-full h-full object-cover">
-            </div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    @foreach($upcomingProjects as $project)
+                        <div class="bg-white rounded-[1.5rem] p-3 border border-gray-100 shadow-sm flex gap-3 items-center hover:shadow-md transition">
+                            <div class="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-gray-50">
+                    @php 
+                        $images = $project->images;
+                        
+                        // Convert to array if it's still a JSON string, otherwise use as is
+                        $imagesArray = is_string($images) ? json_decode($images, true) : $images;
+                        
+                        // Get the first image path
+                        $firstImagePath = (is_array($imagesArray) && count($imagesArray) > 0) ? $imagesArray[0] : null;
+                    @endphp
+                    
+                    <img src="{{ $firstImagePath ? route('ad.display', ['path' => $firstImagePath]) : asset('images/placeholder.png') }}" 
+                        class="w-full h-full object-cover">
+                </div>
             <div class="overflow-hidden">
                 <h3 class="text-xs font-black text-gray-900 truncate">{{ $project->name }}</h3>
                 <p class="text-[9px] text-gray-500 truncate">{{ $project->location }}</p>

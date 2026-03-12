@@ -15,8 +15,12 @@ class UserProfile extends Component
     public $store_name, $store_slug, $service_category, $service_charge;
     public $store_logo; // Temporary upload
     public $existing_logo; // To show current image
+    public $phone;
     
     public $is_business_account = false;
+    public $addresses = [];
+    public $showAddressForm = false;
+    public $newAddr = ['name' => '', 'phone' => '', 'pincode' => '', 'address' => '', 'city' => '', 'state' => ''];
 
     public function mount()
     {
@@ -25,6 +29,8 @@ class UserProfile extends Component
         // Basic Info
         $this->name = $user->name;
         $this->email = $user->email;
+        $this->phone = $user->phone;
+        $this->addresses = auth()->user()->addresses()->latest()->get();
         
         // Check if they are a "Pro" user (Vendor, Consultant, Dealer)
         if (in_array($user->profile_type, ['vendor', 'consultant', 'dealer'])) {
@@ -37,6 +43,28 @@ class UserProfile extends Component
         }
     }
 
+    public function addAddress() 
+    {
+        $this->validate([
+            'newAddr.name' => 'required',
+            'newAddr.phone' => 'required|digits:10',
+            'newAddr.pincode' => 'required|digits:6',
+            'newAddr.address' => 'required',
+            'newAddr.city' => 'required',
+            'newAddr.state' => 'required',
+        ]);
+
+        auth()->user()->addresses()->create($this->newAddr);
+        $this->addresses = auth()->user()->addresses()->latest()->get();
+        $this->showAddressForm = false;
+        session()->flash('message', 'New address saved!');
+    }
+
+public function deleteAddress($id) {
+    auth()->user()->addresses()->find($id)->delete();
+    $this->addresses = auth()->user()->addresses()->latest()->get();
+}
+
     public function updateProfile()
     {
         $user = Auth::user();
@@ -45,13 +73,17 @@ class UserProfile extends Component
         $this->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,'.$user->id,
+            'phone' => 'required|digits:10',
             'store_name' => $this->is_business_account ? 'required|max:255' : 'nullable',
             'store_logo' => 'nullable|image|max:1024', // 1MB Max
         ]);
 
         // 2. Update Basic Info
-        $user->name = $this->name;
-        $user->email = $this->email;
+        auth()->user()->update([
+            'name' => $this->name,
+            'email' => $this->email,
+            'phone' => $this->phone,
+        ]);
 
         // 3. Update Password (Only if typed)
         if (!empty($this->new_password)) {

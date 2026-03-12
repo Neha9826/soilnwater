@@ -1,10 +1,25 @@
 <div class="w-full flex flex-col items-center justify-center min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
     <div class="w-full max-w-4xl">
+        {{-- AUTO-HIDING SUCCESS MESSAGE --}}
+        @if (session()->has('message'))
+            <div x-data="{ show: true }" 
+                 x-init="setTimeout(() => show = false, 5000)" 
+                 x-show="show" 
+                 x-transition.duration.500ms
+                 class="mb-6 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 font-bold rounded shadow-md flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-check-circle"></i>
+                    <span>{{ session('message') }}</span>
+                </div>
+                <button @click="show = false" class="text-green-700 hover:text-green-900 text-2xl line-height-0">&times;</button>
+            </div>
+        @endif
         <div class="text-center mb-10">
             <h1 class="text-3xl font-extrabold text-purple-900">Edit Project</h1>
         </div>
 
         <div class="bg-white rounded-2xl shadow-xl overflow-hidden w-full">
+            
             <form wire:submit.prevent="update" class="p-8 space-y-8">
 
                 {{-- Basic Details --}}
@@ -68,55 +83,89 @@
                 </div>
 
                 {{-- Amenities --}}
-                <div>
-                    <h3 class="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">Project Amenities</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                        @foreach($available_amenities as $amenity)
-                            <label class="flex items-center space-x-2 cursor-pointer bg-gray-50 p-2 rounded">
-                                <input wire:model="selected_amenities" value="{{ $amenity->id }}" type="checkbox" class="rounded text-purple-600 h-5 w-5">
-                                <span class="text-gray-700 text-sm">{{ $amenity->name }}</span>
-                            </label>
-                        @endforeach
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <input wire:model="new_amenity_name" type="text" placeholder="Add custom amenity..." class="border-gray-300 rounded-lg p-2 text-sm">
-                        <button type="button" wire:click="addCustomAmenity" class="bg-gray-800 text-white px-3 py-2 rounded-lg text-sm">Add</button>
-                    </div>
-                </div>
+                <div class="space-y-6 pt-6 border-t border-gray-100">
+            <h3 class="text-xs font-black uppercase text-gray-400 tracking-widest">Amenities & Facilities</h3>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                @foreach($available_amenities as $amenity) {{-- Fixed variable name --}}
+                    <label class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 cursor-pointer hover:bg-gray-50 transition">
+                        <input type="checkbox" wire:model="selected_amenities" value="{{ $amenity->id }}" class="rounded text-leaf-green focus:ring-leaf-green border-gray-300">
+                        <span class="text-[11px] font-bold text-gray-700 uppercase">{{ $amenity->name }}</span>
+                    </label>
+                @endforeach
+            </div>
+
+            {{-- Custom Amenity Input --}}
+            <div class="flex gap-2">
+                <input type="text" wire:model="new_amenity_name" placeholder="Add custom amenity (e.g. Helipad)" class="flex-1 bg-gray-50 border-none rounded-xl px-4 py-2 text-xs font-bold">
+                <button type="button" wire:click="addCustomAmenity" class="bg-gray-900 text-white px-6 py-2 rounded-xl text-[10px] font-black uppercase">Add</button>
+            </div>
+        </div>
 
                 {{-- Media --}}
                 <div>
                     <h3 class="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">Media</h3>
                     
                     {{-- Images --}}
-                    <div class="mb-4">
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Images</label>
+                    {{-- SECTION: IMAGE MANAGEMENT --}}
+                    <div class="bg-purple-50 p-6 rounded-xl border border-purple-100 mb-8">
+                        <h3 class="text-lg font-bold text-purple-900 mb-4 pb-2 border-b border-purple-200">Project Gallery</h3>
                         
-                        @if($existing_images)
-                            <div class="flex gap-2 mb-2 overflow-x-auto">
-                                @foreach($existing_images as $index => $img)
-                                    <div class="relative group">
-                                        <img src="{{ asset('storage/'.$img) }}" class="h-20 w-20 object-cover rounded shadow">
-                                        <button type="button" wire:click="removeImage({{ $index }})" class="absolute top-0 right-0 bg-red-500 text-white w-5 h-5 flex items-center justify-center rounded-full text-xs">x</button>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                            {{-- 1. Show Existing Images --}}
+                            @foreach($existing_images as $index => $path)
+                                <div class="relative group aspect-square rounded-xl overflow-hidden border-2 border-white shadow-sm">
+                                    <img src="{{ route('ad.display', ['path' => $path]) }}" class="w-full h-full object-cover">
+                                    <button type="button" wire:click="removeImage({{ $index }})" 
+                                            class="absolute top-2 right-2 bg-red-600 text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition shadow-lg">
+                                        <i class="fas fa-times text-xs"></i>
+                                    </button>
+                                    <div class="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[8px] text-center py-1 opacity-0 group-hover:opacity-100">EXISTING</div>
+                                </div>
+                            @endforeach
+
+                            {{-- 2. Preview New Uploads (Before Saving) --}}
+                            @if($new_images)
+                                @foreach($new_images as $image)
+                                    <div class="relative aspect-square rounded-xl overflow-hidden border-2 border-leaf-green shadow-sm animate-pulse">
+                                        <img src="{{ $image->temporaryUrl() }}" class="w-full h-full object-cover opacity-70">
+                                        <div class="absolute inset-0 flex items-center justify-center">
+                                            <span class="bg-leaf-green text-white text-[8px] font-black px-2 py-1 rounded">PENDING</span>
+                                        </div>
                                     </div>
                                 @endforeach
+                            @endif
+                        </div>
+
+                        {{-- 3. The Upload Input --}}
+                        <div class="relative">
+                            <label class="w-full flex flex-col items-center px-4 py-6 bg-white text-purple-700 rounded-xl shadow-sm border border-purple-200 cursor-pointer hover:bg-purple-50 transition">
+                                <i class="fas fa-cloud-upload-alt text-3xl mb-2"></i>
+                                <span class="text-sm font-bold">Click to add more photos</span>
+                                <input type="file" wire:model="new_images" multiple class="hidden">
+                            </label>
+                            <div wire:loading wire:target="new_images" class="mt-2 text-xs text-purple-600 font-bold">
+                                <i class="fas fa-spinner fa-spin"></i> Uploading to server...
                             </div>
-                        @endif
-
-                        <input wire:model="new_images" type="file" multiple class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100">
+                        </div>
                     </div>
-                </div>
 
-                <div class="pt-6">
-                    {{-- This button lets you exit back to your listings --}}
-                    <!-- <a href="{{ route('customer.listings') }}" class="px-6 py-3 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-50">
-                        Cancel
-                    </a> -->
-                    <button type="submit" class="w-full bg-purple-700 text-white font-bold py-4 rounded-xl hover:bg-purple-800 shadow-lg text-lg flex justify-center items-center gap-2">
-                        <span wire:loading.remove>Update Project</span>
-                        <span wire:loading>Processing...</span>
-                    </button>
-                </div>
+                <div class="pt-10 grid grid-cols-3 gap-4">
+            {{-- Smaller Go Back Button (1/3 Width) --}}
+            <a href="{{ route('customer.listings') }}" 
+               class="col-span-1 bg-gray-100 text-gray-500 font-black py-5 rounded-2xl hover:bg-gray-200 transition uppercase tracking-widest text-[10px] flex items-center justify-center gap-2">
+                <i class="fas fa-arrow-left"></i> <span class="hidden md:inline">Back</span>
+            </a>
+
+            {{-- Larger Update Button (2/3 Width) --}}
+            <button type="submit" wire:loading.attr="disabled" 
+                    class="col-span-2 bg-green-600 text-white font-black py-5 rounded-2xl hover:bg-green-700 transition shadow-lg uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-3">
+                <span wire:loading.remove wire:target="update">Update Project Details</span>
+                <span wire:loading wire:target="update" class="flex items-center gap-2">
+                    <i class="fas fa-spinner fa-spin"></i> Saving...
+                </span>
+            </button>
+        </div>
 
             </form>
         </div>

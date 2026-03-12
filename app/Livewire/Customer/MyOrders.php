@@ -10,7 +10,7 @@ class MyOrders extends Component
 {
     public function render()
     {
-        // Load orders with their items and the related products
+        // Load orders with their items and the related products in one go
         $orders = Order::with('items.product')
             ->where('user_id', Auth::id())
             ->latest()

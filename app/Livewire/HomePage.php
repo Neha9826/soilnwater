@@ -62,6 +62,7 @@ class HomePage extends Component
                 'offers' => \App\Models\Offer::latest()->take(8)->get(),
 
                 'trendingProducts' => Product::where('is_active', true)
+                                        ->where('is_sellable', true)
                                         ->latest()
                                         ->take(12) // Take 6 for the 2x3 grid we designed
                                         ->get(),
