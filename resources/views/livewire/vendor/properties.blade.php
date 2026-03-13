@@ -58,10 +58,19 @@
                     <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition border border-gray-200 overflow-hidden group flex flex-col h-full relative">
                         
                         <div class="h-48 w-full bg-gray-200 relative overflow-hidden">
-                            @if(!empty($property->images) && count($property->images) > 0)
-                                <img src="{{ !empty($property->images) ? route('ad.display', ['filename' => basename($property->images[0])]) : asset('images/placeholder.png') }}" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-500">
+                           @php 
+                                // Properties table stores images as a JSON array in the 'images' column
+                                $propertyImages = is_array($property->images) ? $property->images : json_decode($property->images, true);
+                                $firstImg = (is_array($propertyImages) && count($propertyImages) > 0) ? $propertyImages[0] : null;
+                            @endphp
+
+                            @if($firstImg)
+                                <img src="{{ route('ad.display', ['path' => $firstImg]) }}" 
+                                    class="w-full h-full object-cover transform group-hover:scale-105 transition duration-500">
                             @else
-                                <div class="w-full h-full flex items-center justify-center text-gray-400"><i class="fas fa-image text-4xl"></i></div>
+                                <div class="w-full h-full flex items-center justify-center text-gray-400 bg-gray-50">
+                                    <i class="fas fa-image text-4xl"></i>
+                                </div>
                             @endif
 
                             {{-- STATUS BADGE --}}

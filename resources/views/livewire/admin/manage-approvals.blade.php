@@ -50,7 +50,7 @@
                                         <td class="p-4">
                                             @php $img = $product->images[0] ?? null; @endphp
                                             <div class="h-12 w-12 bg-gray-100 rounded border overflow-hidden">
-                                                @if($img) <img src="{{ asset('storage/'.$img) }}" class="h-full w-full object-cover"> @endif
+                                                @if($img) <img src="{{ route('ad.display', ['path' => $product->image]) }}" class="h-full w-full object-cover"> @endif
                                             </div>
                                         </td>
                                         <td class="p-4">

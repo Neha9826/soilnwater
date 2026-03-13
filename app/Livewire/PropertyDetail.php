@@ -9,17 +9,14 @@ class PropertyDetail extends Component
 {
     public $property;
 
-    // This runs automatically when the page loads
-    public function mount($slug)
+    public function mount($slug) // Matching your route parameter {slug}
     {
-        // Find the property or show 404 if missing
-        $this->property = Property::where('slug', $slug)
-            ->where('is_active', true)
-            ->firstOrFail();
+        // Load relationships to ensure amenities and user data are available
+        $this->property = Property::with(['user', 'amenities'])->findOrFail($slug);
     }
 
     public function render()
     {
-        return view('livewire.property-detail');
+        return view('livewire.property-detail')->layout('layouts.app');
     }
 }

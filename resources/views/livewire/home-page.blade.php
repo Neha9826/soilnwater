@@ -57,28 +57,31 @@
                 {{-- TRENDING PRODUCTS --}}
                 <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100">
                     <h2 class="text-xl font-black uppercase mb-4">Trending Products</h2>
+                    <a href="{{ route('public.products.index') }}" class="bg-leaf-green text-white text-[10px] font-black px-6 py-2 rounded-full uppercase shadow-md hover:bg-soil-green transition">
+                        View All
+                    </a>
                     <div class="grid grid-cols-2 lg:grid-cols-6 gap-3">
                         @foreach($trendingProducts as $product)
-    <div class="bg-white rounded-2xl border border-gray-100 p-3 hover:shadow-lg transition flex flex-col">
-        <div class="aspect-square rounded-xl overflow-hidden bg-gray-50 mb-3">
-            @php 
-                // Safely handle both array and JSON string formats for product images
-                $images = $product->images;
-                $imagesArray = is_string($images) ? json_decode($images, true) : $images;
-                $firstProductImage = (is_array($imagesArray) && count($imagesArray) > 0) ? $imagesArray[0] : null;
-            @endphp
+                            <div class="bg-white rounded-2xl border border-gray-100 p-3 hover:shadow-lg transition flex flex-col">
+                                <div class="aspect-square rounded-xl overflow-hidden bg-gray-50 mb-3">
+                                    @php 
+                                        // Safely handle both array and JSON string formats for product images
+                                        $images = $product->images;
+                                        $imagesArray = is_string($images) ? json_decode($images, true) : $images;
+                                        $firstProductImage = (is_array($imagesArray) && count($imagesArray) > 0) ? $imagesArray[0] : null;
+                                    @endphp
 
-            <img src="{{ $firstProductImage ? route('ad.display', ['path' => $firstProductImage]) : asset('images/placeholder.png') }}" 
-                 class="w-full h-full object-contain">
-        </div>
+                                    <img src="{{ $firstProductImage ? route('ad.display', ['path' => $firstProductImage]) : asset('images/placeholder.png') }}" 
+                                        class="w-full h-full object-contain">
+                                </div>
 
-        <div class="flex-grow">
-            <h3 class="text-xs font-bold text-gray-900 truncate uppercase">{{ $product->name }}</h3>
-            <p class="text-[10px] font-black text-leaf-green mt-1">₹{{ number_format($product->price) }}</p>
-        </div>
+                                <div class="flex-grow">
+                                    <h3 class="text-xs font-bold text-gray-900 truncate uppercase">{{ $product->name }}</h3>
+                                    <p class="text-[10px] font-black text-leaf-green mt-1">₹{{ number_format($product->price) }}</p>
+                                </div>
 
-    </div>
-@endforeach
+                            </div>
+                        @endforeach
                     </div>
                 </div>
 
@@ -133,6 +136,49 @@
                 @endforeach
             </div>
         </section>
+
+        {{-- NEW REAL ESTATE SECTION (Builder Projects) --}}
+        {{-- resources/views/livewire/home-page.blade.php --}}
+<section class="py-10 px-6 bg-white">
+    <div class="max-w-[1440px] mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h2 class="text-2xl font-black text-gray-900 uppercase tracking-tighter">Premium Real Estate</h2>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Verified Builder Projects</p>
+            </div>
+            {{-- Fixed View All Button --}}
+            <a href="{{ route('public.realestate.index') }}" 
+               class="inline-flex items-center bg-green-600 text-white text-[10px] font-black px-8 py-3 rounded-full uppercase shadow-xl hover:bg-green-700 transition transform hover:-translate-y-1">
+                View all <i class="fas fa-arrow-right ml-2 text-[8px]"></i>
+            </a>
+        </div>
+
+        {{-- 6 CARDS IN A ROW ON DESKTOP --}}
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            @foreach($builderProperties as $property)
+                <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition group">
+                    <div class="relative aspect-[4/3] overflow-hidden bg-gray-50">
+                        @php 
+                            $propertyImages = is_array($property->images) ? $property->images : json_decode($property->images, true);
+                            $displayImg = (is_array($propertyImages) && count($propertyImages) > 0) ? $propertyImages[0] : null;
+                        @endphp
+                        <img src="{{ $displayImg ? route('ad.display', ['path' => $displayImg]) : asset('images/placeholder.png') }}" 
+                             class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                        <div class="absolute top-2 left-2 bg-blue-600 text-white text-[8px] font-black px-2 py-0.5 rounded-full uppercase">Verified</div>
+                    </div>
+                    <div class="p-3">
+                        <h3 class="text-[11px] font-black text-gray-900 truncate uppercase mb-1">{{ $property->title }}</h3>
+                        <p class="text-[9px] text-gray-400 font-bold mb-2 truncate"><i class="fas fa-map-marker-alt"></i> {{ $property->location }}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-black text-leaf-green">₹{{ number_format($property->price) }}</span>
+                            <a href="{{ route('public.property.detail', $property->id) }}" class="text-[9px] font-black text-gray-400 hover:text-leaf-green">DETAILS</a>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+</section>
 
         {{-- HORIZONTAL ADS: 3 Cards Per Row --}}
         <section class="max-w-[1440px] mx-auto px-6 py-4 grid grid-cols-1 md:grid-cols-3 gap-4">

@@ -29,9 +29,6 @@ class HomePage extends Component
                     ->get(),
 
                 
-                // 1. Horizontal Rectangles (e.g., 2x1)
-                // 'horizontalAds' => Ad::whereHas('template.tier', fn($q) => $q->where('grid_width', 2)->where('grid_height', 1))->latest()->take(2)->get(),
-
                 // 2. Vertical Rectangles (e.g., 1x2)
                 'verticalAds' => $verticalAds,
 
@@ -67,8 +64,6 @@ class HomePage extends Component
                                         ->take(12) // Take 6 for the 2x3 grid we designed
                                         ->get(),
 
-                // 'upcomingProjects' => \App\Models\Project::where('is_active', true)->latest()->take(4)->get(),
-
                     // 2. Fetch Non-Banner Ads randomly for the grid
                 'promotedAds' => Ad::whereHas('template.tier', function($query) {
                         $query->whereNot(function($q) {
@@ -79,11 +74,11 @@ class HomePage extends Component
                     ->take(8) // Adjust to fill your 2-row grid (4 columns x 2 rows = 8 slots)
                     ->get(),
 
-                    'properties' => Property::where('is_active', true)
-                                        ->where('title', 'like', '%' . $this->search . '%')
-                                        ->latest()
-                                        ->take(4)
-                                        ->get(),
+                'builderProperties' => Property::where('is_active', true)
+                            ->whereHas('user', fn($q) => $q->where('profile_type', 'builder')) 
+                            ->latest()
+                            ->take(8)
+                            ->get(),
 
                     'products' => Product::where('is_active', true)
                                         ->where('name', 'like', '%' . $this->search . '%')
@@ -100,19 +95,19 @@ class HomePage extends Component
     }
 
     public function addToCart($productId)
-{
-    if (!auth()->check()) {
-        return redirect()->route('login');
+    {
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
+
+        \App\Models\Cart::updateOrCreate(
+            ['user_id' => auth()->id(), 'product_id' => $productId],
+            ['quantity' => \Illuminate\Support\Facades\DB::raw('quantity + 1')]
+        );
+
+        // This refreshes the cart count in your navbar
+        $this->dispatch('cartUpdated'); 
+
+        session()->flash('message', 'Product added to cart!');
     }
-
-    \App\Models\Cart::updateOrCreate(
-        ['user_id' => auth()->id(), 'product_id' => $productId],
-        ['quantity' => \Illuminate\Support\Facades\DB::raw('quantity + 1')]
-    );
-
-    // This refreshes the cart count in your navbar
-    $this->dispatch('cartUpdated'); 
-
-    session()->flash('message', 'Product added to cart!');
-}
 }

@@ -53,12 +53,19 @@ class PropertyResource extends Resource
                     Section::make('Media')->schema([
                         Forms\Components\FileUpload::make('images')
                             ->label('Property Images')
-                            ->multiple()
+                            // ->multiple()
                             ->reorderable()
-                            ->directory('properties')
+                            ->disk('public')
+                            ->directory('properties/gallery')
+                            ->multiple()
                             ->image()
                             ->imageEditor()
                             ->columnSpanFull(),
+
+                        Forms\Components\FileUpload::make('thumbnail')
+                            ->disk('public')
+                            ->directory('properties/thumbnails')
+                            ->image(),
                     ]),
 
                     // 3. Specs & Price

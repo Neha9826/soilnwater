@@ -24,7 +24,7 @@
                     @if($product->images)
                         @foreach($product->images as $img)
                             <a href="{{ asset('storage/'.$img) }}" target="_blank">
-                                <img src="{{ asset('storage/'.$img) }}" class="h-32 w-32 object-cover rounded-lg border dark:border-gray-700 hover:opacity-75 transition">
+                                <img src="{{ route('ad.display', ['path' => $product->image]) }}" class="h-32 w-32 object-cover rounded-lg border dark:border-gray-700 hover:opacity-75 transition">
                             </a>
                         @endforeach
                     @else

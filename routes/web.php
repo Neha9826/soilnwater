@@ -34,22 +34,29 @@ use App\Livewire\UserDashboard;
 use App\Livewire\UserProfile;
 use App\Livewire\User\Onboarding;
 use App\Livewire\User\JoinPartner;
+
 use App\Livewire\Vendor\EditBusinessPage;
 use App\Livewire\Vendor\ManageProducts;
 use App\Livewire\Vendor\Properties;
-use App\Models\Ad;
 use App\Livewire\Vendor\CreateOffer;
+
+use App\Models\Ad;
+
+use App\Livewire\Public\RealEstateListing;
+use App\Livewire\Public\ProjectListing;
+use App\Livewire\Public\OffersListing;
+use App\Livewire\Public\PropertyListing;
 use App\Livewire\Public\ProductListing;
 use App\Livewire\Public\ProductDetail;
-// use App\Livewire\Public\CartPage;
-// use App\Livewire\Customer\MyOrders;
 use App\Livewire\Public\CartPage;
 use App\Livewire\Public\CheckoutPage;
 use App\Livewire\Public\OrderSuccess;
+
 use App\Livewire\Customer\MyOrders;
 use App\Livewire\Customer\MyPosts;
 use App\Livewire\Customer\EditPost;
 use App\Livewire\Customer\ManageListings;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -259,8 +266,27 @@ Route::get('/display-media', function (Request $request) {
 
 Route::get('/promotions', AllAds::class)->name('public.ads.index');
 
+Route::get('/property/{id}', PropertyDetail::class)->name('public.property.detail');
+
 // Public Marketplace Route
 Route::get('/marketplace', ProductListing::class)->name('public.products.index');
 
 // Public Product Detail Route
 Route::get('/product/{slug}', ProductDetail::class)->name('public.product.detail');
+
+// web.php
+
+// 1. Marketplace (Already exists)
+// Route::get('/marketplace', ProductListing::class)->name('public.products.index');
+
+// 2. Real Estate (Builders)
+Route::get('/real-estate', RealEstateListing::class)->name('public.realestate.index');  
+
+// 3. Upcoming Projects
+Route::get('/projects', ProjectListing::class)->name('public.projects.index');
+
+// 4. Hot Offers
+Route::get('/deals', OffersListing::class)->name('public.offers.index');
+
+// 5. User Properties (Classifieds)
+Route::get('/properties', PropertyListing::class)->name('public.properties.index');

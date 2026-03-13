@@ -52,6 +52,8 @@ class ProductResource extends Resource
                     // 2. Media (Images & Video)
                     Section::make('Media')->schema([
                         Forms\Components\FileUpload::make('images')
+                            ->disk('public')
+                            ->image()
                             ->label('Product Gallery')
                             ->multiple()
                             ->reorderable()
@@ -159,18 +161,18 @@ class ProductResource extends Resource
 
                     // 2. Categorization
                     Section::make('Organization')->schema([
-    Forms\Components\Select::make('product_category_id')
-        ->label('Category')
-        ->options(ProductCategory::all()->pluck('name', 'id'))
-        ->reactive() // Enables sub-category filtering
-        ->required(),
+                        Forms\Components\Select::make('product_category_id')
+                            ->label('Category')
+                            ->options(ProductCategory::all()->pluck('name', 'id'))
+                            ->reactive() // Enables sub-category filtering
+                            ->required(),
 
-    Forms\Components\Select::make('product_sub_category_id')
-        ->label('Sub Category')
-        ->options(fn (Get $get) => ProductSubCategory::where('product_category_id', $get('product_category_id'))->pluck('name', 'id'))
-        ->disabled(fn (Get $get) => !$get('product_category_id')) // Activation logic
-        ->required(),
-]),
+                        Forms\Components\Select::make('product_sub_category_id')
+                            ->label('Sub Category')
+                            ->options(fn (Get $get) => ProductSubCategory::where('product_category_id', $get('product_category_id'))->pluck('name', 'id'))
+                            ->disabled(fn (Get $get) => !$get('product_category_id')) // Activation logic
+                            ->required(),
+                    ]),
 
                     // 3. Inventory & Shipping
                     Section::make('Inventory & Shipping')->schema([
@@ -206,6 +208,7 @@ class ProductResource extends Resource
             ->columns([
                 // Image Thumbnail
                 Tables\Columns\ImageColumn::make('images')
+                    ->disk('public')
                     ->circular()
                     ->stacked()
                     ->limit(1),
