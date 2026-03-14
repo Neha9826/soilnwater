@@ -44,6 +44,7 @@ use App\Models\Ad;
 
 use App\Livewire\Public\RealEstateListing;
 use App\Livewire\Public\ProjectListing;
+use App\Livewire\Public\ProjectDetail;
 use App\Livewire\Public\OffersListing;
 use App\Livewire\Public\PropertyListing;
 use App\Livewire\Public\ProductListing;
@@ -83,7 +84,7 @@ Route::get('/view-image', function (Request $request) {
 |--------------------------------------------------------------------------
 */
 Route::get('/', HomePage::class)->name('home');
-Route::get('/property/{slug}', PropertyDetail::class)->name('property.show');
+// Route::get('/property/{slug}', PropertyDetail::class)->name('property.show');
 Route::get('/services/{category?}', ServiceDirectory::class)->name('services.index');
 Route::get('/hotels', HotelList::class)->name('hotels.index');
 Route::get('/projects', ProjectList::class)->name('projects.index');
@@ -254,19 +255,23 @@ Route::post('/login-manual', function (Request $request) {
 //     return response()->file(storage_path('app/public/' . $path));
 // })->name('ad.display');
 
-Route::get('/display-media', function (Request $request) {
+Route::get('/display-media', function (Illuminate\Http\Request $request) {
     $path = $request->query('path');
-    
-    if (!$path || !Storage::disk('public')->exists($path)) {
-        abort(404);
+    $storagePath = storage_path('app/public/' . $path);
+
+    if (!file_exists($storagePath)) {
+        // Fallback to a local placeholder if file is missing
+        return response()->file(public_path('images/placeholder.png'));
     }
 
-    return response()->file(storage_path('app/public/' . $path));
+    return response()->file($storagePath);
 })->name('ad.display');
 
 Route::get('/promotions', AllAds::class)->name('public.ads.index');
 
-Route::get('/property/{id}', PropertyDetail::class)->name('public.property.detail');
+Route::get('/property-detail/{id}', \App\Livewire\Public\PropertyDetail::class)->name('public.property.detail');
+
+
 
 // Public Marketplace Route
 Route::get('/marketplace', ProductListing::class)->name('public.products.index');
@@ -284,6 +289,8 @@ Route::get('/real-estate', RealEstateListing::class)->name('public.realestate.in
 
 // 3. Upcoming Projects
 Route::get('/projects', ProjectListing::class)->name('public.projects.index');
+
+Route::get('/projects/{slug}', ProjectDetail::class)->name('public.project.detail');
 
 // 4. Hot Offers
 Route::get('/deals', OffersListing::class)->name('public.offers.index');

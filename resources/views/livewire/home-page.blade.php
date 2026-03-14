@@ -93,7 +93,7 @@
                             <span class="text-[10px] font-black bg-red-600 text-white px-3 py-1 rounded-full animate-pulse">ENDS IN</span>
                             <span class="font-mono font-black text-red-600" x-text="remaining">00h : 00m : 00s</span>
                         </div>
-                        <a href="#" class="text-xs font-bold text-red-600 underline uppercase">View All</a>
+                        <a href="{{ route('public.offers.index') }}" class="text-xs font-bold text-red-600 underline uppercase">View All</a>
                     </div>
                     <div class="flex gap-4 overflow-x-auto pb-2 scrollbar-hide snap-x">
                         @foreach($offers as $offer)
@@ -193,7 +193,7 @@
         <section class="max-w-[1440px] mx-auto px-6 py-4">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-black uppercase">Verified Properties</h2>
-                <a href="#" class="text-xs font-bold text-leaf-green uppercase underline">View All</a>
+                <a href="{{ route('public.properties.index') }}" class="text-xs font-bold text-leaf-green uppercase underline">View All</a>
             </div>
             <div class="grid grid-cols-2 md:grid-cols-8 gap-3">
                 @foreach($userProperties as $property)
@@ -250,7 +250,7 @@
             <section class="max-w-[1440px] mx-auto px-6 py-6 border-t border-gray-100">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-xl font-black uppercase flex items-center gap-3"><i class="fas fa-city text-blue-600"></i> Upcoming Projects</h2>
-                    <a href="#" class="text-xs font-bold text-blue-600 uppercase underline">View All</a>
+                    <a href="{{ route('public.projects.index') }}" class="text-xs font-bold text-blue-600 uppercase underline">View All</a>
                 </div>
                 {{-- Change 'thumbnail' to 'image' and 'starting_price' to 'price' --}}
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">

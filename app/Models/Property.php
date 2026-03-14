@@ -20,6 +20,11 @@ class Property extends Model
         'is_active' => 'boolean',
     ];
 
+    public function getLocationAttribute()
+    {
+        return "{$this->city}, {$this->state}";
+    }
+
     // RELATIONSHIPS
     public function user()
     {

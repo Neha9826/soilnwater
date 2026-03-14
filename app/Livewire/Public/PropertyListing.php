@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Public;
 
+use App\Models\Property;
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Models\Property;
 
 class PropertyListing extends Component
 {
@@ -12,14 +12,27 @@ class PropertyListing extends Component
 
     public $search = '';
 
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
+
     public function render()
     {
-        $query = Property::where('is_active', true)
-            ->whereHas('user', fn($q) => $q->where('profile_type', '!=', 'builder'))
-            ->when($this->search, fn($q) => $q->where('title', 'like', '%' . $this->search . '%'));
+        // Filter properties to only show those NOT posted by builders
+        $properties = Property::where('is_active', 1)
+            ->whereHas('user', function($query) {
+                $query->where('profile_type', '!=', 'builder');
+            })
+            ->where(function($query) {
+                $query->where('title', 'like', '%' . $this->search . '%')
+                      ->orWhere('city', 'like', '%' . $this->search . '%');
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(12);
 
         return view('livewire.public.property-listing', [
-            'properties' => $query->latest()->paginate(12)
+            'properties' => $properties
         ])->layout('layouts.app');
     }
 }

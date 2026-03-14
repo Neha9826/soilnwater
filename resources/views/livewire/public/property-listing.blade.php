@@ -1,32 +1,40 @@
-<div class="min-h-screen bg-gray-50 pb-20">
-    <div class="bg-white border-b border-gray-200 py-10 mb-10">
-        <div class="max-w-[1440px] mx-auto px-6">
-            <h1 class="text-4xl font-black text-gray-900 uppercase">Property Classifieds</h1>
-            <p class="text-gray-500 font-bold uppercase text-[10px] tracking-widest mt-2">Direct User Listings & Resale</p>
+<div class="min-h-screen bg-[#f3f4f6] pb-16 font-sans antialiased">
+    <div class="bg-white border-b border-gray-200 pt-6 pb-4 sticky top-0 z-50">
+        <div class="max-w-[1400px] mx-auto px-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-xs font-black uppercase tracking-tighter text-gray-900">Used Properties</h1>
+                <p class="text-[10px] font-bold text-gray-400 uppercase">Direct User Postings</p>
+            </div>
+            <div class="flex items-center bg-gray-100 rounded-xl px-4 py-2 w-full md:w-[400px] border border-transparent focus-within:border-green-500 transition-all">
+                <i class="fas fa-search text-gray-400 text-xs mr-3"></i>
+                <input type="text" wire:model.live.debounce.300ms="search" placeholder="Search location or title..." class="bg-transparent border-none focus:ring-0 text-[11px] font-bold uppercase w-full">
+            </div>
         </div>
     </div>
 
-    <div class="max-w-[1440px] mx-auto px-6 flex gap-8">
-        <aside class="w-1/4 hidden lg:block sticky top-28 h-fit">
-            <input type="text" wire:model.live="search" placeholder="Search locations..." class="w-full bg-white border border-gray-200 rounded-2xl px-6 py-4 text-xs font-bold shadow-sm">
-        </aside>
-
-        <main class="flex-grow grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="max-w-[1400px] mx-auto px-4 mt-8">
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             @foreach($properties as $property)
-                <div class="bg-white rounded-[2rem] overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition flex flex-col group">
-                    <div class="h-48 overflow-hidden">
-                        <img src="{{ route('ad.display', ['path' => $property->thumbnail]) }}" class="w-full h-full object-cover">
+                <a href="{{ route('public.property.detail', $property->id) }}" class="group block bg-white rounded-[1.5rem] overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-500">
+                    <div class="relative aspect-square overflow-hidden bg-gray-200">
+                        @php $images = is_array($property->images) ? $property->images : json_decode($property->images, true); @endphp
+                        <img src="{{ route('ad.display', ['path' => $images[0] ?? '']) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                     </div>
-                    <div class="p-6">
-                        <h3 class="font-black text-gray-900 truncate uppercase mb-1">{{ $property->title }}</h3>
-                        <p class="text-[9px] font-bold text-gray-400 mb-4 uppercase"><i class="fas fa-map-marker-alt"></i> {{ $property->location }}</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-xl font-black text-leaf-green">₹{{ number_format($property->price) }}</span>
-                            <a href="{{ route('public.property.detail', $property->id) }}" class="text-[9px] font-black bg-gray-900 text-white px-4 py-2 rounded-full">VIEW</a>
+                    <div class="p-4">
+                        <h3 class="text-[10px] font-black text-gray-900 uppercase truncate leading-tight">{{ $property->title }}</h3>
+                        <p class="text-[8px] font-bold text-gray-400 uppercase mt-1 flex items-center gap-1">
+                            <i class="fas fa-map-marker-alt text-green-500"></i> {{ $property->city }}, {{ $property->state }}
+                        </p>
+                        <div class="mt-3 pt-3 border-t border-gray-50 flex items-center justify-between">
+                            <span class="text-[11px] font-black text-green-600">₹{{ number_format($property->price) }}</span>
+                            <div class="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-green-600 transition-colors">
+                                <i class="fas fa-arrow-right text-[8px] text-gray-400 group-hover:text-white"></i>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </a>
             @endforeach
-        </main>
+        </div>
+        <div class="mt-12">{{ $properties->links() }}</div>
     </div>
 </div>
