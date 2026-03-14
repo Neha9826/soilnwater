@@ -11,6 +11,14 @@ class PropertyListing extends Component
     use WithPagination;
 
     public $search = '';
+    public $minPrice, $maxPrice;
+    public $sort = 'latest';
+    public $showFilters = false;
+
+    public function toggleFilters()
+    {
+        $this->showFilters = !$this->showFilters;
+    }
 
     public function updatingSearch()
     {
@@ -19,20 +27,24 @@ class PropertyListing extends Component
 
     public function render()
     {
-        // Filter properties to only show those NOT posted by builders
-        $properties = Property::where('is_active', 1)
-            ->whereHas('user', function($query) {
-                $query->where('profile_type', '!=', 'builder');
+        $query = Property::where('is_active', 1)
+            ->whereHas('user', function($q) {
+                $q->where('profile_type', '!=', 'builder');
             })
-            ->where(function($query) {
-                $query->where('title', 'like', '%' . $this->search . '%')
-                      ->orWhere('city', 'like', '%' . $this->search . '%');
+            ->when($this->search, function($q) {
+                $q->where(fn($sub) => $sub->where('title', 'like', '%' . $this->search . '%')
+                                           ->orWhere('city', 'like', '%' . $this->search . '%'));
             })
-            ->orderBy('created_at', 'desc')
-            ->paginate(12);
+            ->when($this->minPrice, fn($q) => $q->where('price', '>=', $this->minPrice))
+            ->when($this->maxPrice, fn($q) => $q->where('price', '<=', $this->maxPrice));
+
+        // Sorting Logic
+        if ($this->sort === 'price_low') $query->orderBy('price', 'asc');
+        elseif ($this->sort === 'price_high') $query->orderBy('price', 'desc');
+        else $query->latest();
 
         return view('livewire.public.property-listing', [
-            'properties' => $properties
+            'properties' => $query->paginate(18)
         ])->layout('layouts.app');
     }
 }

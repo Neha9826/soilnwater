@@ -15,36 +15,36 @@
         <div class="min-h-[400px]">
             @if($ads->count() > 0)
                {{-- Master Container: 4 Columns --}}
-{{-- Reduced auto-rows to 280px for a more compact 'at a glance' view --}}
-<div style="display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
-            grid-auto-flow: dense; 
-            gap: 15px; 
-            grid-auto-rows: 280px;" 
-     class="w-full p-4">
-     
-    @foreach($ads as $ad)
-        @php
-            $w = (int)($ad->template->tier->grid_width ?? 1);
-            $h = (int)($ad->template->tier->grid_height ?? 1);
+                {{-- Reduced auto-rows to 280px for a more compact 'at a glance' view --}}
+                <div style="display: grid; 
+                            grid-template-columns: repeat(4, 1fr); 
+                            grid-auto-flow: dense; 
+                            gap: 15px; 
+                            grid-auto-rows: 280px;" 
+                    class="w-full p-4">
+                    
+                    @foreach($ads as $ad)
+                        @php
+                            $w = (int)($ad->template->tier->grid_width ?? 1);
+                            $h = (int)($ad->template->tier->grid_height ?? 1);
 
-            // Inline CSS to force the correct spans across all shapes
-            $gridItemStyle = "grid-column: span {$w}; grid-row: span {$h};";
-            $imageFilename = $ad->preview_image ? basename($ad->preview_image) : null;
-        @endphp
+                            // Inline CSS to force the correct spans across all shapes
+                            $gridItemStyle = "grid-column: span {$w}; grid-row: span {$h};";
+                            $imageFilename = $ad->preview_image ? basename($ad->preview_image) : null;
+                        @endphp
 
-        <div style="{{ $gridItemStyle }}" class="relative group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            @if($imageFilename)
-                <img src="{{ route('ad.display', ['filename' => $imageFilename]) }}" 
-                     class="w-full h-full object-cover">
-            @else
-                <div class="w-full h-full bg-gray-50 flex items-center justify-center text-[10px] font-bold text-gray-400">
-                    Ratio {{ $w }}:{{ $h }}
+                        <div style="{{ $gridItemStyle }}" class="relative group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                            @if($imageFilename)
+                                <img src="{{ route('ad.display', ['filename' => $imageFilename]) }}" 
+                                    class="w-full h-full object-cover">
+                            @else
+                                <div class="w-full h-full bg-gray-50 flex items-center justify-center text-[10px] font-bold text-gray-400">
+                                    Ratio {{ $w }}:{{ $h }}
+                                </div>
+                            @endif
+                        </div>
+                    @endforeach
                 </div>
-            @endif
-        </div>
-    @endforeach
-</div>
                 <div class="mt-8">{{ $ads->links() }}</div>
             @else
                 {{-- EMPTY STATE (Kept as is) --}}

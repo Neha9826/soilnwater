@@ -11,24 +11,28 @@ class ProjectListing extends Component
     use WithPagination;
 
     public $search = '';
+    public $minPrice, $maxPrice;
+    public $sort = 'latest';
+    public $showFilters = false;
 
-    public function updatingSearch()
-    {
-        $this->resetPage();
-    }
+    public function toggleFilters() { $this->showFilters = !$this->showFilters; }
 
     public function render()
     {
-        $projects = Project::where('is_active', 1)
-            ->where(function($query) {
-                $query->where('title', 'like', '%' . $this->search . '%')
-                      ->orWhere('city', 'like', '%' . $this->search . '%');
+        $query = Project::where('is_active', 1)
+            ->when($this->search, function($q) {
+                $q->where('title', 'like', '%' . $this->search . '%')
+                  ->orWhere('city', 'like', '%' . $this->search . '%');
             })
-            ->orderBy('created_at', 'desc')
-            ->paginate(12);
+            ->when($this->minPrice, fn($q) => $q->where('price', '>=', $this->minPrice))
+            ->when($this->maxPrice, fn($q) => $q->where('price', '<=', $this->maxPrice));
+
+        if ($this->sort === 'price_low') $query->orderBy('price', 'asc');
+        elseif ($this->sort === 'price_high') $query->orderBy('price', 'desc');
+        else $query->latest();
 
         return view('livewire.public.project-listing', [
-            'projects' => $projects
+            'projects' => $query->paginate(12)
         ])->layout('layouts.app');
     }
 }

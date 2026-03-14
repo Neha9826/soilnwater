@@ -297,3 +297,5 @@ Route::get('/deals', OffersListing::class)->name('public.offers.index');
 
 // 5. User Properties (Classifieds)
 Route::get('/properties', PropertyListing::class)->name('public.properties.index');
+
+Route::get('/offer-detail/{id}', \App\Livewire\Public\OfferDetail::class)->name('public.offer.detail');
