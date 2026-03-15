@@ -49,6 +49,9 @@ use App\Livewire\Public\OffersListing;
 use App\Livewire\Public\PropertyListing;
 use App\Livewire\Public\ProductListing;
 use App\Livewire\Public\ProductDetail;
+// use App\Livewire\Public\OfferDetail;
+// use App\Livewire\Public\AdListing;
+// use App\Livewire\Public\AdDetail;
 use App\Livewire\Public\CartPage;
 use App\Livewire\Public\CheckoutPage;
 use App\Livewire\Public\OrderSuccess;
@@ -69,13 +72,15 @@ Route::get('/view-image', function (Request $request) {
     $path = $request->query('path');
     
     if (!Storage::disk('public')->exists($path)) {
-        abort(404);
+        return response()->file(public_path('images/placeholder.png'));
     }
 
     $file = Storage::disk('public')->get($path);
     $type = Storage::disk('public')->mimeType($path);
 
-    return Response::make($file, 200)->header("Content-Type", $type);
+    return Response::make($file, 200)
+        ->header("Content-Type", $type)
+        ->header("Cache-Control", "public, max-age=86400"); // Cache for 24 hours
 })->name('image.proxy');
 
 /*
@@ -279,23 +284,27 @@ Route::get('/marketplace', ProductListing::class)->name('public.products.index')
 // Public Product Detail Route
 Route::get('/product/{slug}', ProductDetail::class)->name('public.product.detail');
 
-// web.php
-
-// 1. Marketplace (Already exists)
+// Marketplace (Already exists)
 // Route::get('/marketplace', ProductListing::class)->name('public.products.index');
 
-// 2. Real Estate (Builders)
+// Real Estate (Builders)
 Route::get('/real-estate', RealEstateListing::class)->name('public.realestate.index');  
 
-// 3. Upcoming Projects
+// Upcoming Projects
 Route::get('/projects', ProjectListing::class)->name('public.projects.index');
 
 Route::get('/projects/{slug}', ProjectDetail::class)->name('public.project.detail');
 
-// 4. Hot Offers
+// Hot Offers
 Route::get('/deals', OffersListing::class)->name('public.offers.index');
 
-// 5. User Properties (Classifieds)
+// User Properties (Classifieds)
 Route::get('/properties', PropertyListing::class)->name('public.properties.index');
 
 Route::get('/offer-detail/{id}', \App\Livewire\Public\OfferDetail::class)->name('public.offer.detail');
+
+// Ad Listing Page
+Route::get('/promotions', \App\Livewire\Public\AdListing::class)->name('public.ads.index');
+
+// Ad Detail Page (Absolute path to avoid root folder collision)
+Route::get('/promotion-detail/{id}', \App\Livewire\Public\AdDetail::class)->name('public.ad.detail');
