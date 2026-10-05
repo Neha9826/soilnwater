@@ -1,59 +1,146 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SoilnWater
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A Laravel-based multi-purpose marketplace and local business platform that brings products, services, properties, projects, offers, classifieds, and customer/vendor workflows into one application.
 
-## About Laravel
+## What it does
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+SoilnWater is structured as a marketplace platform with separate public, customer, vendor, and administrative workflows.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Public marketplace
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- Homepage and service directory
+- Hotel and project listings
+- Offers and classified listings
+- Marketplace product browsing and product details
+- Real-estate and property listings
+- Public business/store profiles
+- Promotions and advertisement listings
+- Public media/image delivery through a storage proxy
 
-## Learning Laravel
+### Customer workflows
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+- Account registration and login
+- Google authentication
+- Profile and onboarding
+- Create and manage property, project, and advertisement listings
+- Shopping cart and checkout
+- Order history and order details
+- Order-success flow
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Vendor workflows
 
-## Laravel Sponsors
+- Manage a public business page
+- Manage products and product details
+- Manage properties
+- Manage business branches
+- Create and manage offers
+- Vendor dashboard and profile management
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Administration
 
-### Premium Partners
+The application includes approval-oriented workflows for marketplace content, including product approval screens and authenticated administrative routes.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## Tech Stack
 
-## Contributing
+**Backend**
+- PHP 8.2+
+- Laravel 12
+- Livewire
+- Eloquent ORM
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+**Admin & UI**
+- Filament 3
+- Blade / Livewire components
 
-## Code of Conduct
+**Integrations & utilities**
+- Laravel Socialite
+- Simple Qrcode
+- Spatie Browsershot
+- Vite / npm
+- PHPUnit
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Architecture
 
-## Security Vulnerabilities
+The application uses Laravel as the core web platform with Livewire components for interactive pages and domain-specific workflows. Routes are organized around public discovery, authenticated customer/vendor operations, marketplace transactions, and administrative actions.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+A notable implementation detail is the media proxy route, which serves stored images directly when normal public-storage symlinks are not reliable in the deployment environment.
+
+## Repository Structure
+
+```text
+app/
+  Livewire/       # Interactive public, customer, vendor and admin features
+  Models/         # Domain models
+  Http/           # Controllers and HTTP concerns
+
+database/         # Migrations, factories and seeders
+resources/        # Blade views and frontend assets
+routes/           # Web and authentication routes
+storage/          # Application storage
+tests/            # Automated tests
+```
+
+## Getting Started
+
+### Requirements
+
+- PHP 8.2+
+- Composer
+- Node.js and npm
+- A database supported by Laravel
+
+### Installation
+
+```bash
+git clone https://github.com/Neha9826/soilnwater.git
+cd soilnwater
+
+composer install
+cp .env.example .env
+php artisan key:generate
+
+php artisan migrate
+
+npm install
+npm run build
+```
+
+Configure database and application values in `.env` before running migrations.
+
+### Development
+
+The repository includes a Composer development script that starts the Laravel server, queue listener, application logs, and Vite together:
+
+```bash
+composer run dev
+```
+
+### Tests
+
+```bash
+composer test
+```
+
+## Engineering Highlights
+
+- Multi-role marketplace workflows in a single Laravel application
+- Livewire-driven interactive CRUD and management screens
+- Authenticated customer and vendor areas
+- Public marketplace discovery alongside transactional flows
+- Google authentication through Laravel Socialite
+- Filament-powered administration
+- Media handling designed for shared-hosting deployment constraints
+- QR-code and browser-rendering utilities integrated into the application
+
+## Project Status
+
+Active application project with a broad marketplace feature set and ongoing development.
+
+## Author
+
+**Neha Pattnayak**  
+Full Stack Engineer
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is proprietary unless otherwise specified by the repository owner.
