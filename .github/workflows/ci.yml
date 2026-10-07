@@ -19,6 +19,8 @@ jobs:
       - name: Install PHP dependencies
         run: composer install --no-interaction --prefer-dist
       - name: Run Laravel tests
+        env:
+          APP_KEY: base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
         run: php artisan test
       - name: Setup Node
         uses: actions/setup-node@v4
