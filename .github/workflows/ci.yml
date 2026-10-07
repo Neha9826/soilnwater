@@ -18,6 +18,10 @@ jobs:
           tools: composer
       - name: Install PHP dependencies
         run: composer install --no-interaction --prefer-dist
+      - name: Prepare Laravel test database
+        env:
+          APP_KEY: base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+        run: php artisan migrate --force
       - name: Run Laravel tests
         env:
           APP_KEY: base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
